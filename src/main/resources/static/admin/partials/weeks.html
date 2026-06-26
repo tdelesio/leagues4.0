@@ -1,0 +1,24 @@
+
+<h2>Weeks:</h2>
+<table class="table table-striped table-hover ">
+<thead>
+<tr>
+	<th>edit</th>
+	<th>id</th>
+	<th>week number</th>
+	<th>league type</th>
+	<th>start</th>
+	<th>end</th>
+	</tr>
+</thead>
+<tr id="week" ng-repeat="week in weeks">
+
+<!-- <%if (games.gameStarted && (games.favScore !=0 || games.dogScore != 0)) {%>background-color: teal;<%}%> -->
+	<td><a href="">Edit</a> | <a href="" ng-click="createCtrl.deleteWeek(week)">Delete</a></td>
+	<td>{{week.id}}</td> 
+	<td>{{week.weekNumber}}</td>
+	<td>{{week.leagueType}}</td>
+	<td>{{week.startYear}}</td>
+	<td>{{week.endYear}}</td>	
+</tr>
+</table>

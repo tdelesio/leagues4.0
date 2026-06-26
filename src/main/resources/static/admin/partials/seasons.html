@@ -1,0 +1,24 @@
+
+<h2>Seasons:</h2>
+<table class="table table-striped table-hover ">
+<thead>
+<tr>
+	<th>delete</th>
+	<th>id</th>
+	<th>type</th>
+	<th>start</th>
+	<th>end</th>
+	</tr>
+</thead>
+<tr id="season" ng-repeat="season in seasons">
+
+<!-- <%if (games.gameStarted && (games.favScore !=0 || games.dogScore != 0)) {%>background-color: teal;<%}%> -->
+	<td><a href="#" ng-click="createSeasonCtrl.deleteSeason(season)">Delete</a></td>
+<!-- 	<td><a href="#" ng-click="showPlayers(league.id)">Players</a> </td> -->
+	<td>{{season.id}}</td> 
+	<td>{{season.leagueType}}</td>
+	<td>{{season.startYear}}</td>
+	<td>{{season.endYear}}</td>
+		
+</tr>
+</table>

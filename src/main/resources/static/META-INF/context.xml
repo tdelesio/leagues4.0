@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context>
+ 	<ResourceLink 
+            name="jdbc/leagues"
+            global="jdbc/leagues"
+            type="com.mchange.v2.c3p0.ComboPooledDataSource"
+          />
+                   	
+</Context>

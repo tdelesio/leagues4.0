@@ -1,0 +1,9 @@
+target/
+cookies.txt
+compile_errors.txt
+.DS_Store
+.idea/
+*.class
+*.log
+*.jar
+*.war

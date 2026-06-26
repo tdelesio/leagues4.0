@@ -1,0 +1,9 @@
+<div ng-controller="MakePicksController as makePicksCtrl">
+	<div ng-repeat="game in games">	
+		<div class="gametime" ng-show="game.gameStart != games[$index-1].gameStart">{{game.gameStartFormated}}</div>	
+<!-- 		ng-show="pickMap[game.id] === undefined" -->
+		<make-picks></make-picks>
+		
+<!-- 		<view-picks ng-hide="game.pickmade"></view-picks> -->
+	</div>
+</div>

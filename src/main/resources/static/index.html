@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+<head>
+<!-- <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> -->
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="css/bootstrap.css" />
+<link rel="stylesheet" type="text/css" href="css/font-awesome.css" />
+<link rel="stylesheet" href="css/myp.css" />
+<link rel="stylesheet" href="css/responsive.css" />
+<style type="text/css">
+[ng\:cloak], [ng-cloak], .ng-cloak {
+	display: none !important;
+}
+</style>
+<!-- <script src="_/js/jquery-1.7.1.min.js" type="text/javascript"></script> -->
+<!-- <script src="_/js/underscore-min.js" type="text/javascript"></script> -->
+<!-- <script src="_/js/moment.min.js" type="text/javascript"></script> -->
+<!-- <script src="_/js/moment-timezone-with-data-2010-2020.min.js" type="text/javascript"></script> -->
+<!-- <script src="_/js/util.js" type="text/javascript"></script> -->
+<!-- <script src="_/js/bootstrap.js" type="text/javascript"></script> -->
+<!-- <script src="_/js/test.js" type="text/javascript"></script> -->
+<title>Make Your Picks Mobile</title>
+</head>
+
+
+<body ng-app="app">
+	
+	<div ng-controller="NavigationController as navCtrl">
+	
+		<settings></settings>
+		
+		<navigation></navigation>
+		
+		<div id="results" class="container" ui-view>
+		</div>
+		
+	</div>
+	<script src="js/angular-bootstrap.js" type="text/javascript"></script>
+	<script src="js/angular-ui.js" type="text/javascript"></script>
+	<script src="js/leagueService.js"></script>
+	<script src="js/navigation.js"></script>
+	<script src="js/makePicks.js"></script>
+	<script src="js/app.js"></script>	
+</body>
+</html>

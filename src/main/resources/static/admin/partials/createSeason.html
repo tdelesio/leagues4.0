@@ -1,0 +1,32 @@
+<form name="createSeason" ng-submit="createSeasonCtrl.addSeason()" class="form-horizontal">
+<fieldset>
+	
+	<div class="form-group">
+		<label for="start-input" class="col-lg-2 control-label">Start Year</label>
+		<div class="col-lg-10">
+			<input ng-model="season.startYear" required id="start-input" class="form-control" value="2015"/>
+		</div>
+	</div> 
+	<div class="form-group">
+		<label for="end-input" class="col-lg-2 control-label">End Year</label>
+		<div class="col-lg-10">
+			<input ng-model="season.endYear" required id="end-input" class="form-control" value="2016"/>
+		</div>
+	</div>
+	<div class="form-group">
+			 <label for="leaguetype-input"
+				class="col-lg-2 control-label">League Type</label>
+			<div class="col-lg-10">
+			<select ng-model="season.leagueType" required id="leaguetype-input" class="form-control" ng-options="x for x in season.leagueTypes">
+			</select>
+			<!-- <input ng-model="season.leagueType" required id="leaguetype-input" class="form-control" value="pickem"/> -->
+		</div>
+	</div>
+	<div class="form-group">
+   		<div class="col-lg-10 col-lg-offset-2">
+   			<button class="btn btn-primary">Add Season</button>
+   		</div>
+   		
+   	</div>
+</fieldset>
+</form>

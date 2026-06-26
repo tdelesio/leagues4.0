@@ -1,0 +1,20 @@
+<div> 
+	<h2>Create League</h2> 
+	<div class=jumbotron> 
+		<div class=container ng-controller="CreateLeagueController as createLeagueCtrl"> 
+			
+			<create-league ng-show="showgames"></create-league>
+		
+			<leagues ng-show="showgames"></leagues>
+			
+			<players-in-league ng-show="hideplayers"></players-in-league>
+			
+<!-- 			<div class="col-lg-10 col-lg-offset-2"> -->
+<!--    				<button class="btn btn-primary" ng-click="dummyLeague()">Create Dummy League</button> -->
+<!--    			</div> -->
+   			<div class="col-lg-10 col-lg-offset-2">
+   				<button class="btn btn-primary" ng-click="randomLeague()">Create Full Demo League</button>
+   			</div>
+		</div> 
+	</div> 
+</div>

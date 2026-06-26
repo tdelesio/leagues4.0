@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="viewport" content="width=device-width; initial-scale = 1.0; maximum-scale=1.0; user-scalable=no" />
+<link rel="stylesheet" href="_/css/myp.css" />
+<script src="_/js/jquery-1.7.1.min.js" type="text/javascript"></script>
+<script src="_/js/util.js" type="text/javascript"></script>
+<script type="text/javascript">
+
+//var server = "http://localhost:8080/ws/rest";
+
+function getPage() {
+	//var url = server + '/seasons/current';
+	var league = getURLParameter('league');
+	if (league)
+		
+	$('input[name=leagueName]').attr('value', league);
+	var password = getURLParameter('password');
+	if (password)
+	$('input[name=password]').attr('value', password);
+}
+
+function joinLeague() {
+	//var url = server + "/league";
+	var url = getUrl('/league/join');
+	$.ajax({
+		type : "POST",
+		url : url,
+		contentType : "application/json",
+		dataType : "json",
+		data : $('form').serializeObject(),
+		success : function(res) {
+			window.location.replace('index.html');
+		},
+		error : function(res) {
+			$('#result').text(JSON.stringify(res));
+		}
+	});
+}
+
+
+$(document).ready(function(){
+	getPage();
+});
+</script>
+
+
+<title>Make Your Picks Mobile</title>
+</head>
+
+<body>
+<div style="width:300px; margin:20px auto;">
+<img src="_/img/myp.svg" style="width:300px; height:auto; text-align:center;" />
+<div class="login shadow">
+
+
+
+<form id="createleague">
+
+<p style="text-align:center; color:#fff; font-weight:bold;">League:&nbsp;&nbsp;&nbsp;&nbsp; <input type="text" name="leagueName"></input></p>
+<p style="text-align:center; color:#fff; font-weight:bold;">Password: <input type="text" name="password"></input></p>
+<br/><br/>
+<input type="button" value="Join League" onclick="joinLeague()"/>
+</form>
+
+
+
+</div>
+</div>
+
+</body>
+</html>

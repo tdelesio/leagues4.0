@@ -1,0 +1,64 @@
+<div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+	
+	<div class="scoreboard shadow" ng-class="[game.hasGameStarted ? 'loss' : 'pickable', (doublePick && doublePick.gameId === game.id) ? 'double' : '']" style="position: relative;">
+		<div class="col-sm-12" style="padding-right: 50px;">
+			<div class="row scorerow fav" ng-class="{'selected-pick': pickMap[game.id] && pickMap[game.id].teamId === game.favId}" ng-click="makePick(game.id, game.favId, pickMap[game.id] ? pickMap[game.id].id : undefined)"> 
+
+				<!-- PICK TOOL -->
+				<div class="col-xs-1 pick-selection">
+					<i class="fa fa-check-circle-o" ng-class="(pickMap[game.id] && pickMap[game.id].teamId === game.favId) ? 'show' : 'hide'" style="color: #FFB415;"></i>
+				</div>
+
+				<!-- TEAM ICON -->
+				<div class="col-xs-2">
+					<div class="team-icon {{game.favShortName}}"></div>
+				</div>
+
+				<!-- TEAM NAME ABBR-->
+				<div class="col-xs-5 col-sm-6">
+					<span class="short-name" ng-class="game.favHome ? 'home' : ''">{{game.favShortName}}</span><span class="long-name" ng-class="game.favHome ? 'home' : ''">{{game.favFullName}}</span>
+				</div>
+
+				<!-- SPREAD -->
+				<div class="col-xs-1"><span class="spread">({{game.spread}})</span></div>
+
+				<!-- SCORE -->
+				<div class="col-xs-1">{{game.favScore}}</div>
+			</div>
+
+			<div class="row scorerow dog" ng-class="{'selected-pick': pickMap[game.id] && pickMap[game.id].teamId === game.dogId}" ng-click="makePick(game.id, game.dogId, pickMap[game.id] ? pickMap[game.id].id : undefined)"> 
+
+				<!-- PICK TOOL -->
+				<div class="col-xs-1 pick-selection">
+					<i class="fa fa-check-circle-o" ng-class="(pickMap[game.id] && pickMap[game.id].teamId === game.dogId) ? 'show' : 'hide'" style="color: #FFB415;"></i>
+				</div>
+
+				<!-- TEAM ICON -->
+				<div class="col-xs-2">
+					<div class="team-icon {{game.dogShortName}}"></div>
+				</div>
+
+				<!-- TEAM NAME ABBR-->
+				<div class="col-xs-5 col-sm-6">
+					<span class="short-name" ng-class="game.favHome ? '' : 'home'">{{game.dogShortName}}</span><span class="long-name" ng-class="game.favHome ? '' : 'home'">{{game.dogFullName}}</span>
+				</div>
+
+				<!-- SPREAD -->
+				<div class="col-xs-1"><span class="spread">&nbsp;</span></div>
+	
+				<!-- SCORE -->
+				<div class="col-xs-1">{{game.dogScore}}</div>
+			</div>
+		</div>
+
+		<!-- DOUBLE PICK TOGGLE BUTTON -->
+		<div class="double-toggle-btn" 
+			 ng-show="pickMap[game.id]" 
+			 ng-class="{'is-double': doublePick && doublePick.gameId === game.id}" 
+			 ng-click="toggleDoublePick(game.id, $event)"
+			 title="{{(doublePick && doublePick.gameId === game.id) ? 'Your Double Pick' : 'Make Double Pick'}}"
+			 ng-style="game.hasGameStarted ? {'pointer-events': 'none', 'opacity': '0.5'} : {}">
+			<span class="double-toggle-text">2x</span>
+		</div>
+	</div>
+</div>				

@@ -1,0 +1,78 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<link rel="stylesheet" href="css/myp.css" />
+<script src="jquery-1.7.1.min.js" type="text/javascript"></script>
+<title>Make Your Picks Mobile</title>
+<script type="text/javascript">
+function login() {
+	$('#errorbox').text('');
+	var username = $('input[name="username"]').val();
+	var password = $('input[name="password"]').val();
+	
+	if (!username || !password) {
+		$('#errorbox').text("Please enter both username and password.");
+		return;
+	}
+
+	var data = {
+		username: username,
+		password: password
+	};
+
+	$.ajax({
+		type : "POST",
+		url : "/players/login",
+		contentType : "application/json",
+		dataType : "json",
+		data : JSON.stringify(data),
+		success : function(res) {
+			if (window.localStorage) {
+				localStorage['username'] = res.username;
+			}
+			window.location.replace('index.html');
+		},
+		error : function(res) {
+			$('#errorbox').text("Invalid username or password.");
+		}
+	});
+}
+
+$(document).ready(function() {
+	$('#loginform').keydown(function(event) {
+		if (event.keyCode == 13) {
+			login();
+		}
+	});
+});
+</script>
+</head>
+<body style="background: url('img/bg.jpg') no-repeat center center fixed; background-size: cover; font-family: sans-serif;">
+<div style="width:300px; margin:80px auto;">
+	<div style="text-align: center; margin-bottom: 20px;">
+		<img src="img/myp.svg" style="width:250px; height:auto;" />
+	</div>
+	<div class="login shadow" style="background: rgba(0, 0, 0, 0.7); padding: 25px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+		<form id="loginform">
+			<p style="text-align:center; color:#fff; font-weight:bold; margin-bottom: 15px;">
+				Username: <br/>
+				<input type="text" name="username" style="width: 100%; padding: 8px; margin-top: 5px; border-radius: 4px; border: 1px solid #ccc; color: #000; box-sizing: border-box;"/>
+			</p>
+			<p style="text-align:center; color:#fff; font-weight:bold; margin-bottom: 20px;">
+				Password: <br/>
+				<input type="password" name="password" style="width: 100%; padding: 8px; margin-top: 5px; border-radius: 4px; border: 1px solid #ccc; color: #000; box-sizing: border-box;"/>
+			</p>
+			<div style="text-align: center; margin-bottom: 15px;">
+				<input type="button" onclick="login()" value="Login" style="background: #FFB415; color: #000; border: none; padding: 10px 30px; border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%; transition: background 0.3s;"/>
+			</div>
+			<div style="text-align: center; margin-bottom: 10px; font-size: 14px;">
+				<a href="register.html" style="color: #FFB415; text-decoration: none; font-weight: bold;">Need an account? Register</a>
+			</div>
+			<div id="errorbox" style="color: #ff5555; text-align: center; font-weight: bold; font-size: 14px; min-height: 20px;"></div>
+		</form>
+	</div>
+</div>
+</body>
+</html>

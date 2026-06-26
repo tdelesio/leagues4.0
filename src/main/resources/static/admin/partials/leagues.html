@@ -1,0 +1,31 @@
+
+<h2>Leagues:</h2>
+<table class="table table-striped table-hover ">
+<thead>
+<tr>
+	<th>edit</th>
+	<td>delete</td>
+	<th>id</th>
+	<th>admin</th>
+	<th>season id</th>
+	<th>league type</th>
+	<th>start</th>
+	<th>end</th>
+	<th>league name</th>
+	</tr>
+</thead>
+<tr id="league" ng-repeat="league in leagues" >
+
+<!-- <%if (games.gameStarted && (games.favScore !=0 || games.dogScore != 0)) {%>background-color: teal;<%}%> -->
+	<td><a href="">Edit</a></br><a href="#" ng-click="showPlayers(league.id)">Players</a> </td>
+	<td><a href="#" ng-click="deleteLeague(league.id)">Delete</a>
+	<td>{{league.id}}</td> 
+	<td>{{league.adminId}}</td>
+	<td>{{league.seasonId}}</td>
+	<td>{{league.leagueType}}</td>
+	<td>{{league.startYear}}</td>
+	<td>{{league.endYear}}</td>
+	<td>{{league.leagueName}}</td>
+		
+</tr>
+</table>

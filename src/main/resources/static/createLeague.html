@@ -1,0 +1,99 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="viewport" content="width=device-width; initial-scale = 1.0; maximum-scale=1.0; user-scalable=no" />
+<link rel="stylesheet" href="_/css/myp.css" />
+<script src="_/js/jquery-1.7.1.min.js" type="text/javascript"></script>
+<script src="_/js/util.js" type="text/javascript"></script>
+<script type="text/javascript">
+
+//var server = "http://localhost:8080/ws/rest";
+
+function getPage() {
+	//var url = server + '/seasons/current';
+	var url = getUrl('/seasons/current');
+	$.getJSON(url,function(json){
+		
+		var seasonHTML="";
+		seasonHTML += '<select name="season.id" id="season">';
+		
+		//build the option list for the seasons
+		$.each(json, function(i,data){
+			
+			seasonHTML += '<option value="';
+			seasonHTML += data.id;
+			seasonHTML += '"';
+			if (i==0) {
+				seasonHTML += 'selected="selected"';
+			}
+			seasonHTML += '>';
+			seasonHTML += data.leagueType.leagueTypeDisplay;
+			seasonHTML += ' (';
+			seasonHTML += data.startYear;
+			seasonHTML += '-';
+			seasonHTML += data.endYear;
+			seasonHTML += ')';
+			seasonHTML += '</option>';
+		});
+		
+		seasonHTML += '</select>';
+		
+		//append the html to the source
+		$("#season-select").append(seasonHTML);
+	});
+}
+
+function createLeague() {
+	//var url = server + "/league";
+	var url = getUrl('/league');
+	$.ajax({
+		type : "POST",
+		url : url,
+		contentType : "application/json",
+		dataType : "json",
+		data : $('form').serializeObject(),
+		success : function(res) {
+			$('#result').text(JSON.stringify(res));
+		},
+		error : function(res) {
+			$('#result').text(JSON.stringify(res));
+		}
+	});
+}
+
+
+$(document).ready(function(){
+	getPage();
+});
+</script>
+
+
+<title>Make Your Picks Mobile</title>
+</head>
+
+<body>
+
+<!-- <div class="bg"></div> -->
+
+<!-- <div class="screen"> -->
+
+<form id="createleague">
+
+League Name: <input type="text" name="leagueName" size="20"></input>
+<br/>
+League Password: <input type="text" name="password" size="20"></input>
+<br/>
+League Type: <div id="season-select"></div>
+<br/>
+Play with Spreads? <input type="checkbox" checked="checked" name="spreads" value="true"/>
+<br/>
+Play with doubles? <input type="checkbox" checked="checked" name="doubleEnabled" value="true"/>
+<br/>
+<input type="button" value="Create League" onclick="createLeague()"/>
+</form>
+
+<div id="result"></div>
+<!-- </div> -->
+</body>
+</html>

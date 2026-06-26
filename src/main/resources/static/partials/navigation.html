@@ -1,0 +1,41 @@
+<div class="nav">	
+	<div class="container">
+		<div class="row">
+			<div class="col-xs-3 col-sm-2 col-lg-1">
+				<img src="img/myp.svg" width="75" height="75" id="logo" />
+			</div>
+			<div class="col-xs-9 col-sm-9">
+				<div class="row" id="navrow">
+					<div class="col-xs-11 col-sm-12">
+						<ul>
+							<li id="nav-make" ui-sref-active="active"><a ui-sref="make">Make Picks</a></li>
+							<li id="nav-view" ui-sref-active="active"><a ui-sref="view">View Picks</a></li>
+							<li id="nav-standings" ui-sref-active="active"><a ui-sref="winsummary">Standings</a></li>
+							<li id="nav-settings" ng-click="navCtrl.settings();"><a href="#"><i class="fa fa-cog"></i></a></li>
+						</ul>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-xs-4" id="mn-view">
+						<div class="page-select">
+							<select name="Page" id="page" ng-model="selectedPage" ng-change="changePage(selectedPage)">
+								<option value="make">Make Picks</option>
+								<option value="view">View Picks</option>
+								<option value="winsummary">Standings</option>
+							</select>
+						</div>
+						<span id="username">{{username}}</span>
+						<div id="week-container">
+							<select ng-model="week.weekId" id="week-select" >
+								<option ng-repeat="week in weeks" value="{{week.id}}">
+							 		Week {{week.weekNumber}}
+								</option>
+							</select>
+						</div>
+					</div>
+					<div class="col-xs-7" id="sn-view"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>	

@@ -1,0 +1,30 @@
+<form name="createWeek" ng-submit="createCtrl.addWeek()" class="form-horizontal">
+<fieldset>
+	<div class="form-group">
+		<label for="league-select" class="col-lg-2 control-label">Season</label>
+		<div class="col-lg-10">
+			<select ng-model="week.seasonId" required id="league-select" class="form-control">
+				<option ng-repeat="season in seasons" value="{{season.id}}">
+					 {{season.leagueType}} ({{season.startYear}} - {{season.endYear}})
+				</option>
+			</select>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="week-input" class="col-lg-2 control-label">Week Number</label>
+		<div class="col-lg-10">
+			<input type="number" min=1 max="17" ng-model="week.weekNumber" required id="week-input" class="form-control"/>
+		</div>
+	</div>
+	<div class="form-group">
+   		<div class="col-lg-10 col-lg-offset-2">
+   			<button class="btn btn-primary">Add Week</button>
+   		</div>
+   		<br/>
+   		<br/>
+   		<div class="col-lg-10 col-lg-offset-2">
+   			<a href="" ng-click="createCtrl.autoWeek()" class="btn btn-primary">Auto Create Week</a>
+   		</div>
+   	</div>
+</fieldset>
+</form>

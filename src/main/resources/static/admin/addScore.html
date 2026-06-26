@@ -1,0 +1,101 @@
+<div> 
+	<h2>Add Score</h2> 
+	<div class="jumbotron"> 
+		<div class="container" ng-controller="AddScoreController"> 
+			
+			<!-- Season and Week Quick Selectors -->
+			<div class="well">
+				<form class="form-inline">
+					<div class="form-group" style="margin-right: 20px;">
+						<label for="addscore-season-select" style="margin-right: 10px;">Season:</label>
+						<select ng-model="add_game_model.seasonId" required id="addscore-season-select" class="form-control" ng-change="changeSeason()">
+							<option ng-repeat="season in seasons" value="{{season.id}}">
+								{{season.leagueType}} ({{season.startYear}} - {{season.endYear}})
+							</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label for="addscore-week-select" style="margin-right: 10px;">Week:</label>
+						<select ng-model="add_game_model.weekId" id="addscore-week-select" class="form-control" ng-change="changeWeek()">
+							<option ng-repeat="week in weeks" value="{{week.id}}">
+								{{week.weekNumber}}
+							</option>
+						</select>
+					</div>
+				</form>
+			</div>
+
+			<hr/>
+			
+			<!-- Game Selector -->
+			<div class="form-group" style="margin-bottom: 25px;">
+				<label for="addscore-game-select" style="font-size: 16px; margin-bottom: 8px; font-weight: bold;">Select Matchup to Score:</label>
+				<select ng-model="selectedGame" id="addscore-game-select" class="form-control input-lg" 
+						ng-options="game as (game.favFullName + ' vs ' + game.dogFullName + ' (' + game.gameStartFormated + ')') for game in games | filter:isGameUnscored"
+						style="border-radius: 6px;">
+					<option value="">-- Choose an unscored game --</option>
+				</select>
+			</div>
+			
+			<!-- Game Editor Block (Displays inline when a game is selected) -->
+			<div ng-show="selectedGame" class="panel panel-primary" style="margin-top: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+				<div class="panel-heading" style="border-top-left-radius: 7px; border-top-right-radius: 7px; background-color: #3ca2e0; border-color: #2698dd;">
+					<h3 class="panel-title" style="font-size: 18px; font-weight: 600;">Enter Game Scores</h3>
+				</div>
+				<div class="panel-body" style="padding: 25px; background-color: #fff;">
+					<form name="addScoreForm" ng-submit="submitScore()" class="form-horizontal">
+						<fieldset>
+							
+							<!-- Favorite Team Score -->
+							<div class="form-group">
+								<label class="col-sm-4 control-label" style="font-size: 16px; padding-top: 5px; text-align: right;">
+									<span class="label label-warning" style="margin-right: 8px; font-size: 11px; vertical-align: middle;">FAVORITE</span>
+									<span style="font-weight: 600; vertical-align: middle;">{{selectedGame.favFullName}}</span>
+								</label>
+								<div class="col-sm-8">
+									<input type="number" ng-model="selectedGame.favScore" min="0" required class="form-control input-lg" style="font-weight: bold; font-size: 22px; text-align: center; max-width: 150px; border-radius: 6px;" placeholder="0" />
+								</div>
+							</div>
+							
+							<div class="row" style="margin: 15px 0;">
+								<div class="col-sm-offset-4 col-sm-8" style="padding-left: 70px;">
+									<strong style="font-size: 16px; color: #777;">VS</strong>
+								</div>
+							</div>
+							
+							<!-- Underdog Team Score -->
+							<div class="form-group">
+								<label class="col-sm-4 control-label" style="font-size: 16px; padding-top: 5px; text-align: right;">
+									<span class="label label-default" style="margin-right: 8px; font-size: 11px; vertical-align: middle;">UNDERDOG</span>
+									<span style="font-weight: 600; vertical-align: middle;">{{selectedGame.dogFullName}}</span>
+								</label>
+								<div class="col-sm-8">
+									<input type="number" ng-model="selectedGame.dogScore" min="0" required class="form-control input-lg" style="font-weight: bold; font-size: 22px; text-align: center; max-width: 150px; border-radius: 6px;" placeholder="0" />
+								</div>
+							</div>
+							
+							<hr/>
+							
+							<!-- Save Button -->
+							<div class="form-group" style="margin-bottom: 0;">
+								<div class="col-sm-offset-4 col-sm-8">
+									<button type="submit" class="btn btn-success btn-lg" style="padding: 10px 40px; font-size: 18px; font-weight: 600; border-radius: 25px; box-shadow: 0 4px 10px rgba(92,184,92,0.3); transition: all 0.2s;">
+										<span class="glyphicon glyphicon-save" style="margin-right: 8px;"></span>Save Score
+									</button>
+								</div>
+							</div>
+							
+						</fieldset>
+					</form>
+				</div>
+			</div>
+			
+			<!-- No games message -->
+			<div ng-hide="selectedGame || (games | filter:isGameUnscored).length > 0" class="alert alert-info" style="margin-top: 20px; border-radius: 6px;">
+				<span class="glyphicon glyphicon-info-sign" style="margin-right: 8px;"></span>
+				All games for this week have scores entered, or no games are scheduled.
+			</div>
+			
+		</div> 
+	</div> 
+</div>

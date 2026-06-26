@@ -1,0 +1,54 @@
+<%
+var pickmap = {};
+var points = 0;
+var gt = ""
+_.each(picks,function(pick,i) {
+pickmap[pick.game.id] = pick;
+});
+
+<!-- _.each(games,function(game, i) { -->
+
+	
+<!-- var tz = moment(game.gameStart).tz("America/New_York"); -->
+<!-- var gsFormatted = tz.format("dddd, MMMM Do YYYY, h:mm A z"); -->
+
+<!-- 	if(gt != game.gameStartDisplay) {	%> -->
+<!-- 		<div class="gametime"><%=gsFormatted%></div> -->
+<!-- 	<% } -->
+
+<!-- 	gt = game.gameStartDisplay; -->
+//DETERMINE IF WIN OR NOT
+	var pick;
+	if (pickmap[game.id]) {
+		pick = pickmap[game.id];
+//increament the pouints
+		points += pick.winValue;
+	}
+
+// HAS PICK
+//********************************
+if (pick) {
+%>
+	
+
+<%
+}
+// NO PICK HAS BEEN MADE
+//********************************
+else {
+//no pick was made
+%>
+	
+
+<%
+}
+%>
+<%
+//close gamebox
+%>
+</div>
+<%
+place = "4th";
+$("#point-total").html('<span>PTS: </span>'+points+' <span style="margin-left:10px;">POS: </span>' + place);
+});
+%>

@@ -1,0 +1,82 @@
+<style>
+  .winner-cell {
+    background-color: #dff0d8 !important;
+    color: #3c763d !important;
+    font-weight: bold;
+    transition: all 0.3s ease;
+  }
+  .loser-cell {
+    background-color: #f2dede !important;
+    color: #a94442 !important;
+    transition: all 0.3s ease;
+  }
+  .actions-cell a {
+    font-weight: 600;
+    transition: color 0.2s;
+  }
+  .actions-cell a.delete-link {
+    color: #d9534f;
+  }
+  .actions-cell a.delete-link:hover {
+    color: #c9302c;
+    text-decoration: underline;
+  }
+  .actions-cell a.edit-link {
+    color: #337ab7;
+  }
+  .actions-cell a.edit-link:hover {
+    color: #23527c;
+    text-decoration: underline;
+  }
+  th {
+    background-color: #f5f5f5;
+    font-weight: 700;
+    color: #333;
+    border-bottom: 2px solid #ddd !important;
+  }
+</style>
+
+<h2>Games for {{getWeekNumber(add_game_model.weekId) || 'Active Week'}}</h2>
+<table class="table table-striped table-hover table-bordered" style="margin-top: 20px; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+	<thead>
+		<tr>
+			<th style="width: 150px; text-align: center;">Actions</th>
+			<th style="width: 180px;">Game Start Time</th>
+			<th>Favorite Team</th>
+			<th style="width: 110px; text-align: center;">Fav Score</th>
+			<th style="width: 80px; text-align: center;">Spread</th>
+			<th>Underdog Team</th>
+			<th style="width: 110px; text-align: center;">Dog Score</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr id="game" ng-repeat="game in games">
+			<td class="actions-cell" style="text-align: center; vertical-align: middle;">
+				<a href="" ng-click="setupCtrl.showEditGame(game)" class="edit-link" style="margin-right: 12px;">
+					<span class="glyphicon glyphicon-pencil" style="margin-right: 4px;"></span>Edit
+				</a>
+				<a href="" ng-click="setupCtrl.deleteGame(game.id)" class="delete-link">
+					<span class="glyphicon glyphicon-trash" style="margin-right: 4px;"></span>Delete
+				</a>
+			</td>
+			<td class="gameStart" style="vertical-align: middle;">{{game.gameStartFormated}}</td>
+			<td ng-class="{'winner-cell': isFavWinner(game), 'loser-cell': isFavLoser(game)}" style="vertical-align: middle;">
+				<span class="home" ng-show="game.favHome" style="color: #777; margin-right: 4px;">@</span>
+				<span class="fav" style="font-weight: 500;">{{game.favFullName}}</span>
+			</td>
+			<td ng-class="{'winner-cell': isFavWinner(game), 'loser-cell': isFavLoser(game)}" style="text-align: center; font-weight: bold; font-size: 16px; vertical-align: middle;">
+				{{game.favScore}}
+			</td>
+			<td style="text-align: center; font-weight: 600; vertical-align: middle; background-color: #fafafa;">
+				{{game.spread}}
+			</td>
+			<td ng-class="{'winner-cell': isDogWinner(game), 'loser-cell': isDogLoser(game)}" style="vertical-align: middle;">
+				<span class="home" ng-hide="game.favHome" style="color: #777; margin-right: 4px;">@</span>
+				<span class="dog" style="font-weight: 500;">{{game.dogFullName}}</span>
+			</td>
+			<td ng-class="{'winner-cell': isDogWinner(game), 'loser-cell': isDogLoser(game)}" style="text-align: center; font-weight: bold; font-size: 16px; vertical-align: middle;">
+				{{game.dogScore}}
+			</td>
+		</tr>
+	</tbody>
+</table>

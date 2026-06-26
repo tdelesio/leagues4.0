@@ -1,0 +1,53 @@
+<div> 
+	<h2>Setup Week</h2> 
+	<div class=jumbotron> 
+		<div class=container ng-controller="SetupWeekController as setupCtrl"> 
+									
+			<create-game></create-game>
+
+			<hr/>
+			<h2>Create Mock Week</h2>
+			<form name="createMockWeekForm" ng-submit="setupCtrl.createMockWeek(mock_week_model)" class="form-horizontal">
+				<fieldset>
+					<div class="form-group">
+						<label for="mock-season-select" class="col-lg-2 control-label">Season</label>
+						<div class="col-lg-10">
+							<select ng-model="mock_week_model.seasonId" required id="mock-season-select" class="form-control">
+								<option ng-repeat="season in seasons" value="{{season.id}}">
+									{{season.leagueType}} ({{season.startYear}} - {{season.endYear}})
+								</option>
+							</select>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="mock-games-count" class="col-lg-2 control-label">Number of Games</label>
+						<div class="col-lg-10">
+							<input ng-model="mock_week_model.numberOfGames" type="number" min="1" max="16" required id="mock-games-count" class="form-control"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="mock-gamestart-input" class="col-lg-2 control-label">Game Start</label>
+						<div class="col-lg-10">
+							<input id="mock-gamestart-input" class="form-control" ng-model="mock_week_model.gameStart" type="datetime-local" step="any" placeholder="yyyy-MM-ddTHH:mm:ss" required/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="mock-week-select" class="col-lg-2 control-label">Week</label>
+						<div class="col-lg-10">
+							<select ng-model="mock_week_model.weekId" required id="mock-week-select" class="form-control">
+								<option ng-repeat="week in weeks" value="{{week.id}}">
+									{{week.weekNumber}}
+								</option>
+							</select>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-lg-10 col-lg-offset-2">
+							<button class="btn btn-primary">Create Week</button>
+						</div>
+					</div>
+				</fieldset>
+			</form>
+		</div> 
+	</div> 
+</div>

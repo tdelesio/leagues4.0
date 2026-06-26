@@ -1,0 +1,82 @@
+<div id="weekNav"></div>
+<div id="weeks"></div>
+<script type="text/template" id="addgame">
+<form>
+<br/>
+
+Favorite:<br/>
+<select name="fav.id">
+	<% _.each(teams,function(teams){ %>
+		<option value="<%=teams.id%>"><%=teams.city%>&nbsp;<%=teams.teamName%></option>
+	<% }); %>
+</select>
+<br/>
+Dog:<br/>
+<select name="dog.id">
+	<% _.each(teams,function(teams){ %>
+		<option value="<%=teams.id%>"><%=teams.city%>&nbsp;<%=teams.teamName%></option>
+	<% }); %>
+</select>
+<br/>
+
+Spread:<br/>
+<input type="text" name="spread" size="3" value=""/>
+<br/>
+
+Favorite Home:<br/>
+<input type="checkbox" name="favHome" value="true" id="favhome" checked="checked"/>
+<br/>
+<br/>
+Game Start:
+<br/>
+Time:<input type="text" name="gsTime" size="5" value="13:00"/> 
+Date:<input id="gsdate" type="text" name="gameStartDate" size="10" />
+<input type="hidden" name="week.id" id="weekid" value="1"/>
+<br/>
+<input type="button" value="add game" onClick="addNewGame()"/>
+</form>
+</script>
+<script type="text/template" id="games">
+Game in Week:<br/>
+<% _.each(games,function(games, index){ 
+
+
+var tz = moment(games.gameStart).tz("America/New_York");
+var gsFormatted = tz.format("dddd, MMMM Do YYYY, h:mm A z");
+var timeFormatted = tz.format("h:mm");
+%>
+
+<form name="game<%=index%>">
+	<div class="gamebox" style=" border: 1px solid black; <%if (games.gameStarted && (games.favScore !=0 || games.dogScore != 0)) {%>background-color: teal;<%}%>">
+	<div class="gametime"><%=gsFormatted%></div>
+	<div class="scoreboard shadow">
+		<div class="scorerow">
+			<div class="teamname">
+				<%=games.fav.fullTeamName%> <span class="spread">(<%=games.spread%>)</span>
+			</div>
+			
+			<div class="score">
+				<input size="2" name="favScore" value="<%=games.favScore%>"/>
+			</div>
+		</div>
+
+		<div class="scorerow" >
+			<div class="teamname"><%=games.dog.fullTeamName%></div>
+			<div class="score">
+				<input size="2" name="dogScore" value="<%=games.dogScore%>"/>
+			</div>
+		</div>
+
+		<div class="edit">
+			<input type="text" name="gsTime" size="5" value="<%=timeFormatted%>"/> 
+			Date:<input type="text" name="gameStartDate" size="10" value="<%=games.gameStartDateForUpdate%>"/>
+			<input type="hidden" name="id" value="<%=games.id%>"/>
+			<input type="button" value="update" onClick="updateScore(this.form)"/>
+		</div>
+
+			<div style="clear:both;"></div>
+	</div>
+	</div>
+</form>
+<% }); %>
+</script>

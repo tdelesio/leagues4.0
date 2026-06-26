@@ -1,0 +1,70 @@
+<h2>Create Game</h2>
+<form name="addGame" ng-show="weeksSetup" ng-submit="setupCtrl.addGame(add_game_model)" class="form-horizontal">
+	<fieldset>
+		<div class="form-group">
+			<label for="season-select" class="col-lg-2 control-label">Season</label>
+			<div class="col-lg-10">
+				<select ng-model="add_game_model.seasonId" required id="season-select"  ng-change="changeSeason()">
+					<option ng-repeat="season in seasons" value="{{season.id}}">
+		 				{{season.leagueType}} ({{season.startYear}} - {{season.endYear}})
+					</option>
+				</select>
+     		</div>
+		</div>
+		<div class="form-group">
+			<label for="favorite-select" class="col-lg-2 control-label">Favorite</label>
+			<div class="col-lg-10">
+				<select ng-model="add_game_model.favId" required id="favorite-select" class="form-control">
+					<option ng-repeat="team in teams | orderBy:['city', 'teamName']" value="{{team.id}}">
+						 {{team.city}}&nbsp;{{team.teamName}}
+					</option>
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
+			<label for="dog-select" class="col-lg-2 control-label">Dog</label>
+			<div class="col-lg-10">
+				<select ng-model="add_game_model.dogId" required id="dog-select" class="form-control">
+					<option ng-repeat="team in teams | orderBy:['city', 'teamName']" value="{{team.id}}">
+						 {{team.city}}&nbsp;{{team.teamName}}
+					</option>
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
+			<label for="spread-input" class="col-lg-2 control-label">Spread</label>
+			<div class="col-lg-10">
+				<input ng-model="add_game_model.spread" type="number" smartFloat min="0.5" max="20.5" required id="spread-input" class="form-control"/>
+			</div>
+		</div>
+		<div class="form-group">
+			<label for="home-check" class="col-lg-2 control-label">Favorite Home?</label>
+			<div class="col-lg-10">
+				<input type="checkbox" ng-model="add_game_model.favHome" id="home-check"/>
+			</div>
+		</div>
+		<div class="form-group">
+			<label for="gamestart-input" class="col-lg-2 control-label">Game Start</label>
+			<div class="col-lg-10">
+				<input id="gamestart-input" class="form-control" ng-model="add_game_model.gameStart" type="datetime-local" step="any" placeholder="yyyy-MM-ddTHH:mm:ss" required/>
+			</div>
+		</div>
+		<div class="form-group">
+			<label for="week-select" class="col-lg-2 control-label">Week</label>
+			<div class="col-lg-10">
+				<select ng-model="add_game_model.weekId" id="week-select" class="form-control" ng-change="changeWeek()">
+					<option ng-repeat="week in weeks" value="{{week.id}}">
+				 		{{week.weekNumber}}
+					</option>
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
+      		<div class="col-lg-10 col-lg-offset-2">
+      			<button class="btn btn-primary">add game</button>
+      		</div>
+      	</div>	
+	</fieldset>		
+</form>
+
+<div ng-hide="weeksSetup">Leagues or Weeks are not setup.</div>

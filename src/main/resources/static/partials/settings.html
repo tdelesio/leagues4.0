@@ -1,0 +1,25 @@
+<div id="settings-panel">
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-6">
+				<div class="subnav" id="season-view">
+					<div class="season-select">
+						<select ng-model="league.seasonId" id="season">
+							<option ng-repeat="league in leagues" value="{{league.seasonId}}">
+						 		{{league.leagueName}}
+							</option>
+						</select>
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div id="logout">
+					<a href="#" onclick="logout()">logout</a>
+				</div>
+				<div id="admin-link" style="margin-top: 10px;">
+					<a href="/admin/index.html" style="color: #e2b007; font-weight: bold; text-transform: uppercase; font-size: 13px; letter-spacing: 1px;"><i class="fa fa-cog"></i> Admin Console</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

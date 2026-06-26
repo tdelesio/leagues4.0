@@ -1,0 +1,34 @@
+<form name="createLeague" ng-submit="createLeagueCtrl.addLeague()" class="form-horizontal">
+<fieldset>
+	<div class="form-group">
+		<label for="season-select" class="col-lg-2 control-label">Season</label>
+		<div class="col-lg-10">
+			<select ng-model="league.seasonId" required id="season-select" class="form-control">
+				<option ng-repeat="season in seasons" value="{{season.id}}">
+					 {{season.startYear}} - {{season.endYear}}
+				</option>
+			</select>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="name-input" class="col-lg-2 control-label">League Name</label>
+		<div class="col-lg-10">
+			<input ng-model="league.leagueName" required id="name-input" class="form-control"/>
+		</div>
+	</div>
+	
+	<div class="form-group">
+		<label for="password-input" class="col-lg-2 control-label">League Password</label>
+		<div class="col-lg-10">
+			<input ng-model="league.password" id="password-input" class="form-control"/>
+		</div>
+	</div>
+	<br/>
+	<div class="form-group">
+   		<div class="col-lg-10 col-lg-offset-2">
+   			<button class="btn btn-primary">Add League</button>
+   		</div>
+   		
+   	</div>
+</fieldset>
+</form>

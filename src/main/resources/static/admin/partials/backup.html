@@ -1,0 +1,334 @@
+<style>
+.backup-restore-container {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 30px;
+	margin-top: 20px;
+}
+
+.br-card {
+	flex: 1;
+	min-width: 320px;
+	background: rgba(255, 255, 255, 0.08);
+	border: 1px solid rgba(255, 255, 255, 0.15);
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	border-radius: 16px;
+	padding: 30px;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+	transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+	position: relative;
+	overflow: hidden;
+}
+
+.br-card:hover {
+	transform: translateY(-5px);
+	box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+	border-color: rgba(255, 255, 255, 0.3);
+}
+
+.br-card::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 4px;
+	background: linear-gradient(90deg, #3a7bd5, #3a6073);
+}
+
+.br-card.restore-card::before {
+	background: linear-gradient(90deg, #11998e, #38ef7d);
+}
+
+.br-card-header {
+	display: flex;
+	align-items: center;
+	margin-bottom: 20px;
+	gap: 15px;
+}
+
+.br-icon-wrapper {
+	width: 50px;
+	height: 50px;
+	border-radius: 12px;
+	background: rgba(58, 123, 213, 0.15);
+	color: #3a7bd5;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 24px;
+}
+
+.br-card.restore-card .br-icon-wrapper {
+	background: rgba(56, 239, 125, 0.15);
+	color: #2ecc71;
+}
+
+.br-card h3 {
+	margin: 0;
+	font-size: 22px;
+	font-weight: 600;
+	color: #fff;
+}
+
+.br-card p {
+	color: #b0c4de;
+	font-size: 14px;
+	line-height: 1.6;
+	margin-bottom: 25px;
+}
+
+/* Custom Drop Zone */
+.dropzone {
+	border: 2px dashed rgba(255, 255, 255, 0.25);
+	border-radius: 12px;
+	padding: 30px 20px;
+	text-align: center;
+	background: rgba(0, 0, 0, 0.15);
+	cursor: pointer;
+	transition: all 0.3s ease;
+	position: relative;
+	margin-bottom: 25px;
+}
+
+.dropzone:hover {
+	border-color: #38ef7d;
+	background: rgba(56, 239, 125, 0.05);
+}
+
+.dropzone-icon {
+	font-size: 36px;
+	color: rgba(255, 255, 255, 0.4);
+	margin-bottom: 10px;
+	transition: color 0.3s ease;
+}
+
+.dropzone:hover .dropzone-icon {
+	color: #38ef7d;
+}
+
+.dropzone-text {
+	font-size: 14px;
+	color: #b0c4de;
+}
+
+.dropzone-text strong {
+	color: #fff;
+}
+
+.file-info-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	background: rgba(56, 239, 125, 0.15);
+	color: #38ef7d;
+	border: 1px solid rgba(56, 239, 125, 0.25);
+	padding: 8px 16px;
+	border-radius: 8px;
+	font-size: 13px;
+	font-weight: 500;
+	margin-top: 10px;
+	max-width: 100%;
+	word-break: break-all;
+}
+
+.file-info-badge i {
+	font-size: 16px;
+}
+
+/* Loading Overlay */
+.br-loading-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(0, 0, 0, 0.7);
+	backdrop-filter: blur(4px);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	z-index: 100;
+	border-radius: 16px;
+}
+
+.spinner {
+	width: 45px;
+	height: 45px;
+	border: 4px solid rgba(255, 255, 255, 0.1);
+	border-top-color: #38ef7d;
+	border-radius: 50%;
+	animation: spin 1s infinite linear;
+	margin-bottom: 15px;
+}
+
+@keyframes spin {
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
+}
+
+.br-loading-text {
+	color: #fff;
+	font-size: 16px;
+	font-weight: 500;
+}
+
+/* Alert Boxes */
+.alert-box {
+	border-radius: 10px;
+	padding: 15px 20px;
+	margin-bottom: 20px;
+	display: flex;
+	align-items: flex-start;
+	gap: 15px;
+	animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+	from { opacity: 0; transform: translateY(10px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+.alert-box-success {
+	background: rgba(39, 174, 96, 0.15);
+	border: 1px solid rgba(39, 174, 96, 0.3);
+	color: #2ecc71;
+}
+
+.alert-box-danger {
+	background: rgba(231, 76, 60, 0.15);
+	border: 1px solid rgba(231, 76, 60, 0.3);
+	color: #e74c3c;
+}
+
+.alert-box-icon {
+	font-size: 20px;
+	margin-top: 2px;
+}
+
+.alert-box-content {
+	font-size: 14px;
+	line-height: 1.5;
+}
+
+/* Action Buttons */
+.br-btn {
+	width: 100%;
+	border: none;
+	border-radius: 8px;
+	padding: 12px 24px;
+	font-size: 15px;
+	font-weight: 600;
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	transition: all 0.2s ease;
+	text-decoration: none !important;
+}
+
+.br-btn-primary {
+	background: linear-gradient(135deg, #3a7bd5, #3a6073);
+	color: #fff !important;
+	box-shadow: 0 4px 15px rgba(58, 123, 213, 0.3);
+}
+
+.br-btn-primary:hover {
+	background: linear-gradient(135deg, #4a8be5, #4a7083);
+	box-shadow: 0 6px 20px rgba(58, 123, 213, 0.4);
+}
+
+.br-btn-success {
+	background: linear-gradient(135deg, #11998e, #38ef7d);
+	color: #fff !important;
+	box-shadow: 0 4px 15px rgba(56, 239, 125, 0.3);
+}
+
+.br-btn-success:hover {
+	background: linear-gradient(135deg, #12a99d, #48ff8d);
+	box-shadow: 0 6px 20px rgba(56, 239, 125, 0.4);
+}
+
+.br-btn:disabled, .br-btn[disabled] {
+	background: rgba(255, 255, 255, 0.1) !important;
+	color: rgba(255, 255, 255, 0.3) !important;
+	cursor: not-allowed;
+	box-shadow: none !important;
+}
+</style>
+
+<div class="backup-restore-container">
+	<!-- Left Card: Export/Backup -->
+	<div class="br-card">
+		<div class="br-card-header">
+			<div class="br-icon-wrapper">
+				<i class="fa fa-cloud-download"></i>
+			</div>
+			<h3>Backup Database</h3>
+		</div>
+		<p>
+			Export the entire system database into a single, structured backup file. This backup includes all players, active seasons, weeks, scheduled games, player leagues, and picks. Download and save this file securely.
+		</p>
+		<div style="margin-top: auto;">
+			<a href="/admin/backup/export" class="br-btn br-btn-primary">
+				<i class="fa fa-download"></i> Download Database Backup
+			</a>
+		</div>
+	</div>
+
+	<!-- Right Card: Import/Restore -->
+	<div class="br-card restore-card">
+		<!-- Loading state overlay -->
+		<div class="br-loading-overlay" ng-if="status.loading">
+			<div class="spinner"></div>
+			<div class="br-loading-text">Restoring Database...</div>
+		</div>
+
+		<div class="br-card-header">
+			<div class="br-icon-wrapper">
+				<i class="fa fa-refresh"></i>
+			</div>
+			<h3>Restore Database</h3>
+		</div>
+		<p>
+			Restore the database state from a previously downloaded backup JSON file. 
+			<strong style="color: #f39c12;"><i class="fa fa-exclamation-triangle"></i> Warning:</strong> This operation is destructive. It completely wipes out all current database states before restoring the backup contents.
+		</p>
+
+		<!-- Alert Messages -->
+		<div class="alert-box alert-box-success" ng-if="status.success">
+			<div class="alert-box-icon"><i class="fa fa-check-circle"></i></div>
+			<div class="alert-box-content">{{status.success}}</div>
+		</div>
+
+		<div class="alert-box alert-box-danger" ng-if="status.error">
+			<div class="alert-box-icon"><i class="fa fa-times-circle"></i></div>
+			<div class="alert-box-content">{{status.error}}</div>
+		</div>
+
+		<!-- File selection dragzone area -->
+		<div class="dropzone" onclick="document.getElementById('backupFileInput').click()">
+			<input type="file" id="backupFileInput" accept=".json" style="display: none;" onchange="angular.element(this).scope().onFileChange(this)">
+			<div ng-if="!restoreFile">
+				<div class="dropzone-icon"><i class="fa fa-file-code-o"></i></div>
+				<div class="dropzone-text">
+					Click or Drag & Drop backup file here
+					<br><small style="color: rgba(255,255,255,0.4)">Supports: .json backups</small>
+				</div>
+			</div>
+			<div ng-if="restoreFile" class="file-info-badge">
+				<i class="fa fa-file-text"></i>
+				<span>{{restoreFile.name}} ({{(restoreFile.size / 1024).toFixed(2)}} KB)</span>
+			</div>
+		</div>
+
+		<div>
+			<button type="button" class="br-btn br-btn-success" ng-click="restoreDatabase()" ng-disabled="!restoreFile || status.loading">
+				<i class="fa fa-upload"></i> Restore Database File
+			</button>
+		</div>
+	</div>
+</div>

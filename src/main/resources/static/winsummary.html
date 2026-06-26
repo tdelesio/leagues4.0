@@ -1,0 +1,72 @@
+<div ng-controller="WinsummaryController" class="standings-container">
+	<div ng-if="loading" class="text-center" style="padding: 50px;">
+		<i class="fa fa-spinner fa-spin fa-3x" style="color: #FFB415;"></i>
+		<p style="color: #fff; margin-top: 15px;">Loading standings...</p>
+	</div>
+
+	<div ng-if="!loading" class="row">
+		<!-- Left: Season Standings -->
+		<div class="col-md-6 col-xs-12">
+			<h3 style="color: #FFB415; margin-bottom: 20px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; font-size: 18px;">
+				<i class="fa fa-trophy"></i> Season Standings
+			</h3>
+			<div class="glass-table-container">
+				<table class="table table-bordered picks-matrix-table">
+					<thead>
+						<tr>
+							<th class="text-center header-cell" style="width: 20%;">Place</th>
+							<th class="header-cell" style="width: 50%;">Player</th>
+							<th class="text-center header-cell" style="width: 30%;">Wins</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="row in standings">
+							<td class="text-center pick-cell font-weight-bold" style="color: #FFB415;">
+								{{row.place}}
+							</td>
+							<td class="pick-cell" style="font-weight: 600; color: #ffffff;">
+								{{row.playerId}}
+							</td>
+							<td class="text-center pick-cell font-weight-bold" style="color: #4ade80;">
+								{{row.numberOfWins}}
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<div ng-if="standings.length === 0" class="text-center" style="padding: 20px; color: #ccc;">
+					No standings recorded yet.
+				</div>
+			</div>
+		</div>
+
+		<!-- Right: Week Winners -->
+		<div class="col-md-6 col-xs-12">
+			<h3 style="color: #FFB415; margin-bottom: 20px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; font-size: 18px;">
+				<i class="fa fa-calendar-check-o"></i> Week Winners
+			</h3>
+			<div class="glass-table-container">
+				<table class="table table-bordered picks-matrix-table">
+					<thead>
+						<tr>
+							<th class="text-center header-cell" style="width: 30%;">Week</th>
+							<th class="header-cell" style="width: 70%;">Winners</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="row in weekWinners">
+							<td class="text-center pick-cell font-weight-bold" style="color: #ffffff;">
+								Week {{row.weekNumber}}
+							</td>
+							<td class="pick-cell" style="color: #4ade80; font-weight: 600;">
+								{{row.winners}}
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<div ng-if="weekWinners.length === 0" class="text-center" style="padding: 20px; color: #ccc;">
+					No weekly winners recorded yet.
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

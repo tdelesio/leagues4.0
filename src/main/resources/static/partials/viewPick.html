@@ -1,0 +1,160 @@
+<div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+	<div class="scoreboard row shadow pickmade> 
+<!-- 	<% -->
+<!-- 	var winner = ""; -->
+<!-- 	//need to figure out which row to mark as a loss -->
+<!-- 	if( pick.fav && (pick.winnerStatus == 2)) { -->
+<!-- 		loss = "f"; -->
+<!-- 	} else if (pick.dog && (pick.winnerStatus == 2) ) { -->
+<!-- 		winner = "d"; -->
+<!-- 	} -->
+
+<!-- 	if(pick.winnerStatus == 1) { -->
+<!-- 		%>win <% -->
+<!-- 		if(pick.weight == 2) { -->
+<!-- 			%>double <% -->
+<!-- 		} -->
+<!-- 	} -->
+<!-- 	else if (pick.winnerStatus == 2) { -->
+<!-- 		%>loss <% -->
+<!-- 		if(pick.weight == 2) { -->
+<!-- 			%>double <% -->
+<!-- 		} -->
+<!-- 	} -->
+
+<!-- 	if (!game.gameStarted) { -->
+<!-- 		%>pickable <% -->
+<!-- 	} -->
+<!-- 	else  -->
+<!-- 	{ -->
+<!-- 		%><% -->
+<!-- 	} -->
+<!-- 	//div closes scoreboard -->
+<!-- 	%>"> -->
+		<div class="col-sm-12">
+
+			<!-- FAV -->
+			<div class="fav row scorerow">
+	<!-- 		 <%=i%>"  -->
+	<!-- 		<%if (!game.gameStarted && update == true) { -->
+	<!-- 			if (pick.fav) {%> -->
+	<!-- 				onclick="doublePick(<%=pick.id%>, <%=i%>, 'fav')" -->
+	<!-- 			<%} else {%> -->
+	<!-- 				onclick="updatePick(<%=pick.id%>, <%=game.id%>, <%=game.fav.id%>, <%=game.dog.id%>, '<%=game.fav.shortName%>', '<%=game.dog.shortName%>', 'fav', <%=i%>)" -->
+	<!-- 			<%} -->
+	<!-- 		}%>  -->
+		
+				<div class="col-xs-1 pick-selection">
+		
+					<!-- CHECK OR X -->
+					<i class="fa fa-check-circle-o"></i>
+	<!-- 	<% if (!game.gameStarted && update == false) {%> -->
+	<!-- 		hide -->
+	<!-- 	<% } else if(pick.fav){%> -->
+			 
+	<!-- 		<%if (game.gameStarted) {%> -->
+	<!-- 			gamestarted -->
+	<!-- 		<%} -->
+	
+	<!-- 		if (pick.weight == 2) {%> -->
+	<!-- 			doubled  -->
+	<!-- 		<%} -->
+	<!-- 	} else {%> -->
+	<!-- 		hide -->
+	<!-- 	<%}%>" -->
+				</div>
+	
+	
+				<!-- TEAM ICON -->
+				<div class="col-xs-2"><div class="team-icon <%=pick.game.fav.shortName%>"></div>
+			</div>
+	
+			<!-- TEAM NAME ABBR-->
+			<div class="col-xs-5 col-sm-6">
+				<span class="short-name <%if (game.favHome) {%>home <%}%>"><%=pick.game.fav.shortName%></span><span class="long-name <%if (game.favHome) {%>home <%}%>"><%=pick.game.fav.fullTeamName%>
+			</div>
+	
+			<!-- SPREAD -->
+			<div class="col-xs-1">
+				<span class="spread">(<%=pick.game.spread%>)</span>
+			</div>
+	
+			<!-- SCORE -->
+			<div class="col-xs-1">
+	<!-- 		<% -->
+	<!-- 		if (pick.game.gameStarted && pick.game.favScore == 0 && pick.game.dogScore == 0) -->
+	<!-- 		{ -->
+	<!-- 		%> -->
+				<a href="#" onclick="userUpdateScore(<%=game.id%>, '<%=pick.game.fav.shortName%>', '<%=pick.game.dog.shortName%>')" id="enterscorelink">add</a>
+	<!-- 		<%	 -->
+	<!-- 		} else { -->
+	<!-- 		%> -->
+				<%=pick.game.favScore%>
+	<!-- 		<% -->
+	<!-- 		} -->
+	<!-- 		%> -->
+			</div>
+		</div>
+
+		<!-- DOG -->
+		<div class="dog row scorerow">
+<!-- 		 <%=i%>"  -->
+<!-- 		<%if (!game.gameStarted && update == true) { -->
+<!-- 			if (pick.dog) {%> -->
+<!-- 				onclick="doublePick(<%=pick.id%>, <%=i%>, 'dog')" -->
+<!-- 			<%} else {%> -->
+<!-- 				onclick="updatePick(<%=pick.id%>, <%=game.id%>, <%=game.dog.id%>, <%=game.fav.id%>, '<%=game.dog.shortName%>', '<%=game.fav.shortName%>', 'dog', <%=i%>)" -->
+<!-- 			<%} -->
+<!-- 		}%>  -->
+	
+			<div class="col-xs-1 pick-selection">
+				<i class="fa fa-check-circle-o"></i>
+<!-- 	<% if (!game.gameStarted && update == false) {%> -->
+<!-- 		hide -->
+<!-- 	<% } else if(pick.dog){%> -->
+		 
+<!-- 		<%if (game.gameStarted) {%> -->
+<!-- 			gamestarted -->
+<!-- 		<%} -->
+
+<!-- 		if (pick.weight == 2) {%> -->
+<!-- 			doubled  -->
+<!-- 		<%} -->
+<!-- 	} else {%> -->
+<!-- 		hide -->
+<!-- 	<%}%> -->
+			</div>
+
+			<!-- TEAM ICON -->
+			<div class="col-xs-2">
+				<div class="team-icon <%=pick.game.dog.shortName%>"></div>
+			</div>
+
+			<!-- TEAM NAME ABBR-->
+			<div class="col-xs-5 col-sm-6">
+				<span class="short-name <%if (!game.favHome) {%>home <%}%>"><%=pick.game.dog.shortName%></span><span class="long-name <%if (!game.favHome) {%>home <%}%>"><%=pick.game.dog.fullTeamName%>
+			</div>
+
+			<!-- SPREAD -->
+			<div class="col-xs-1">
+				<span class="spread">&nbsp;</span>
+			</div>
+
+			<!-- SCORE -->
+			<div class="col-xs-1">
+<!-- 		<% -->
+<!-- 		if (pick.game.gameStarted && pick.game.favScore == 0 && pick.game.dogScore == 0) -->
+<!-- 		{ -->
+<!-- 		%> -->
+				<a href="#" onclick="userUpdateScore(<%=game.id%>, '<%=pick.game.fav.shortName%>', '<%=pick.game.dog.shortName%>')" id="enterscorelink">score</a>
+<!-- 		<%	 -->
+<!-- 		} else { -->
+<!-- 		%> -->
+				<%=pick.game.dogScore%>
+<!-- 		<% -->
+<!-- 		} -->
+<!-- 		%> -->
+			</div>
+		</div>
+	</div>
+</div>
