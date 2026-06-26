@@ -11,7 +11,7 @@
 							<li id="nav-make" ui-sref-active="active"><a ui-sref="make">Make Picks</a></li>
 							<li id="nav-view" ui-sref-active="active"><a ui-sref="view">View Picks</a></li>
 							<li id="nav-standings" ui-sref-active="active"><a ui-sref="winsummary">Standings</a></li>
-							<li id="nav-settings" ng-click="navCtrl.settings();"><a href="#"><i class="fa fa-cog"></i></a></li>
+							<li id="nav-admin" ng-if="isAdminOfAnyLeague"><a href="/admin/index.html">Admin</a></li>
 						</ul>
 					</div>
 				</div>

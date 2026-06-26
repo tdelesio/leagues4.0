@@ -6,9 +6,24 @@
 		$scope.league = {};
 		$scope.week = {};
 		$scope.selectedPage = $state.current.name || 'make';
+		$scope.username = "";
+		$scope.leagues = [];
+		$scope.isAdminOfAnyLeague = false;
+
+		function checkAdminStatus() {
+			if ($scope.username && $scope.leagues && $scope.leagues.length > 0) {
+				for (var i = 0; i < $scope.leagues.length; i++) {
+					if ($scope.leagues[i].adminId === $scope.username) {
+						$scope.isAdminOfAnyLeague = true;
+						break;
+					}
+				}
+			}
+		}
 		
 		$http.get('/user').success(function(data) {
 			$scope.username = data.name;
+			checkAdminStatus();
 		});
 
 		$scope.changePage = function(stateName) {
@@ -32,6 +47,8 @@
 			$log.debug('SettingsController:Leagues=' +JSON.stringify(data));
 
 			$scope.leagues = data;
+			checkAdminStatus();
+			
 			// Set league id and seasonId properly
 			if (data && data.length > 0) {
 				$scope.league.id = data[0].id;
