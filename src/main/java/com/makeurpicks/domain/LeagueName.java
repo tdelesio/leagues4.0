@@ -7,19 +7,27 @@ public class LeagueName implements Serializable {
 	private String leagueName;
 	private String leagueId;
 	private String seasonId;
+	private String adminId;
 	
 	public LeagueName()
 	{
 		
 	}
 	
-	
-	
 	public LeagueName(League league)
 	{
 		this.leagueName = league.getLeagueName();
 		this.leagueId = league.getId();
 		this.seasonId = league.getSeasonId();
+		this.adminId = league.getAdminId();
+	}
+	
+	public String getAdminId() {
+		return adminId;
+	}
+
+	public void setAdminId(String adminId) {
+		this.adminId = adminId;
 	}
 	
 	 

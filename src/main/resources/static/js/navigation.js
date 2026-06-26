@@ -21,9 +21,64 @@
 			}
 		}
 		
-		$http.get('/user').success(function(data) {
-			$scope.username = data.name;
-			checkAdminStatus();
+		function loadWeeksForSeason(seasonId) {
+			$http.get('/weeks/seasonid/' + seasonId).success(function(weeksData) {
+				$log.debug('SettingsController:Weeks=' + JSON.stringify(weeksData));
+				$scope.weeks = weeksData;
+				if (weeksData && weeksData.length > 0) {
+					$scope.week.weekId = weeksData[0].id;
+				} else {
+					$scope.week = {};
+				}
+				$rootScope.$broadcast('weekLoaded');
+			});
+		}
+
+		$scope.$watch('league.id', function(newVal, oldVal) {
+			if (newVal) {
+				var selectedLeague = null;
+				for (var i = 0; i < $scope.leagues.length; i++) {
+					if ($scope.leagues[i].id === newVal) {
+						selectedLeague = $scope.leagues[i];
+						break;
+					}
+				}
+				if (selectedLeague) {
+					$scope.league.seasonId = selectedLeague.seasonId;
+					$scope.league.leagueName = selectedLeague.leagueName;
+					loadWeeksForSeason(selectedLeague.seasonId);
+				}
+			}
+		});
+
+		$http.get('/user').success(function(userData) {
+			$scope.username = userData.name;
+			
+			leagueService.getLeaguesForPlayer($scope.username).then(function(data) {
+				$log.debug('Leagues for player=' + JSON.stringify(data));
+				var leagues = [];
+				if (data) {
+					for (var i = 0; i < data.length; i++) {
+						leagues.push({
+							id: data[i].leagueId,
+							leagueName: data[i].leagueName,
+							seasonId: data[i].seasonId,
+							adminId: data[i].adminId
+						});
+					}
+				}
+				$scope.leagues = leagues;
+				checkAdminStatus();
+				
+				if (leagues.length > 0) {
+					$scope.league.id = leagues[0].id;
+				} else {
+					$scope.league = {};
+					$scope.weeks = [];
+					$scope.week = {};
+					$rootScope.$broadcast('weekLoaded');
+				}
+			});
 		});
 
 		$scope.changePage = function(stateName) {
@@ -48,29 +103,6 @@
 		$scope.$watch('week.weekId', function(newVal, oldVal) {
 			if (newVal && newVal !== oldVal) {
 				$rootScope.$broadcast('weekLoaded');
-			}
-		});
-
-		//get the leagues
-		leagueService.getLeagues().then(function(data) {
-			$log.debug('SettingsController:Leagues=' +JSON.stringify(data));
-
-			$scope.leagues = data;
-			checkAdminStatus();
-			
-			// Set league id and seasonId properly
-			if (data && data.length > 0) {
-				$scope.league.id = data[0].id;
-				$scope.league.seasonId = data[0].seasonId;
-				
-				$http.get('/weeks/seasonid/'+$scope.league.seasonId).success(function(data) {
-					$log.debug('SettingsController:Weeks='+JSON.stringify(data));
-					$scope.weeks = data;
-					if (data && data.length > 0) {
-						$scope.week.weekId = data[0].id;
-					}
-					$rootScope.$broadcast('weekLoaded');
-				});
 			}
 		});
 		

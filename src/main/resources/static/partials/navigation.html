@@ -17,9 +17,18 @@
 					</div>
 				</div>
 				<div class="row">
-					<div class="col-xs-4" id="mn-view">
-						<span id="username">{{username}}</span>
-						<div id="week-container">
+					<div class="col-xs-11 col-sm-12" id="mn-view">
+						<span id="username" class="username">{{username}}</span>
+						<a href="joinLeague.html" id="join-league-link"><i class="fa fa-plus-circle" style="margin-right: 4px;"></i>Join League</a>
+						<div style="clear: both; margin-top: 5px;"></div>
+						<div id="league-container" ng-if="leagues && leagues.length > 0">
+							<select ng-model="league.id" id="league-select">
+								<option ng-repeat="lg in leagues" value="{{lg.id}}">
+									{{lg.leagueName}}
+								</option>
+							</select>
+						</div>
+						<div id="week-container" ng-if="leagues && leagues.length > 0">
 							<select ng-model="week.weekId" id="week-select" >
 								<option ng-repeat="week in weeks" value="{{week.id}}">
 							 		Week {{week.weekNumber}}
@@ -27,7 +36,6 @@
 							</select>
 						</div>
 					</div>
-					<div class="col-xs-7" id="sn-view"></div>
 				</div>
 			</div>
 		</div>

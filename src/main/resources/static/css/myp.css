@@ -96,6 +96,7 @@ p a:hover { color: #F16428; }
 .subnav{float:right; width:180px; margin-top:5px;}
 
 #mn-view{ overflow: auto; }
+#league-container { float:left; margin-right: 10px;}
 #week-container { float:left; margin-right: 10px;}
 #player-container { float:left;}
 	
@@ -105,8 +106,25 @@ p a:hover { color: #F16428; }
 	/* MAKE PICKS */
 	.week-select{margin-left:10px; float:right;}
 	
+	#league-container select {background-color:#000000; color:#FFFFFF; font-size:10px;}
 	#week-container select {background-color:#000000; color:#FFFFFF; font-size:10px;}
 	#player-container select {background-color:#000000; color:#FFFFFF; font-size:10px;}
+
+#join-league-link {
+	color: #FFB415;
+	margin-left: 12px;
+	font-weight: bold;
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.8px;
+	text-decoration: none;
+	display: inline-flex;
+	align-items: center;
+	transition: color 0.25s ease, transform 0.25s ease;
+}
+#join-league-link:hover {
+	color: #FFF !important;
+}
 
 
 	.points {font-family:Arial, Helvetica, sans-serif; color:#FFFFFF; font-size:14px; font-weight:bold; float:right;}

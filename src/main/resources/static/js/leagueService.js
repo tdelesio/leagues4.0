@@ -9,6 +9,12 @@
 				           return result.data;
 				       });
 				},
+
+				getLeaguesForPlayer: function(username) {
+					return $http.get('/leagues/player/' + username).then(function(result) {
+						return result.data;
+					});
+				},
 			
 				getGames: function(weekId) {
 				

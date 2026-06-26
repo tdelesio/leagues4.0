@@ -1,73 +1,103 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!doctype html>
+<html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<meta name="viewport" content="width=device-width; initial-scale = 1.0; maximum-scale=1.0; user-scalable=no" />
-<link rel="stylesheet" href="_/css/myp.css" />
-<script src="_/js/jquery-1.7.1.min.js" type="text/javascript"></script>
-<script src="_/js/util.js" type="text/javascript"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<link rel="stylesheet" href="css/myp.css" />
+<script src="jquery-1.7.1.min.js" type="text/javascript"></script>
+<title>Join League - Make Your Picks</title>
 <script type="text/javascript">
-
-//var server = "http://localhost:8080/ws/rest";
+function getURLParameter(name) {
+	return decodeURI(
+		(RegExp(name + '=' + '(.+?)(&|$)').exec(location.search) || [, null])[1]
+	);
+}
 
 function getPage() {
-	//var url = server + '/seasons/current';
 	var league = getURLParameter('league');
-	if (league)
-		
-	$('input[name=leagueName]').attr('value', league);
+	if (league && league !== "null") {
+		$('input[name="leagueName"]').val(league);
+	}
 	var password = getURLParameter('password');
-	if (password)
-	$('input[name=password]').attr('value', password);
+	if (password && password !== "null") {
+		$('input[name="password"]').val(password);
+	}
 }
 
 function joinLeague() {
-	//var url = server + "/league";
-	var url = getUrl('/league/join');
+	$('#errorbox').text('');
+	var leagueName = $('input[name="leagueName"]').val();
+	var password = $('input[name="password"]').val();
+	
+	if (!leagueName) {
+		$('#errorbox').text("Please enter a league name.");
+		return;
+	}
+
+	var data = {
+		leagueName: leagueName,
+		password: password
+	};
+
 	$.ajax({
 		type : "POST",
-		url : url,
+		url : "/leagues/player",
 		contentType : "application/json",
 		dataType : "json",
-		data : $('form').serializeObject(),
+		data : JSON.stringify(data),
 		success : function(res) {
 			window.location.replace('index.html');
 		},
-		error : function(res) {
-			$('#result').text(JSON.stringify(res));
+		error : function(xhr) {
+			// Handle void/empty response from Spring (jQuery treats empty response as error when dataType is JSON)
+			if (xhr.status === 200 || xhr.status === 201) {
+				window.location.replace('index.html');
+			} else {
+				var msg = "Failed to join league. Please verify the name and password.";
+				if (xhr.responseJSON && xhr.responseJSON.message) {
+					msg = xhr.responseJSON.message;
+				}
+				$('#errorbox').text(msg);
+			}
 		}
 	});
 }
 
-
-$(document).ready(function(){
+$(document).ready(function() {
 	getPage();
+	$('#joinform').keydown(function(event) {
+		if (event.keyCode == 13) {
+			joinLeague();
+		}
+	});
 });
 </script>
-
-
-<title>Make Your Picks Mobile</title>
 </head>
-
-<body>
-<div style="width:300px; margin:20px auto;">
-<img src="_/img/myp.svg" style="width:300px; height:auto; text-align:center;" />
-<div class="login shadow">
-
-
-
-<form id="createleague">
-
-<p style="text-align:center; color:#fff; font-weight:bold;">League:&nbsp;&nbsp;&nbsp;&nbsp; <input type="text" name="leagueName"></input></p>
-<p style="text-align:center; color:#fff; font-weight:bold;">Password: <input type="text" name="password"></input></p>
-<br/><br/>
-<input type="button" value="Join League" onclick="joinLeague()"/>
-</form>
-
-
-
+<body style="background: url('img/bg.jpg') no-repeat center center fixed; background-size: cover; font-family: sans-serif;">
+<div style="width:300px; margin:80px auto;">
+	<div style="text-align: center; margin-bottom: 20px;">
+		<img src="img/myp.svg" style="width:250px; height:auto;" />
+	</div>
+	<div class="login shadow" style="background: rgba(0, 0, 0, 0.7); padding: 25px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+		<form id="joinform">
+			<h3 style="color: #FFB415; text-align: center; margin-bottom: 20px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Join a League</h3>
+			<p style="text-align:center; color:#fff; font-weight:bold; margin-bottom: 15px;">
+				League Name: <br/>
+				<input type="text" name="leagueName" style="width: 100%; padding: 8px; margin-top: 5px; border-radius: 4px; border: 1px solid #ccc; color: #000; box-sizing: border-box;"/>
+			</p>
+			<p style="text-align:center; color:#fff; font-weight:bold; margin-bottom: 20px;">
+				Password: <br/>
+				<input type="password" name="password" style="width: 100%; padding: 8px; margin-top: 5px; border-radius: 4px; border: 1px solid #ccc; color: #000; box-sizing: border-box;"/>
+			</p>
+			<div style="text-align: center; margin-bottom: 15px;">
+				<input type="button" onclick="joinLeague()" value="Join League" style="background: #FFB415; color: #000; border: none; padding: 10px 30px; border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%; transition: background 0.3s;"/>
+			</div>
+			<div style="text-align: center; margin-bottom: 10px; font-size: 14px;">
+				<a href="index.html" style="color: #FFB415; text-decoration: none; font-weight: bold;">Back to Dashboard</a>
+			</div>
+			<div id="errorbox" style="color: #ff5555; text-align: center; font-weight: bold; font-size: 14px; min-height: 20px;"></div>
+		</form>
+	</div>
 </div>
-</div>
-
 </body>
 </html>
