@@ -109,6 +109,24 @@
 				alert('fail');
 			});
 		};	
+
+		$scope.getRemainingPicksCount = function() {
+			if (!$scope.games) {
+				return 0;
+			}
+			var count = 0;
+			for (var i = 0; i < $scope.games.length; i++) {
+				var gameId = $scope.games[i].id;
+				if (!$scope.pickMap || !$scope.pickMap[gameId] || !$scope.pickMap[gameId].teamId) {
+					count++;
+				}
+			}
+			return count;
+		};
+
+		$scope.isDoublePickSelected = function() {
+			return !!($scope.doublePick && $scope.doublePick.gameId);
+		};
 	});
 
 	app.controller('ViewPicksController', function ($scope, $http, $log) {

@@ -476,3 +476,97 @@ box-shadow: 0 0 5px #000000;
 	box-shadow: 0 0 10px rgba(255, 180, 21, 0.4);
 	transform: translateY(-50%) scale(1.05);
 }
+
+/* Premium Glassmorphic Picks Summary Banner */
+.picks-summary-banner {
+	background: rgba(255, 255, 255, 0.03);
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	border-radius: 8px;
+	padding: 12px 20px;
+	margin: 15px auto 25px auto;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 15px;
+	animation: slideDownFade 0.3s ease-out;
+}
+
+@keyframes slideDownFade {
+	0% { transform: translateY(-8px); opacity: 0; }
+	100% { transform: translateY(0); opacity: 1; }
+}
+
+.picks-summary-banner .summary-stat {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.picks-summary-banner .stat-label {
+	font-size: 12px;
+	text-transform: uppercase;
+	letter-spacing: 1.5px;
+	color: rgba(255, 255, 255, 0.5);
+	font-weight: bold;
+}
+
+.picks-summary-banner .stat-value {
+	font-size: 15px;
+	font-weight: bold;
+	color: #FFF;
+	display: flex;
+	align-items: center;
+}
+
+.picks-summary-banner .badge-pill-counter {
+	background: #e11d48; /* premium vibrant warning red */
+	color: #FFF;
+	padding: 3px 12px;
+	border-radius: 20px;
+	font-size: 13px;
+	font-weight: bold;
+	box-shadow: 0 0 8px rgba(225, 29, 72, 0.3);
+	transition: all 0.2s ease;
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+}
+
+.picks-summary-banner .badge-pill-counter.completed {
+	background: #10b981; /* vibrant emerald success green */
+	box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
+}
+
+.picks-summary-banner .double-pick-indicator {
+	color: rgba(255, 255, 255, 0.3);
+	transition: all 0.2s ease;
+	font-size: 13px;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.picks-summary-banner .double-pick-indicator.selected {
+	color: #FFB415;
+	text-shadow: 0 0 8px rgba(255, 180, 21, 0.3);
+}
+
+/* Scoreboard Card Left Highlight Accent Treatments */
+.scoreboard {
+	border-left: 4px solid transparent;
+	transition: border-left-color 0.25s ease, background-color 0.25s ease;
+}
+
+.scoreboard.unpicked {
+	border-left: 4px solid #ef4444; /* subtle solid crimson alert bar */
+}
+
+.scoreboard.double {
+	border-left: 4px solid #FFB415 !important; /* premium brand gold bar */
+}

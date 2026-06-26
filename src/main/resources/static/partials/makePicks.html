@@ -1,6 +1,6 @@
 <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
 	
-	<div class="scoreboard shadow" ng-class="[game.hasGameStarted ? 'loss' : 'pickable', (doublePick && doublePick.gameId === game.id) ? 'double' : '']" style="position: relative;">
+	<div class="scoreboard shadow" ng-class="[game.hasGameStarted ? 'loss' : 'pickable', (doublePick && doublePick.gameId === game.id) ? 'double' : '', !pickMap[game.id] ? 'unpicked' : '']" style="position: relative;">
 		<div class="col-sm-12" style="padding-right: 50px;">
 			<div class="row scorerow fav" ng-class="{'selected-pick': pickMap[game.id] && pickMap[game.id].teamId === game.favId}" ng-click="makePick(game.id, game.favId, pickMap[game.id] ? pickMap[game.id].id : undefined)"> 
 

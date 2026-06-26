@@ -1,4 +1,28 @@
 <div ng-controller="MakePicksController as makePicksCtrl">
+
+	<!-- PREMIUM PICKS SUMMARY BANNER -->
+	<div class="picks-summary-banner" ng-if="games && games.length > 0">
+		<div class="summary-stat">
+			<span class="stat-label">Remaining Picks:</span>
+			<span class="stat-value">
+				<span class="badge-pill-counter" ng-class="{'completed': getRemainingPicksCount() === 0}">
+					<i class="fa" ng-class="getRemainingPicksCount() === 0 ? 'fa-check' : ''"></i>
+					{{ getRemainingPicksCount() === 0 ? 'All Completed' : getRemainingPicksCount() }}
+				</span>
+			</span>
+		</div>
+		
+		<div class="summary-stat">
+			<span class="stat-label">Double Pick:</span>
+			<span class="stat-value">
+				<span class="double-pick-indicator" ng-class="{'selected': isDoublePickSelected()}">
+					<i class="fa" ng-class="isDoublePickSelected() ? 'fa-star' : 'fa-star-o'"></i>
+					{{ isDoublePickSelected() ? 'Active' : 'Pending' }}
+				</span>
+			</span>
+		</div>
+	</div>
+
 	<div ng-repeat="game in games">	
 		<div class="gametime" ng-show="game.gameStart != games[$index-1].gameStart">{{game.gameStartFormated}}</div>	
 <!-- 		ng-show="pickMap[game.id] === undefined" -->
