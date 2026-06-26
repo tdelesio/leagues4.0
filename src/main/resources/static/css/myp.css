@@ -264,6 +264,7 @@ box-shadow: 0 0 5px #000000;
 #navrow ul li.active a {color:#FDFDFD; }
 
 #navrow ul li#nav-admin a { color:#FFB415;}
+#navrow ul li#nav-logout:hover a { color: #e11d48; transition: color 0.2s ease; }
 
 /* NFL TEAMS */
 

@@ -32,6 +32,15 @@
 			}
 		};
 
+		$scope.logout = function() {
+			$http.post('/logout', {}).then(function() {
+				$window.location.href = '/login.html';
+			}, function(err) {
+				$log.error('Logout failed:', err);
+				$window.location.href = '/login.html'; // Fallback redirect
+			});
+		};
+
 		$rootScope.$on('$stateChangeSuccess', function(event, toState) {
 			$scope.selectedPage = toState.name;
 		});
