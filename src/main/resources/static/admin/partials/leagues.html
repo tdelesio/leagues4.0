@@ -12,6 +12,7 @@
 	<th>start</th>
 	<th>end</th>
 	<th>league name</th>
+	<th>password</th>
 	</tr>
 </thead>
 <tr id="league" ng-repeat="league in leagues" >
@@ -26,6 +27,7 @@
 	<td>{{league.startYear}}</td>
 	<td>{{league.endYear}}</td>
 	<td>{{league.leagueName}}</td>
+	<td><code style="background-color: rgba(255, 180, 21, 0.1); color: #FFB415; border: 1px solid rgba(255, 180, 21, 0.25); padding: 2px 6px; border-radius: 4px; font-size: 13px;">{{league.password || "None"}}</code></td>
 		
 </tr>
 </table>
