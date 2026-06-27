@@ -68,6 +68,9 @@ public class AdminController {
 	@Autowired
 	private TeamService teamService;
 
+	@Autowired
+	private com.makeurpicks.repository.PlayerRepository playerRepository;
+
 	@RequestMapping(value = {"", "/"}, method = RequestMethod.GET)
 	public void forwardToAdminIndex(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		request.getRequestDispatcher("/admin/index.html").forward(request, response);
@@ -126,6 +129,47 @@ public class AdminController {
 	@RequestMapping(value = "/leagues/types", method = RequestMethod.GET)
 	public @ResponseBody LeagueType[] getLeagueTypes() {
 		return LeagueType.values();
+	}
+
+	public static class PlayerAdminView {
+		private String username;
+		private String email;
+		private List<String> leagues;
+		private boolean admin;
+
+		public PlayerAdminView(String username, String email, List<String> leagues, boolean admin) {
+			this.username = username;
+			this.email = email;
+			this.leagues = leagues;
+			this.admin = admin;
+		}
+
+		public String getUsername() { return username; }
+		public String getEmail() { return email; }
+		public List<String> getLeagues() { return leagues; }
+		public boolean isAdmin() { return admin; }
+	}
+
+	@RequestMapping(value = "/players/", method = RequestMethod.GET)
+	public @ResponseBody List<PlayerAdminView> getPlayers() {
+		List<com.makeurpicks.domain.Player> players = playerRepository.findAll();
+		List<PlayerAdminView> views = new ArrayList<>();
+		for (com.makeurpicks.domain.Player player : players) {
+			List<String> leagueNames = new ArrayList<>();
+			try {
+				Set<com.makeurpicks.domain.LeagueName> leagues = leagueService.getLeaguesForPlayer(player.getUsername());
+				if (leagues != null) {
+					for (com.makeurpicks.domain.LeagueName ln : leagues) {
+						leagueNames.add(ln.getLeagueName());
+					}
+				}
+			} catch (Exception e) {
+				// Ignore or log
+			}
+			boolean isAdmin = "admin".equalsIgnoreCase(player.getAccountLevel());
+			views.add(new PlayerAdminView(player.getUsername(), player.getEmail(), leagueNames, isAdmin));
+		}
+		return views;
 	}
 
 	@RequestMapping(value = "/leagues/seasons/", method = RequestMethod.POST)

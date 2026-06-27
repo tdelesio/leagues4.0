@@ -21,6 +21,10 @@
 		      url: "/leagues",
 		      templateUrl: "createLeague.html"
 		    })
+		   .state('players', {
+		      url: "/players",
+		      templateUrl: "players.html"
+		    })
 		   .state('seasons', {
 		      url: "/seasons",
 		      templateUrl: "createSeasons.html"
@@ -124,6 +128,13 @@
 		};
 	});
 	
+	app.directive('playersList', function() {
+		return {
+			restrict: 'E',
+			templateUrl: 'partials/playersList.html'
+		};
+	});
+	
 	
 	app.factory('leagueService', function ($http, $log) {
 	$log.debug('leagueService');
@@ -158,6 +169,24 @@
 			        });
 			   
 			    }
+	});
+
+	app.controller('PlayersController', function ($scope, $http, $log) {
+		$scope.players = [];
+		$scope.loading = true;
+
+		$scope.loadPlayers = function() {
+			$scope.loading = true;
+			$http.get('/admin/players/').success(function(data) {
+				$scope.players = data;
+				$scope.loading = false;
+			}).error(function(err) {
+				$log.error('Error loading players:', err);
+				$scope.loading = false;
+			});
+		};
+
+		$scope.loadPlayers();
 	});
 	
 	//***************  Season  **************************

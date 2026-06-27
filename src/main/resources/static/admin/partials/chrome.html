@@ -9,6 +9,7 @@
 				</div> 
 				
 				<ul class="nav nav-sidebar"> 
+					<li ng-class="{active: $state.includes('players')}"><a ui-sref="players">Players</a></li>
 					<li ng-class="{active: $state.includes('seasons')}"><a ui-sref="seasons">Seasons</a></li> 
 					<li ng-class="{active: $state.includes('leagues')}"><a ui-sref="leagues">Leagues</a></li>
 					<li ng-class="{active: $state.includes('create')}"><a ui-sref="create">Weeks</a></li>
