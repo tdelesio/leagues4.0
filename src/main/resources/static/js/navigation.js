@@ -54,6 +54,12 @@
 		$http.get('/user').success(function(userData) {
 			$scope.username = userData.name;
 			
+			$http.get('/players/username/' + $scope.username).success(function(player) {
+				if (player && (player.accountLevel === 'admin' || player.memberLevel === 'ADMIN')) {
+					$scope.isAdminOfAnyLeague = true;
+				}
+			});
+			
 			leagueService.getLeaguesForPlayer($scope.username).then(function(data) {
 				$log.debug('Leagues for player=' + JSON.stringify(data));
 				var leagues = [];
