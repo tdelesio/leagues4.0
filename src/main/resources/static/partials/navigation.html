@@ -19,7 +19,7 @@
 				<div class="row">
 					<div class="col-xs-11 col-sm-12" id="mn-view">
 						<span id="username" class="username">{{username}}</span>
-						<a href="joinLeague.html" id="join-league-link"><i class="fa fa-plus-circle" style="margin-right: 4px;"></i>Join League</a>
+						<a href="" ng-click="openJoinLeagueModal()" id="join-league-link"><i class="fa fa-plus-circle" style="margin-right: 4px;"></i>Join League</a>
 						<div style="clear: both; margin-top: 5px;"></div>
 						<div id="league-container" ng-if="leagues && leagues.length > 0">
 							<select ng-model="league.id" id="league-select">
@@ -38,6 +38,33 @@
 					</div>
 				</div>
 			</div>
+		</div>
+	</div>
+
+	<!-- Join League Modal Overlay -->
+	<div class="join-league-modal-overlay" ng-class="{'active': showJoinModal}">
+		<div class="join-league-modal-card shadow">
+			<h3>Join a League</h3>
+			<form ng-submit="joinLeague()">
+				<p>
+					<label for="modal-league-select">Available Leagues</label>
+					<select id="modal-league-select" ng-model="joinLeagueData.leagueId">
+						<option value="" disabled selected>-- Select a League to Join --</option>
+						<option ng-repeat="l in availableLeagues" value="{{l.id}}">
+							{{l.leagueName}}
+						</option>
+					</select>
+				</p>
+				<p>
+					<label for="modal-password-input">Password (Optional)</label>
+					<input type="password" id="modal-password-input" ng-model="joinLeagueData.password" placeholder="Enter league password if required" />
+				</p>
+				<div class="error-msg" ng-bind="joinLeagueError"></div>
+				<div>
+					<button type="submit" class="btn-submit">Join League</button>
+					<a href="" ng-click="closeJoinLeagueModal()" class="btn-cancel">Cancel</a>
+				</div>
+			</form>
 		</div>
 	</div>
 </div>	

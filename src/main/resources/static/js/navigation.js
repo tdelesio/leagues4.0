@@ -51,16 +51,8 @@
 			}
 		});
 
-		$http.get('/user').success(function(userData) {
-			$scope.username = userData.name;
-			
-			$http.get('/players/username/' + $scope.username).success(function(player) {
-				if (player && (player.accountLevel === 'admin' || player.memberLevel === 'ADMIN')) {
-					$scope.isAdminOfAnyLeague = true;
-				}
-			});
-			
-			leagueService.getLeaguesForPlayer($scope.username).then(function(data) {
+		function loadPlayerLeagues(username, selectJoinedLeagueId) {
+			return leagueService.getLeaguesForPlayer(username).then(function(data) {
 				$log.debug('Leagues for player=' + JSON.stringify(data));
 				var leagues = [];
 				if (data) {
@@ -77,7 +69,11 @@
 				checkAdminStatus();
 				
 				if (leagues.length > 0) {
-					$scope.league.id = leagues[0].id;
+					if (selectJoinedLeagueId) {
+						$scope.league.id = selectJoinedLeagueId;
+					} else {
+						$scope.league.id = leagues[0].id;
+					}
 				} else {
 					$scope.league = {};
 					$scope.weeks = [];
@@ -85,7 +81,94 @@
 					$rootScope.$broadcast('weekLoaded');
 				}
 			});
+		}
+
+		$http.get('/user').success(function(userData) {
+			$scope.username = userData.name;
+			
+			$http.get('/players/username/' + $scope.username).success(function(player) {
+				if (player && (player.accountLevel === 'admin' || player.memberLevel === 'ADMIN')) {
+					$scope.isAdminOfAnyLeague = true;
+				}
+			});
+			
+			loadPlayerLeagues($scope.username);
 		});
+
+		// Join League Modal Logic
+		$scope.showJoinModal = false;
+		$scope.availableLeagues = [];
+		$scope.joinLeagueData = {
+			leagueId: '',
+			password: ''
+		};
+		$scope.joinLeagueError = '';
+
+		$scope.openJoinLeagueModal = function() {
+			$scope.showJoinModal = true;
+			$scope.joinLeagueData.leagueId = '';
+			$scope.joinLeagueData.password = '';
+			$scope.joinLeagueError = '';
+			$scope.availableLeagues = [];
+
+			$http.get('/leagues/').success(function(allLeagues) {
+				var joinedMap = {};
+				for (var i = 0; i < $scope.leagues.length; i++) {
+					joinedMap[$scope.leagues[i].id] = true;
+				}
+				
+				var available = [];
+				if (allLeagues) {
+					for (var j = 0; j < allLeagues.length; j++) {
+						if (!joinedMap[allLeagues[j].id]) {
+							available.push(allLeagues[j]);
+						}
+					}
+				}
+				$scope.availableLeagues = available;
+			}).error(function() {
+				$scope.joinLeagueError = "Failed to load available leagues. Please try again.";
+			});
+		};
+
+		$scope.closeJoinLeagueModal = function() {
+			$scope.showJoinModal = false;
+		};
+
+		$scope.joinLeague = function() {
+			$scope.joinLeagueError = '';
+			
+			if (!$scope.joinLeagueData.leagueId) {
+				$scope.joinLeagueError = "Please select a league to join.";
+				return;
+			}
+
+			var selectedLeague = null;
+			for (var i = 0; i < $scope.availableLeagues.length; i++) {
+				if ($scope.availableLeagues[i].id === $scope.joinLeagueData.leagueId) {
+					selectedLeague = $scope.availableLeagues[i];
+					break;
+				}
+			}
+
+			var payload = {
+				leagueId: $scope.joinLeagueData.leagueId,
+				leagueName: selectedLeague ? selectedLeague.leagueName : null,
+				password: $scope.joinLeagueData.password
+			};
+
+			$http.post('/leagues/player', payload).success(function() {
+				var joinedLeagueId = payload.leagueId;
+				$scope.showJoinModal = false;
+				loadPlayerLeagues($scope.username, joinedLeagueId);
+			}).error(function(xhr) {
+				var msg = "Failed to join league. Please verify the password.";
+				if (xhr && xhr.message) {
+					msg = xhr.message;
+				}
+				$scope.joinLeagueError = msg;
+			});
+		};
 
 		$scope.changePage = function(stateName) {
 			if (stateName) {
