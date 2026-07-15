@@ -1,4 +1,4 @@
-version: "3.8"
+version: "3.7"
 
 services:
   mysql:
@@ -37,8 +37,6 @@ services:
   app:
     image: tdelesio/leagues-app:0.0.1
     container_name: leagues-app
-    ports:
-      - "8080:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/leagues_mono?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: dbuser
@@ -52,10 +50,28 @@ services:
         condition: service_healthy
     networks:
       - leagues-network
+      - traefik_proxy # Connect to the external Traefik proxy network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=leagues-app"
+      - "traefik.frontend.rule=Host:leagues.${DOMAINNAME}"
+      - "traefik.port=8080" # The inner port our app listens on
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.headers.STSSeconds=315360000"
+      - "traefik.frontend.headers.browserXSSFilter=true"
+      - "traefik.frontend.headers.contentTypeNosniff=true"
+      - "traefik.frontend.headers.forceSTSHeader=true"
+      - "traefik.frontend.headers.SSLHost=delesio.com"
+      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+      - "traefik.frontend.headers.STSPreload=true"
+      - "traefik.frontend.headers.frameDeny=false"
 
 networks:
   leagues-network:
     driver: bridge
+  traefik_proxy:
+    external: true
 
 volumes:
   mysql-data:
