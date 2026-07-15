@@ -802,6 +802,229 @@
 			});
 		};
 		
+		// --- THE-ODDS-API INTEGRATION FOR WEEK GAMES IMPORT ---
+		$scope.apiGames = [];
+		$scope.importing = false;
+		$scope.selectAll = true;
+		$scope.importWeeks = [];
+		
+		$scope.import_week_model = {
+			seasonId: "",
+			weekId: ""
+		};
+
+		var teamNameToIdMap = {
+			"Arizona Cardinals": "ari",
+			"Buffalo Bills": "buf",
+			"Miami Dolphins": "mia",
+			"New England Patriots": "ne",
+			"New York Jets": "nyj",
+			"Baltimore Ravens": "bal",
+			"Cincinnati Bengals": "cin",
+			"Cleveland Browns": "cle",
+			"Pittsburgh Steelers": "pit",
+			"Houston Texans": "hou",
+			"Indianapolis Colts": "ind",
+			"Jacksonville Jaguars": "jac",
+			"Tennessee Titans": "ten",
+			"Denver Broncos": "den",
+			"Kansas City Chiefs": "kc",
+			"Las Vegas Raiders": "lv",
+			"Los Angeles Chargers": "lac",
+			"Dallas Cowboys": "dal",
+			"New York Giants": "nyg",
+			"Philadelphia Eagles": "phi",
+			"Washington Commanders": "was",
+			"Washington Redskins": "was",
+			"Chicago Bears": "chi",
+			"Detroit Lions": "det",
+			"Green Bay Packers": "gb",
+			"Minnesota Vikings": "min",
+			"Atlanta Falcons": "atl",
+			"Tampa Bay Buccaneers": "tb",
+			"New Orleans Saints": "no",
+			"San Francisco 49ers": "sf",
+			"Seattle Seahawks": "sea",
+			"Carolina Panthers": "car",
+			"Los Angeles Rams": "lar"
+		};
+
+		$scope.$watch('seasons', function(newSeasons) {
+			if (newSeasons && Object.keys(newSeasons).length > 0) {
+				// seasons is an array/object returned from current endpoint
+				var firstSeason = newSeasons[0] || newSeasons[Object.keys(newSeasons)[0]];
+				if (firstSeason) {
+					$scope.import_week_model.seasonId = firstSeason.id;
+					$scope.onImportSeasonChange();
+				}
+			}
+		}, true);
+
+		$scope.onImportSeasonChange = function() {
+			if ($scope.import_week_model.seasonId) {
+				$http.get('/admin/weeks/seasonid/' + $scope.import_week_model.seasonId).success(function(data) {
+					$scope.importWeeks = data;
+					if (data && data.length > 0) {
+						$scope.import_week_model.weekId = data[0].id;
+					}
+				});
+			}
+		};
+
+		this.toggleSelectAll = function() {
+			angular.forEach($scope.apiGames, function(g) {
+				if (g.awayMapped && g.homeMapped) {
+					g.selected = $scope.selectAll;
+				}
+			});
+		};
+
+		this.hasSelectedGames = function() {
+			if (!$scope.apiGames) return false;
+			for (var i = 0; i < $scope.apiGames.length; i++) {
+				if ($scope.apiGames[i].selected) return true;
+			}
+			return false;
+		};
+
+		this.fetchApiGames = function() {
+			$scope.importing = true;
+			$scope.apiGames = [];
+			$scope.selectAll = true;
+			
+			var apiKey = "0655b9dbb7b49726390fef3e109b84af";
+			var url = "https://api.the-odds-api.com/v4/sports/americanfootball_nfl/odds/?apiKey=" + apiKey + "&regions=us&markets=spreads&bookmakers=draftkings";
+			
+			$log.debug('Fetching NFL schedule & spreads from the-odds-api...');
+			$http.get(url).success(function(data) {
+				$scope.importing = false;
+				var parsedGames = [];
+				
+				angular.forEach(data, function(game) {
+					var commenceDate = new Date(game.commence_time);
+					
+					var spreadMarket = null;
+					if (game.bookmakers && game.bookmakers[0] && game.bookmakers[0].markets) {
+						spreadMarket = game.bookmakers[0].markets[0];
+					}
+					
+					if (spreadMarket && spreadMarket.outcomes && spreadMarket.outcomes.length === 2) {
+						var outcomes = spreadMarket.outcomes;
+						var favName, dogName, spreadVal;
+						
+						if (outcomes[0].point < 0) {
+							favName = outcomes[0].name;
+							dogName = outcomes[1].name;
+							spreadVal = Math.abs(outcomes[0].point);
+						} else if (outcomes[1].point < 0) {
+							favName = outcomes[1].name;
+							dogName = outcomes[0].name;
+							spreadVal = Math.abs(outcomes[1].point);
+						} else {
+							// Spread is even/0 or positive, treat first as favorite with minimal spread
+							favName = outcomes[0].name;
+							dogName = outcomes[1].name;
+							spreadVal = 0.5;
+						}
+						
+						var favId = teamNameToIdMap[favName];
+						var dogId = teamNameToIdMap[dogName];
+						var awayMapped = !!teamNameToIdMap[game.away_team];
+						var homeMapped = !!teamNameToIdMap[game.home_team];
+						var favHome = (favName === game.home_team);
+						
+						parsedGames.push({
+							favId: favId,
+							dogId: dogId,
+							favHome: favHome,
+							spread: spreadVal,
+							gameStart: commenceDate,
+							awayName: game.away_team,
+							homeName: game.home_team,
+							awayMapped: awayMapped,
+							homeMapped: homeMapped,
+							selected: awayMapped && homeMapped
+						});
+					}
+				});
+				
+				$scope.apiGames = parsedGames;
+				if (parsedGames.length === 0) {
+					alert('No NFL games with valid spreads found.');
+				}
+			}).error(function(err) {
+				$scope.importing = false;
+				alert('Failed to retrieve spreads: ' + JSON.stringify(err));
+			});
+		};
+
+		this.importSelectedGames = function() {
+			var gamesToImport = [];
+			angular.forEach($scope.apiGames, function(g) {
+				if (g.selected) {
+					gamesToImport.push(g);
+				}
+			});
+			
+			if (gamesToImport.length === 0) {
+				alert('No games selected.');
+				return;
+			}
+			
+			if (!$window.confirm('Are you sure you want to import ' + gamesToImport.length + ' games into the selected week?')) {
+				return;
+			}
+			
+			$scope.importing = true;
+			var importCount = 0;
+			var failCount = 0;
+			
+			var saveNextGame = function(index) {
+				if (index >= gamesToImport.length) {
+					$scope.importing = false;
+					$scope.apiGames = []; // Clear preview on completion
+					alert('Successfully imported ' + importCount + ' games! ' + (failCount > 0 ? (failCount + ' games failed.') : ''));
+					
+					// If the active viewed week in admin.js is the same as the imported week, refresh the active games list
+					if ($scope.add_game_model && $scope.add_game_model.weekId === $scope.import_week_model.weekId) {
+						leagueService.getGames($scope.add_game_model.weekId).then(function(data) {
+							$scope.games = data.data;
+							$scope.resetAvailableTeamsSelection();
+						});
+					}
+					return;
+				}
+				
+				var g = gamesToImport[index];
+				var payload = {
+					seasonId: $scope.import_week_model.seasonId,
+					weekId: $scope.import_week_model.weekId,
+					favId: g.favId,
+					dogId: g.dogId,
+					favHome: g.favHome,
+					spread: g.spread,
+					gameStart: g.gameStart.toISOString().replace('Z', '') // Maintain standard UTC formatting expected by parser
+				};
+				
+				$http({
+					method : "POST",
+					url : '/admin/games/',
+					contentType : "application/json",
+					dataType : "json",
+					data : JSON.stringify(payload)
+				}).success(function(res) {
+					importCount++;
+					saveNextGame(index + 1);
+				}).error(function(err) {
+					failCount++;
+					$log.error('Failed to import game: ' + JSON.stringify(g) + ' error: ' + JSON.stringify(err));
+					saveNextGame(index + 1);
+				});
+			};
+			
+			saveNextGame(0);
+		};
+
 		$scope.changeSeason = function() {
 			$log.debug('changeSeason seasonId='+$scope.add_game_model.seasonId);
 			$http.get('/admin/weeks/seasonid/'+$scope.add_game_model.seasonId).success(function(data) {
