@@ -35,7 +35,7 @@ services:
       - leagues-network
 
   app:
-    image: tdelesio/leagues-app:0.0.1
+    image: tdelesio/leagues-app:0.0.2
     container_name: leagues-app
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/leagues_mono?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
