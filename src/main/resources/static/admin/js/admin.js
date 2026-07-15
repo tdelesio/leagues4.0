@@ -810,7 +810,9 @@
 		
 		$scope.import_week_model = {
 			seasonId: "",
-			weekId: ""
+			weekId: "",
+			startDate: null,
+			endDate: null
 		};
 
 		var teamNameToIdMap = {
@@ -849,9 +851,49 @@
 			"Los Angeles Rams": "lar"
 		};
 
+		var parseBoundaryDate = function(input, isEnd) {
+			if (!input) return null;
+			if (angular.isDate(input)) {
+				var d = new Date(input.getTime());
+				if (isEnd) {
+					d.setHours(23, 59, 59, 999);
+				} else {
+					d.setHours(0, 0, 0, 0);
+				}
+				return d;
+			}
+			if (typeof input === 'string') {
+				if (input.indexOf('-') !== -1) {
+					var parts = input.split('-');
+					if (isEnd) {
+						return new Date(parts[0], parts[1] - 1, parts[2], 23, 59, 59, 999);
+					} else {
+						return new Date(parts[0], parts[1] - 1, parts[2], 0, 0, 0, 0);
+					}
+				}
+				if (input.indexOf('/') !== -1) {
+					var parts = input.split('/');
+					if (isEnd) {
+						return new Date(parts[2], parts[0] - 1, parts[1], 23, 59, 59, 999);
+					} else {
+						return new Date(parts[2], parts[0] - 1, parts[1], 0, 0, 0, 0);
+					}
+				}
+			}
+			var parsed = new Date(input);
+			if (!isNaN(parsed.getTime())) {
+				if (isEnd) {
+					parsed.setHours(23, 59, 59, 999);
+				} else {
+					parsed.setHours(0, 0, 0, 0);
+				}
+				return parsed;
+			}
+			return null;
+		};
+
 		$scope.$watch('seasons', function(newSeasons) {
 			if (newSeasons && Object.keys(newSeasons).length > 0) {
-				// seasons is an array/object returned from current endpoint
 				var firstSeason = newSeasons[0] || newSeasons[Object.keys(newSeasons)[0]];
 				if (firstSeason) {
 					$scope.import_week_model.seasonId = firstSeason.id;
@@ -871,9 +913,35 @@
 			}
 		};
 
+		this.onStartDateChange = function() {
+			if ($scope.import_week_model.startDate) {
+				var start = $scope.import_week_model.startDate;
+				if (!angular.isDate(start)) {
+					var parts = String(start).split('-');
+					if (parts.length === 3) {
+						start = new Date(parts[0], parts[1] - 1, parts[2]);
+					} else {
+						start = new Date(start);
+					}
+				}
+				
+				if (start && !isNaN(start.getTime())) {
+					var end = new Date(start.getTime() + 5 * 24 * 60 * 60 * 1000);
+					if (angular.isDate($scope.import_week_model.startDate)) {
+						$scope.import_week_model.endDate = end;
+					} else {
+						var yyyy = end.getFullYear();
+						var mm = String(end.getMonth() + 1).padStart(2, '0');
+						var dd = String(end.getDate()).padStart(2, '0');
+						$scope.import_week_model.endDate = yyyy + '-' + mm + '-' + dd;
+					}
+				}
+			}
+		};
+
 		this.toggleSelectAll = function() {
 			angular.forEach($scope.apiGames, function(g) {
-				if (g.awayMapped && g.homeMapped) {
+				if (g.favId && g.dogId) {
 					g.selected = $scope.selectAll;
 				}
 			});
@@ -903,6 +971,17 @@
 				angular.forEach(data, function(game) {
 					var commenceDate = new Date(game.commence_time);
 					
+					// Apply start and end date boundary filtering
+					var startBoundary = parseBoundaryDate($scope.import_week_model.startDate, false);
+					if (startBoundary && commenceDate < startBoundary) {
+						return;
+					}
+					
+					var endBoundary = parseBoundaryDate($scope.import_week_model.endDate, true);
+					if (endBoundary && commenceDate > endBoundary) {
+						return;
+					}
+					
 					var spreadMarket = null;
 					if (game.bookmakers && game.bookmakers[0] && game.bookmakers[0].markets) {
 						spreadMarket = game.bookmakers[0].markets[0];
@@ -910,27 +989,29 @@
 					
 					if (spreadMarket && spreadMarket.outcomes && spreadMarket.outcomes.length === 2) {
 						var outcomes = spreadMarket.outcomes;
-						var favName, dogName, spreadVal;
+						var favName, dogName, rawSpread;
 						
+						// Identify Favorite (negative/lowest points value) and Underdog (positive points value)
 						if (outcomes[0].point < 0) {
 							favName = outcomes[0].name;
 							dogName = outcomes[1].name;
-							spreadVal = Math.abs(outcomes[0].point);
+							rawSpread = Math.abs(outcomes[0].point);
 						} else if (outcomes[1].point < 0) {
 							favName = outcomes[1].name;
 							dogName = outcomes[0].name;
-							spreadVal = Math.abs(outcomes[1].point);
+							rawSpread = Math.abs(outcomes[1].point);
 						} else {
-							// Spread is even/0 or positive, treat first as favorite with minimal spread
+							// Spread is even/0, treat the first outcome team as favorite
 							favName = outcomes[0].name;
 							dogName = outcomes[1].name;
-							spreadVal = 0.5;
+							rawSpread = Math.abs(outcomes[0].point) || 0.0;
 						}
+						
+						// Force spread to end in .5 (e.g. 3 -> 3.5, 3.5 -> 3.5, 0 -> 0.5)
+						var spreadVal = Math.floor(rawSpread) + 0.5;
 						
 						var favId = teamNameToIdMap[favName];
 						var dogId = teamNameToIdMap[dogName];
-						var awayMapped = !!teamNameToIdMap[game.away_team];
-						var homeMapped = !!teamNameToIdMap[game.home_team];
 						var favHome = (favName === game.home_team);
 						
 						parsedGames.push({
@@ -939,18 +1020,16 @@
 							favHome: favHome,
 							spread: spreadVal,
 							gameStart: commenceDate,
-							awayName: game.away_team,
-							homeName: game.home_team,
-							awayMapped: awayMapped,
-							homeMapped: homeMapped,
-							selected: awayMapped && homeMapped
+							favName: favName,
+							dogName: dogName,
+							selected: !!favId && !!dogId
 						});
 					}
 				});
 				
 				$scope.apiGames = parsedGames;
 				if (parsedGames.length === 0) {
-					alert('No NFL games with valid spreads found.');
+					alert('No NFL games with valid spreads found within the selected date range.');
 				}
 			}).error(function(err) {
 				$scope.importing = false;
@@ -1003,7 +1082,7 @@
 					dogId: g.dogId,
 					favHome: g.favHome,
 					spread: g.spread,
-					gameStart: g.gameStart.toISOString().replace('Z', '') // Maintain standard UTC formatting expected by parser
+					gameStart: g.gameStart.toISOString() // Maintain standard UTC formatting expected by parser
 				};
 				
 				$http({

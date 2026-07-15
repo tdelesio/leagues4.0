@@ -73,6 +73,18 @@
 							</div>
 						</div>
 						<div class="form-group">
+							<label for="import-start-date" class="col-lg-2 control-label">Week Start Date</label>
+							<div class="col-lg-4">
+								<input type="date" ng-model="import_week_model.startDate" required id="import-start-date" class="form-control" ng-change="setupCtrl.onStartDateChange()"/>
+								<span class="help-block" style="font-size: 11px;">Kickoff starts on this date (usually Thursday)</span>
+							</div>
+							<label for="import-end-date" class="col-lg-2 control-label">Week End Date</label>
+							<div class="col-lg-4">
+								<input type="date" ng-model="import_week_model.endDate" required id="import-end-date" class="form-control"/>
+								<span class="help-block" style="font-size: 11px;">Kickoff ends on this date (usually Monday/Tuesday)</span>
+							</div>
+						</div>
+						<div class="form-group">
 							<div class="col-lg-10 col-lg-offset-2">
 								<button type="submit" class="btn btn-info" ng-disabled="importing">
 									<span class="glyphicon glyphicon-cloud-download" style="margin-right: 4px;"></span> Fetch NFL Games & Spreads
@@ -92,25 +104,27 @@
 						<tr>
 							<th style="width: 50px; text-align: center;"><input type="checkbox" ng-model="selectAll" ng-change="setupCtrl.toggleSelectAll()"/></th>
 							<th>Kickoff Time (Local)</th>
-							<th>Away Team</th>
+							<th>Favorite Team</th>
 							<th style="width: 100px; text-align: center;">Spread</th>
-							<th>Home Team</th>
+							<th>Underdog Team</th>
 						</tr>
 					</thead>
 					<tbody>
 						<tr ng-repeat="g in apiGames">
 							<td style="text-align: center; vertical-align: middle;">
-								<input type="checkbox" ng-model="g.selected" ng-disabled="!g.awayMapped || !g.homeMapped"/>
+								<input type="checkbox" ng-model="g.selected" ng-disabled="!g.favId || !g.dogId"/>
 							</td>
 							<td style="vertical-align: middle;">{{g.gameStart | date:'medium'}}</td>
-							<td style="vertical-align: middle;" ng-class="{'text-danger': !g.awayMapped}">
-								{{g.awayName}} <span ng-if="!g.awayMapped" class="label label-danger" style="margin-left: 4px;">Unmapped</span>
+							<td style="vertical-align: middle;" ng-class="{'text-danger': !g.favId}">
+								<span ng-if="g.favHome" style="font-weight: bold; margin-right: 4px;">@</span>{{g.favName}}
+								<span ng-if="!g.favId" class="label label-danger" style="margin-left: 4px;">Unmapped</span>
 							</td>
 							<td style="vertical-align: middle; text-align: center; font-weight: bold; background-color: #fcfcfc;">
 								{{g.spread}}
 							</td>
-							<td style="vertical-align: middle;" ng-class="{'text-danger': !g.homeMapped}">
-								@ {{g.homeName}} <span ng-if="!g.homeMapped" class="label label-danger" style="margin-left: 4px;">Unmapped</span>
+							<td style="vertical-align: middle;" ng-class="{'text-danger': !g.dogId}">
+								<span ng-if="!g.favHome" style="font-weight: bold; margin-right: 4px;">@</span>{{g.dogName}}
+								<span ng-if="!g.dogId" class="label label-danger" style="margin-left: 4px;">Unmapped</span>
 							</td>
 						</tr>
 					</tbody>
