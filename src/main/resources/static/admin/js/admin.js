@@ -196,7 +196,7 @@
 				$window.alert('You cannot delete yourself!');
 				return;
 			}
-			if ($window.confirm('Are you sure you want to permanently delete player ' + player.username + '? This will cascade and purge all of their picks and league records.')) {
+			$window.customConfirm('Are you sure you want to permanently delete player ' + player.username + '? This will cascade and purge all of their picks and league records.', function() {
 				$http.delete('/admin/players/' + encodeURIComponent(player.username)).success(function() {
 					var idx = $scope.players.indexOf(player);
 					if (idx > -1) {
@@ -206,7 +206,7 @@
 					$window.alert('Error deleting player: ' + (err.message || 'unknown error'));
 					$log.error('Error deleting player:', err);
 				});
-			}
+			});
 		};
 
 		$scope.loadPlayers();
@@ -236,8 +236,7 @@
 		this.deleteSeason = function(season) {
 			$log.debug("CreateSeasonController:deleteSeason: season.id="+season.id);
 			
-			if (confirm("Are yoou sure you want to delete season?")) {
-		    
+			$window.customConfirm("Are you sure you want to delete this season?", function() {
 				var url = '/admin/leagues/seasons/'+season.id;
 				$http({
 					method : "DELETE",
@@ -255,9 +254,8 @@
 				}).error(function(res) {
 					alert('fail');
 				});
-			
-		 
-		    }
+			});
+		};
 		}
 		
 		this.addSeason = function() {
@@ -348,8 +346,7 @@
 			$log.debug("CreateLeagueController:deleteLeague: leagueId="+leagueId);
 			$scope.hideplayers=true;
 			
-			if (confirm("Are you sure you want to delete league?")) {
-		    
+			$window.customConfirm("Are you sure you want to delete this league?", function() {
 				var url = '/admin/leagues/'+leagueId;
 				$http({
 					method : "DELETE",
@@ -365,9 +362,7 @@
 				}).error(function(res) {
 					alert('fail');
 				});
-			
-		 
-		    }
+			});
 		}
 		
 		$scope.dummyLeague = function () {
@@ -486,7 +481,7 @@
 		this.deleteWeek = function(week) {
 			$log.debug("CreateWeekController:deleteWeek: week.id="+week.id);
 			
-			if (confirm("Are you sure you want to delete week?")) {
+			$window.customConfirm("Are you sure you want to delete this week?", function() {
 				var url = '/admin/weeks/' + week.id;
 				$http({
 					method : "DELETE",
@@ -501,7 +496,7 @@
 				}).error(function(res) {
 					alert('fail');
 				});
-			}
+			});
 		}
 		
 //		$http.get('leagues/').success(function(data) {
@@ -746,112 +741,110 @@
 				return;
 			}
 
-			if (!$window.confirm("Are you sure you want to retrieve and automatically update scores for all games in the selected week?")) {
-				return;
-			}
+			$window.customConfirm("Are you sure you want to retrieve and automatically update scores for all games in the selected week?", function() {
+				$scope.importing = true;
+				var apiKey = "0655b9dbb7b49726390fef3e109b84af";
+				var url = "https://api.the-odds-api.com/v4/sports/americanfootball_nfl/scores/?apiKey=" + apiKey + "&daysFrom=3";
 
-			$scope.importing = true;
-			var apiKey = "0655b9dbb7b49726390fef3e109b84af";
-			var url = "https://api.the-odds-api.com/v4/sports/americanfootball_nfl/scores/?apiKey=" + apiKey + "&daysFrom=3";
+				$log.debug('Fetching NFL live and recently completed scores...');
+				$http.get(url).success(function(apiScores) {
+					var updateQueue = [];
 
-			$log.debug('Fetching NFL live and recently completed scores...');
-			$http.get(url).success(function(apiScores) {
-				var updateQueue = [];
+					angular.forEach($scope.games, function(g) {
+						// Find matching api score
+						var matchedApiGame = null;
+						for (var i = 0; i < apiScores.length; i++) {
+							var apiGame = apiScores[i];
+							var apiHomeId = teamNameToIdMap[apiGame.home_team];
+							var apiAwayId = teamNameToIdMap[apiGame.away_team];
 
-				angular.forEach($scope.games, function(g) {
-					// Find matching api score
-					var matchedApiGame = null;
-					for (var i = 0; i < apiScores.length; i++) {
-						var apiGame = apiScores[i];
-						var apiHomeId = teamNameToIdMap[apiGame.home_team];
-						var apiAwayId = teamNameToIdMap[apiGame.away_team];
+							var dbFavId = g.fav ? g.fav.id : g.favId;
+							var dbDogId = g.dog ? g.dog.id : g.dogId;
 
-						var dbFavId = g.fav ? g.fav.id : g.favId;
-						var dbDogId = g.dog ? g.dog.id : g.dogId;
-
-						if ((dbFavId === apiHomeId && dbDogId === apiAwayId) ||
-							(dbFavId === apiAwayId && dbDogId === apiHomeId)) {
-							matchedApiGame = apiGame;
-							break;
-						}
-					}
-
-					if (matchedApiGame && matchedApiGame.scores && matchedApiGame.scores.length > 0) {
-						var homeScore = null;
-						var awayScore = null;
-
-						angular.forEach(matchedApiGame.scores, function(s) {
-							if (s.name === matchedApiGame.home_team) {
-								homeScore = Number(s.score);
-							} else if (s.name === matchedApiGame.away_team) {
-								awayScore = Number(s.score);
+							if ((dbFavId === apiHomeId && dbDogId === apiAwayId) ||
+								(dbFavId === apiAwayId && dbDogId === apiHomeId)) {
+								matchedApiGame = apiGame;
+								break;
 							}
-						});
-
-						if (homeScore !== null && awayScore !== null && !isNaN(homeScore) && !isNaN(awayScore)) {
-							// Deep copy local game object to modify
-							var updatedGame = {};
-							angular.copy(g, updatedGame);
-
-							updatedGame.favId = g.fav ? g.fav.id : g.favId;
-							updatedGame.dogId = g.dog ? g.dog.id : g.dogId;
-
-							if (g.favHome) {
-								updatedGame.favScore = homeScore;
-								updatedGame.dogScore = awayScore;
-							} else {
-								updatedGame.favScore = awayScore;
-								updatedGame.dogScore = homeScore;
-							}
-
-							updateQueue.push(updatedGame);
 						}
-					}
-				});
 
-				if (updateQueue.length === 0) {
-					$scope.importing = false;
-					alert("No matching live or completed game scores were found on the API for the current week's games.");
-					return;
-				}
+						if (matchedApiGame && matchedApiGame.scores && matchedApiGame.scores.length > 0) {
+							var homeScore = null;
+							var awayScore = null;
 
-				var successCount = 0;
-				var failCount = 0;
+							angular.forEach(matchedApiGame.scores, function(s) {
+								if (s.name === matchedApiGame.home_team) {
+									homeScore = Number(s.score);
+								} else if (s.name === matchedApiGame.away_team) {
+									awayScore = Number(s.score);
+								}
+							});
 
-				var updateNextGameScore = function(index) {
-					if (index >= updateQueue.length) {
+							if (homeScore !== null && awayScore !== null && !isNaN(homeScore) && !isNaN(awayScore)) {
+								// Deep copy local game object to modify
+								var updatedGame = {};
+								angular.copy(g, updatedGame);
+
+								updatedGame.favId = g.fav ? g.fav.id : g.favId;
+								updatedGame.dogId = g.dog ? g.dog.id : g.dogId;
+
+								if (g.favHome) {
+									updatedGame.favScore = homeScore;
+									updatedGame.dogScore = awayScore;
+								} else {
+									updatedGame.favScore = awayScore;
+									updatedGame.dogScore = homeScore;
+								}
+
+								updateQueue.push(updatedGame);
+							}
+						}
+					});
+
+					if (updateQueue.length === 0) {
 						$scope.importing = false;
-						alert("Auto-score completion summary:\n\n• Successfully scored " + successCount + " game(s)\n• Failed to update " + failCount + " game(s)\n\nThe table will now refresh with the latest scored results!");
-						
-						// Refresh local games list
-						leagueService.getGames($scope.add_game_model.weekId).then(function(data) {
-							$scope.games = data.data;
-						});
+						alert("No matching live or completed game scores were found on the API for the current week's games.");
 						return;
 					}
 
-					var gameToUpdate = updateQueue[index];
-					$http({
-						method: "PUT",
-						url: '/admin/games/',
-						contentType: "application/json",
-						dataType: "json",
-						data: JSON.stringify(gameToUpdate)
-					}).success(function() {
-						successCount++;
-						updateNextGameScore(index + 1);
-					}).error(function() {
-						failCount++;
-						updateNextGameScore(index + 1);
-					});
-				};
+					var successCount = 0;
+					var failCount = 0;
 
-				updateNextGameScore(0);
+					var updateNextGameScore = function(index) {
+						if (index >= updateQueue.length) {
+							$scope.importing = false;
+							alert("Auto-score completion summary:\n\n• Successfully scored " + successCount + " game(s)\n• Failed to update " + failCount + " game(s)\n\nThe table will now refresh with the latest scored results!");
+							
+							// Refresh local games list
+							leagueService.getGames($scope.add_game_model.weekId).then(function(data) {
+								$scope.games = data.data;
+							});
+							return;
+						}
 
-			}).error(function(err) {
-				$scope.importing = false;
-				alert("Failed to retrieve live scores from the API: " + JSON.stringify(err));
-			});
+						var gameToUpdate = updateQueue[index];
+						$http({
+							method: "PUT",
+							url: '/admin/games/',
+							contentType: "application/json",
+							dataType: "json",
+							data: JSON.stringify(gameToUpdate)
+						}).success(function() {
+							successCount++;
+							updateNextGameScore(index + 1);
+						}).error(function() {
+							failCount++;
+							updateNextGameScore(index + 1);
+						});
+					};
+
+					updateNextGameScore(0);
+
+				}).error(function(err) {
+					$scope.importing = false;
+					alert("Failed to retrieve live scores from the API: " + JSON.stringify(err));
+				});
+			}, true);
 		};
 
 		this.createMockWeek = function(mock_week_model) {
@@ -880,21 +873,20 @@
 		}
 		
 		this.deleteGame = function(gameId) {
-			if (!$window.confirm('Are you sure you want to delete this game?')) {
-				return;
-			}
-			$log.debug('deleteGame gameId=' + gameId);
-			$http({
-				method : "DELETE",
-				url : '/admin/games/' + gameId
-			}).success(function(res) {
-				alert('Game deleted successfully!');
-				leagueService.getGames($scope.add_game_model.weekId).then(function(data) {
-					$scope.games = data.data;
-					$scope.resetAvailableTeamsSelection();
+			$window.customConfirm('Are you sure you want to delete this game?', function() {
+				$log.debug('deleteGame gameId=' + gameId);
+				$http({
+					method : "DELETE",
+					url : '/admin/games/' + gameId
+				}).success(function(res) {
+					alert('Game deleted successfully!');
+					leagueService.getGames($scope.add_game_model.weekId).then(function(data) {
+						$scope.games = data.data;
+						$scope.resetAvailableTeamsSelection();
+					});
+				}).error(function(res) {
+					alert('Failed to delete game');
 				});
-			}).error(function(res) {
-				alert('Failed to delete game');
 			});
 		};
 		
@@ -1146,58 +1138,56 @@
 				return;
 			}
 			
-			if (!$window.confirm('Are you sure you want to import ' + gamesToImport.length + ' games into the selected week?')) {
-				return;
-			}
-			
-			$scope.importing = true;
-			var importCount = 0;
-			var failCount = 0;
-			
-			var saveNextGame = function(index) {
-				if (index >= gamesToImport.length) {
-					$scope.importing = false;
-					$scope.apiGames = []; // Clear preview on completion
-					alert('Successfully imported ' + importCount + ' games! ' + (failCount > 0 ? (failCount + ' games failed.') : ''));
-					
-					// If the active viewed week in admin.js is the same as the imported week, refresh the active games list
-					if ($scope.add_game_model && $scope.add_game_model.weekId === $scope.import_week_model.weekId) {
-						leagueService.getGames($scope.add_game_model.weekId).then(function(data) {
-							$scope.games = data.data;
-							$scope.resetAvailableTeamsSelection();
-						});
-					}
-					return;
-				}
+			$window.customConfirm('Are you sure you want to import ' + gamesToImport.length + ' games into the selected week?', function() {
+				$scope.importing = true;
+				var importCount = 0;
+				var failCount = 0;
 				
-				var g = gamesToImport[index];
-				var payload = {
-					seasonId: $scope.import_week_model.seasonId,
-					weekId: $scope.import_week_model.weekId,
-					favId: g.favId,
-					dogId: g.dogId,
-					favHome: g.favHome,
-					spread: g.spread,
-					gameStart: g.gameStart.toISOString() // Maintain standard UTC formatting expected by parser
+				var saveNextGame = function(index) {
+					if (index >= gamesToImport.length) {
+						$scope.importing = false;
+						$scope.apiGames = []; // Clear preview on completion
+						alert('Successfully imported ' + importCount + ' games! ' + (failCount > 0 ? (failCount + ' games failed.') : ''));
+						
+						// If the active viewed week in admin.js is the same as the imported week, refresh the active games list
+						if ($scope.add_game_model && $scope.add_game_model.weekId === $scope.import_week_model.weekId) {
+							leagueService.getGames($scope.add_game_model.weekId).then(function(data) {
+								$scope.games = data.data;
+								$scope.resetAvailableTeamsSelection();
+							});
+						}
+						return;
+					}
+					
+					var g = gamesToImport[index];
+					var payload = {
+						seasonId: $scope.import_week_model.seasonId,
+						weekId: $scope.import_week_model.weekId,
+						favId: g.favId,
+						dogId: g.dogId,
+						favHome: g.favHome,
+						spread: g.spread,
+						gameStart: g.gameStart.toISOString() // Maintain standard UTC formatting expected by parser
+					};
+					
+					$http({
+						method : "POST",
+						url : '/admin/games/',
+						contentType : "application/json",
+						dataType : "json",
+						data : JSON.stringify(payload)
+					}).success(function(res) {
+						importCount++;
+						saveNextGame(index + 1);
+					}).error(function(err) {
+						failCount++;
+						$log.error('Failed to import game: ' + JSON.stringify(g) + ' error: ' + JSON.stringify(err));
+						saveNextGame(index + 1);
+					});
 				};
 				
-				$http({
-					method : "POST",
-					url : '/admin/games/',
-					contentType : "application/json",
-					dataType : "json",
-					data : JSON.stringify(payload)
-				}).success(function(res) {
-					importCount++;
-					saveNextGame(index + 1);
-				}).error(function(err) {
-					failCount++;
-					$log.error('Failed to import game: ' + JSON.stringify(g) + ' error: ' + JSON.stringify(err));
-					saveNextGame(index + 1);
-				});
-			};
-			
-			saveNextGame(0);
+				saveNextGame(0);
+			}, true);
 		};
 
 		$scope.changeSeason = function() {
@@ -1408,31 +1398,29 @@
 				return;
 			}
 
-			if (!confirm("WARNING: This will delete ALL current database records and overwrite the system with the contents of this backup file. Are you absolutely sure you want to proceed?")) {
-				return;
-			}
+			$window.customConfirm("WARNING: This will delete ALL current database records and overwrite the system with the contents of this backup file. Are you absolutely sure you want to proceed?", function() {
+				$scope.status.loading = true;
+				$scope.status.success = null;
+				$scope.status.error = null;
 
-			$scope.status.loading = true;
-			$scope.status.success = null;
-			$scope.status.error = null;
+				var fd = new FormData();
+				fd.append('file', $scope.restoreFile);
 
-			var fd = new FormData();
-			fd.append('file', $scope.restoreFile);
-
-			$http.post('/admin/backup/import', fd, {
-				transformRequest: angular.identity,
-				headers: {'Content-Type': undefined}
-			}).success(function(data) {
-				$scope.status.loading = false;
-				$scope.status.success = "Database successfully restored from " + $scope.restoreFile.name;
-				$scope.restoreFile = null;
-				var fileInput = document.getElementById('backupFileInput');
-				if (fileInput) {
-					fileInput.value = '';
-				}
-			}).error(function(data, status) {
-				$scope.status.loading = false;
-				$scope.status.error = "Failed to restore database: " + (data || "Unknown Error") + " (Status: " + status + ")";
+				$http.post('/admin/backup/import', fd, {
+					transformRequest: angular.identity,
+					headers: {'Content-Type': undefined}
+				}).success(function(data) {
+					$scope.status.loading = false;
+					$scope.status.success = "Database successfully restored from " + $scope.restoreFile.name;
+					$scope.restoreFile = null;
+					var fileInput = document.getElementById('backupFileInput');
+					if (fileInput) {
+						fileInput.value = '';
+					}
+				}).error(function(data, status) {
+					$scope.status.loading = false;
+					$scope.status.error = "Failed to restore database: " + (data || "Unknown Error") + " (Status: " + status + ")";
+				});
 			});
 		};
 	});
