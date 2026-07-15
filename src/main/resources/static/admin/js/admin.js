@@ -741,22 +741,118 @@
 		};
 		
 		this.autoScore = function(week) {
-			
-			var week = {};
-			week.id = $scope.add_game_model.weekId;
-			$log.debug('autoScore: week='+JSON.stringify(week));
-			$http({
-				method : "POST",
-				url : '/admin/games/autoscore',
-				contentType : "application/json",
-				dataType : "json",
-				data : JSON.stringify(week)
-			}).success(function(res) { 
-//				$window.location.href = 'index.html';
-			}).error(function(res) {
-				alert('fail');
+			if (!$scope.games || $scope.games.length === 0) {
+				alert("No games are currently listed for this week. Please fetch or add some games first!");
+				return;
+			}
+
+			if (!$window.confirm("Are you sure you want to retrieve and automatically update scores for all games in the selected week?")) {
+				return;
+			}
+
+			$scope.importing = true;
+			var apiKey = "0655b9dbb7b49726390fef3e109b84af";
+			var url = "https://api.the-odds-api.com/v4/sports/americanfootball_nfl/scores/?apiKey=" + apiKey + "&daysFrom=3";
+
+			$log.debug('Fetching NFL live and recently completed scores...');
+			$http.get(url).success(function(apiScores) {
+				var updateQueue = [];
+
+				angular.forEach($scope.games, function(g) {
+					// Find matching api score
+					var matchedApiGame = null;
+					for (var i = 0; i < apiScores.length; i++) {
+						var apiGame = apiScores[i];
+						var apiHomeId = teamNameToIdMap[apiGame.home_team];
+						var apiAwayId = teamNameToIdMap[apiGame.away_team];
+
+						var dbFavId = g.fav ? g.fav.id : g.favId;
+						var dbDogId = g.dog ? g.dog.id : g.dogId;
+
+						if ((dbFavId === apiHomeId && dbDogId === apiAwayId) ||
+							(dbFavId === apiAwayId && dbDogId === apiHomeId)) {
+							matchedApiGame = apiGame;
+							break;
+						}
+					}
+
+					if (matchedApiGame && matchedApiGame.scores && matchedApiGame.scores.length > 0) {
+						var homeScore = null;
+						var awayScore = null;
+
+						angular.forEach(matchedApiGame.scores, function(s) {
+							if (s.name === matchedApiGame.home_team) {
+								homeScore = Number(s.score);
+							} else if (s.name === matchedApiGame.away_team) {
+								awayScore = Number(s.score);
+							}
+						});
+
+						if (homeScore !== null && awayScore !== null && !isNaN(homeScore) && !isNaN(awayScore)) {
+							// Deep copy local game object to modify
+							var updatedGame = {};
+							angular.copy(g, updatedGame);
+
+							updatedGame.favId = g.fav ? g.fav.id : g.favId;
+							updatedGame.dogId = g.dog ? g.dog.id : g.dogId;
+
+							if (g.favHome) {
+								updatedGame.favScore = homeScore;
+								updatedGame.dogScore = awayScore;
+							} else {
+								updatedGame.favScore = awayScore;
+								updatedGame.dogScore = homeScore;
+							}
+
+							updateQueue.push(updatedGame);
+						}
+					}
+				});
+
+				if (updateQueue.length === 0) {
+					$scope.importing = false;
+					alert("No matching live or completed game scores were found on the API for the current week's games.");
+					return;
+				}
+
+				var successCount = 0;
+				var failCount = 0;
+
+				var updateNextGameScore = function(index) {
+					if (index >= updateQueue.length) {
+						$scope.importing = false;
+						alert("Auto-score completion summary:\n\n• Successfully scored " + successCount + " game(s)\n• Failed to update " + failCount + " game(s)\n\nThe table will now refresh with the latest scored results!");
+						
+						// Refresh local games list
+						leagueService.getGames($scope.add_game_model.weekId).then(function(data) {
+							$scope.games = data.data;
+						});
+						return;
+					}
+
+					var gameToUpdate = updateQueue[index];
+					$http({
+						method: "PUT",
+						url: '/admin/games/',
+						contentType: "application/json",
+						dataType: "json",
+						data: JSON.stringify(gameToUpdate)
+					}).success(function() {
+						successCount++;
+						updateNextGameScore(index + 1);
+					}).error(function() {
+						failCount++;
+						updateNextGameScore(index + 1);
+					});
+				};
+
+				updateNextGameScore(0);
+
+			}).error(function(err) {
+				$scope.importing = false;
+				alert("Failed to retrieve live scores from the API: " + JSON.stringify(err));
 			});
-		}
+		};
 
 		this.createMockWeek = function(mock_week_model) {
 			var local_model = {};
