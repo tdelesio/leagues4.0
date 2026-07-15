@@ -140,6 +140,11 @@ public class Game extends AbstractModel{
 		}
 	}
 	
+	public boolean getHasScoresEntered()
+	{
+		return hasScoresEntered();
+	}
+	
 	public boolean getHasGameStarted()
 	{
 		return gameStart.isBefore(ZonedDateTime.now());

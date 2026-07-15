@@ -1,33 +1,142 @@
 <div ng-controller="ViewPicksController" class="view-picks-wrapper">
-	<h3 style="color: #FFB415; margin-bottom: 20px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; font-size: 18px;">
-		<i class="fa fa-th-list"></i> Player Picks Matrix
+	<h3 style="color: #FFB415; margin-bottom: 25px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; font-size: 18px;">
+		<i class="fa fa-th-list"></i> Weekly Picks Matrix
 	</h3>
 	
-	<div ng-if="loading" class="text-center" style="padding: 50px;">
+	<!-- Loading state spinner -->
+	<div ng-if="loading" class="text-center" style="padding: 60px 0;">
 		<i class="fa fa-spinner fa-spin fa-3x" style="color: #FFB415;"></i>
-		<p style="color: #fff; margin-top: 15px;">Loading picks matrix...</p>
+		<p style="color: rgba(255, 255, 255, 0.6); margin-top: 15px; font-weight: 500;">Transposing and loading picks matrix...</p>
 	</div>
 
-	<div ng-if="!loading && viewPicksGrid.length > 0" class="table-responsive glass-table-container">
-		<table class="table table-bordered picks-matrix-table">
+	<!-- Transposed 2x2 Matrix Table -->
+	<div ng-if="!loading && transposedRows.length > 0" class="table-responsive matrix-table-container">
+		<table class="table matrix-table">
 			<thead>
-				<tr ng-repeat="row in [viewPicksGrid[0]]">
-					<th ng-repeat="col in row" class="text-center header-cell">
-						{{col.value}}
+				<tr>
+					<!-- Player Column Header -->
+					<th class="text-center player-column-title">
+						<span class="player-header-text">Player</span>
+					</th>
+					<!-- Wins Column Header -->
+					<th class="text-center wins-column-title">
+						<span class="player-header-text">Wins</span>
+					</th>
+					
+					<!-- Game columns -->
+					<th ng-repeat="col in transposedColumns" ng-if="!col.isPlayerHeader" class="text-center game-header-col">
+						<div>
+							<div class="game-header-matchup">
+								<div ng-if="col.favShortName && col.dogShortName" class="stacked-matchup">
+									<span class="team-abbr fav">{{col.favShortName}}</span>
+									<span class="vs-divider">vs</span>
+									<span class="team-abbr dog">{{col.dogShortName}}</span>
+								</div>
+								<div ng-if="!col.favShortName || !col.dogShortName" class="unstacked-matchup">
+									{{col.matchup}}
+								</div>
+							</div>
+							<div class="game-header-time">
+								<span class="game-date">{{col.gameStartShort.day}} {{col.gameStartShort.date}}</span>
+								<span class="game-time">{{col.gameStartShort.time}}</span>
+							</div>
+							<div class="game-header-score" ng-if="col.hasScoresEntered">
+								<span class="score-box">{{col.favScore}}-{{col.dogScore}}</span>
+							</div>
+						</div>
 					</th>
 				</tr>
 			</thead>
 			<tbody>
-				<tr ng-repeat="row in viewPicksGrid" ng-if="!$first">
-					<td ng-repeat="col in row" class="text-center pick-cell" ng-class="col.attribute">
-						{{col.value}}
+				<tr ng-repeat="row in transposedRows" class="standings-row">
+					<!-- Player Name Header Cell -->
+					<td class="player-row-header">
+						<span class="player-name-text" title="{{row.playerName}}">{{row.playerName}}</span>
+					</td>
+					
+					<!-- Wins Column Cell -->
+					<td class="player-wins-cell text-center">
+						<span class="player-wins-text">{{row.totalWins}}</span>
+					</td>
+					
+					<!-- Intersection Picks Cells -->
+					<td ng-repeat="pick in row.picks" class="matrix-pick-cell" ng-class="{'win-cell': pick.hasScoresEntered && pick.isWin, 'loss-cell': pick.hasScoresEntered && pick.isLoss}">
+						<!-- Game not started yet: hide picks and show neutral hyphen -->
+						<div ng-if="!pick.hasGameStarted">
+							<span class="neutral-hyphen" title="Game not started">-</span>
+						</div>
+						
+						<!-- Game has started: show team icon logo or X if no pick -->
+						<div ng-if="pick.hasGameStarted">
+							<!-- No pick made -->
+							<div ng-if="pick.value === 'X' || !pick.value" class="no-pick-text">
+								No Pick
+							</div>
+							
+							<!-- Pick made: render SVG logo -->
+							<div ng-if="pick.value !== 'X' && pick.value" class="matrix-team-icon-container">
+								<div class="matrix-team-logo team-icon" ng-class="[pick.value, pick.isDoublePick ? 'is-double' : '']" title="{{pick.value}}"></div>
+								<span class="double-pick-badge" ng-if="pick.isDoublePick" title="Double Pick">
+									<i class="fa fa-star"></i> 2x
+								</span>
+								
+								<!-- Status Overlays -->
+								<!-- Single Win (Regular Pick Win) -->
+								<div ng-if="pick.hasScoresEntered && pick.isWin && !pick.isDoublePick" class="pick-overlay win-overlay" title="Win">
+									<i class="fa fa-check"></i>
+								</div>
+								<!-- Double Win -->
+								<div ng-if="pick.hasScoresEntered && pick.isWin && pick.isDoublePick" class="pick-overlay double-win-overlay" title="Double Win">
+									<i class="fa fa-check check-one"></i>
+									<i class="fa fa-check check-two"></i>
+								</div>
+								<!-- Loss -->
+								<div ng-if="pick.hasScoresEntered && pick.isLoss" class="pick-overlay loss-overlay" title="Loss">
+									<i class="fa fa-times"></i>
+								</div>
+							</div>
+						</div>
 					</td>
 				</tr>
 			</tbody>
 		</table>
 	</div>
 
-	<div ng-if="!loading && viewPicksGrid.length === 0" class="text-center" style="padding: 50px;">
-		<p style="color: #ccc; font-size: 16px;">No picks found or games scheduled for this week.</p>
+	<!-- Empty state message -->
+	<div ng-if="!loading && transposedRows.length === 0" class="text-center" style="padding: 60px 0; background: rgba(30, 30, 30, 0.3); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05);">
+		<p style="color: rgba(255, 255, 255, 0.4); font-size: 16px; font-weight: 500;">
+			<i class="fa fa-info-circle" style="margin-right: 6px;"></i> No picks found or games scheduled for this week.
+		</p>
+	</div>
+
+	<!-- Dynamic Standings & Points Table -->
+	<div ng-if="!loading && transposedRows.length > 0" class="standings-section">
+		<h4 class="standings-title">
+			<i class="fa fa-trophy"></i> Weekly Points Standings
+		</h4>
+		<div class="table-responsive">
+			<table class="table standings-table">
+				<thead>
+					<tr>
+						<th class="text-left" style="width: 100px;">Rank</th>
+						<th class="text-left">Player Name</th>
+						<th class="text-right" style="width: 160px; padding-right: 25px !important;">Total Points</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr ng-repeat="player in playerStandings" class="standings-row">
+						<td class="standings-rank">
+							#{{$index + 1}}
+						</td>
+						<td style="font-weight: 600; color: #fff;">
+							{{player.playerName}}
+						</td>
+						<td class="text-right standings-points" style="font-size: 15px; padding-right: 25px !important;">
+							{{player.totalPoints}} {{player.totalPoints === 1 ? 'Point' : 'Points'}}
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
 	</div>
 </div>

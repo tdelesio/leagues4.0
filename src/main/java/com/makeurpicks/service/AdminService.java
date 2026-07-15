@@ -22,6 +22,13 @@ import com.makeurpicks.repository.PlayerRepository;
 import com.makeurpicks.repository.PickRepository;
 import com.makeurpicks.repository.DoublePickRepository;
 import com.makeurpicks.repository.PicksByWeekRepository;
+import com.makeurpicks.repository.PlayerLeagueRepository;
+import com.makeurpicks.repository.LeagueRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import com.makeurpicks.service.GameService;
 import com.makeurpicks.service.LeagueService;
 import com.makeurpicks.service.SeasonService;
@@ -65,6 +72,12 @@ public class AdminService {
 
 	@Autowired
 	private PicksByWeekRepository picksByWeekRepository;
+
+	@Autowired
+	private PlayerLeagueRepository playerLeagueRepository;
+
+	@Autowired
+	private LeagueRepository leagueRepository;
 	
 	public List<Season> getSeasons() {
 		return seasonService.getCurrentSeasons();
@@ -460,5 +473,79 @@ public class AdminService {
 		view.setNoPick(false);
 		view.setPickLastUpdated(pick.getPickLastUpdated());
 		return view;
+	}
+
+	@org.springframework.transaction.annotation.Transactional
+	public void deletePlayer(String username) {
+		if (username == null || username.trim().isEmpty() || "admin".equals(username)) {
+			return;
+		}
+
+		ensureAdminPlayerExists();
+
+		// 1. League Admin Ownership Transfer: reassign leagues owned by username to admin
+		List<League> leaguesOwned = leagueRepository.findByAdminId(username);
+		if (leaguesOwned != null) {
+			for (League league : leaguesOwned) {
+				league.setAdminId("admin");
+				leagueRepository.save(league);
+			}
+		}
+
+		// 2. Remove League Associations
+		playerLeagueRepository.deleteByIdPlayerId(username);
+
+		// 3. Purge Double Picks from Redis
+		Map<String, String> allDoublePicks = doublePickRepository.getAllDoublePicks();
+		if (allDoublePicks != null && !allDoublePicks.isEmpty()) {
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+			TypeReference<HashMap<String, DoublePick>> typeRef = new TypeReference<HashMap<String, DoublePick>>() {};
+			for (Map.Entry<String, String> entry : allDoublePicks.entrySet()) {
+				String key = entry.getKey();
+				String json = entry.getValue();
+				if (json != null && !json.isEmpty()) {
+					try {
+						Map<String, DoublePick> doublePicks = mapper.readValue(json, typeRef);
+						if (doublePicks != null && doublePicks.containsKey(username)) {
+							doublePicks.remove(username);
+							String updatedJson = mapper.writeValueAsString(doublePicks);
+							allDoublePicks.put(key, updatedJson);
+						}
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				}
+			}
+			doublePickRepository.saveAllDoublePicks(allDoublePicks);
+		}
+
+		// 4. Purge Picks from Redis and DB
+		Map<String, Map<String, Map<String, Map<String, String>>>> picksByWeek = picksByWeekRepository.getAllPicksByWeek();
+		if (picksByWeek != null && !picksByWeek.isEmpty()) {
+			for (Map<String, Map<String, Map<String, String>>> weekMap : picksByWeek.values()) {
+				if (weekMap != null) {
+					for (Map<String, Map<String, String>> playersMap : weekMap.values()) {
+						if (playersMap != null) {
+							Map<String, String> playerGamesMap = playersMap.remove(username);
+							if (playerGamesMap != null) {
+								for (String pickId : playerGamesMap.values()) {
+									if (pickId != null && !pickId.isEmpty()) {
+										pickRepository.deleteById(pickId);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			picksByWeekRepository.saveAllPicksByWeek(picksByWeek);
+		}
+
+		// 5. Delete Player Account
+		Player player = playerRepository.findByUsername(username);
+		if (player != null) {
+			playerRepository.delete(player);
+		}
 	}
 }

@@ -15,7 +15,7 @@
 }
 
 /* 768 <-> 992  */
-@media (min-width: 768px) and(max-width: 992px) {
+@media (min-width: 768px) and (max-width: 992px) {
 	#navrow { height:50px;}
 	#navrow ul li { list-style:none; display:inline; float:left; margin-right:10px; padding:15px 8px 8px;}
 	#navrow ul li a { color:#CCCCCC; text-decoration:none; font-weight:bold; font-size:12px; font-weight:bold; line-height:20px; }

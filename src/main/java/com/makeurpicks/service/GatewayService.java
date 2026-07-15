@@ -90,13 +90,14 @@ public class GatewayService {
 							if (!game.getHasGameStarted())
 							{
 								pickColumn = ViewPickColumn.asNotStarted(game.getId(), player.getId());
+								pickMatrix.put(matrixKey(player.getId(), game.getId()), pickColumn);
 								continue;
 							}
 							
 							//figure out gamewinner
 							String gameWinner = game.getGameWinner();
 							
-							PickView pick = picksForAllPlayers.get(game.getId());
+							PickView pick = picksForAllPlayers != null ? picksForAllPlayers.get(game.getId()) : null;
 							if (pick != null)
 							{
 								DoublePickView dpv = doublePicks.get(player.getId());
@@ -104,7 +105,7 @@ public class GatewayService {
 								if (dpv!=null && dpv.getGameId().equals(game.getId()))
 									isDouble = true;
 								
-								if (gameWinner.equals(pick.getTeamId()))
+								if (gameWinner != null && gameWinner.equals(pick.getTeamId()))
 								{
 									PlayerWins playerWins = winsByPlayer.get(player.getId());
 									if (playerWins == null)

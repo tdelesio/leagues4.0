@@ -18,6 +18,11 @@ public interface PlayerLeagueRepository extends JpaRepository<PlayerLeague, Stri
 	
 	public PlayerLeague findByIdLeagueIdAndIdPlayerId(String leagueId, String playerId);
 
+	@org.springframework.data.jpa.repository.Modifying
+	@org.springframework.transaction.annotation.Transactional
+	@Query("delete from PlayerLeague pl where pl.id.playerId = ?1")
+	public void deleteByIdPlayerId(String playerId);
+
 	default PlayerLeague findOne(String id) {
 		return findById(id).orElse(null);
 	}

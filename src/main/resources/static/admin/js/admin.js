@@ -171,9 +171,14 @@
 			    }
 	});
 
-	app.controller('PlayersController', function ($scope, $http, $log) {
+	app.controller('PlayersController', function ($scope, $http, $window, $log) {
 		$scope.players = [];
 		$scope.loading = true;
+		$scope.currentUser = '';
+
+		$http.get('/admin/user').success(function(data) {
+			$scope.currentUser = data.name;
+		});
 
 		$scope.loadPlayers = function() {
 			$scope.loading = true;
@@ -184,6 +189,24 @@
 				$log.error('Error loading players:', err);
 				$scope.loading = false;
 			});
+		};
+
+		$scope.deletePlayer = function(player) {
+			if (player.username === $scope.currentUser) {
+				$window.alert('You cannot delete yourself!');
+				return;
+			}
+			if ($window.confirm('Are you sure you want to permanently delete player ' + player.username + '? This will cascade and purge all of their picks and league records.')) {
+				$http.delete('/admin/players/' + encodeURIComponent(player.username)).success(function() {
+					var idx = $scope.players.indexOf(player);
+					if (idx > -1) {
+						$scope.players.splice(idx, 1);
+					}
+				}).error(function(err) {
+					$window.alert('Error deleting player: ' + (err.message || 'unknown error'));
+					$log.error('Error deleting player:', err);
+				});
+			}
 		};
 
 		$scope.loadPlayers();
@@ -881,10 +904,16 @@
 			return isFavEmpty && isDogEmpty;
 		};
 
+		var lastSelectedGameId = null;
 		$scope.$watch('selectedGame', function(newVal) {
 			if (newVal) {
-				if (newVal.favScore === 0) newVal.favScore = null;
-				if (newVal.dogScore === 0) newVal.dogScore = null;
+				if (newVal.id !== lastSelectedGameId) {
+					lastSelectedGameId = newVal.id;
+					if (newVal.favScore === 0) newVal.favScore = null;
+					if (newVal.dogScore === 0) newVal.dogScore = null;
+				}
+			} else {
+				lastSelectedGameId = null;
 			}
 		});
 		

@@ -172,6 +172,12 @@ public class AdminController {
 		return views;
 	}
 
+	@RequestMapping(value = "/players/{username}", method = RequestMethod.DELETE)
+	public @ResponseBody boolean deletePlayer(@PathVariable String username) {
+		adminService.deletePlayer(username);
+		return true;
+	}
+
 	@RequestMapping(value = "/leagues/seasons/", method = RequestMethod.POST)
 	public @ResponseBody Season createSeason(@RequestBody Season season) {
 		return seasonService.createSeason(season);
@@ -318,4 +324,47 @@ public class AdminController {
 
 		return createdGames;
 	}
+
+	@Autowired
+	private com.makeurpicks.repository.LeagueRepository leagueRepository;
+
+	@Autowired
+	private com.makeurpicks.repository.WeekRepository weekRepository;
+
+	@Autowired
+	private com.makeurpicks.repository.GameRepository gameRepository;
+
+	@Autowired
+	private com.makeurpicks.repository.PlayerLeagueRepository playerLeagueRepository;
+
+	@Autowired
+	private com.makeurpicks.config.DataInitializer dataInitializer;
+
+	@Autowired
+	private org.springframework.data.redis.connection.RedisConnectionFactory redisConnectionFactory;
+
+	@RequestMapping(value = "/cache/clear", method = RequestMethod.POST)
+	public void clearCache() {
+		redisConnectionFactory.getConnection().flushDb();
+	}
+
+	@RequestMapping(value = "/db/reset", method = RequestMethod.POST)
+	@org.springframework.transaction.annotation.Transactional
+	public void resetDatabase() throws Exception {
+		try {
+			redisConnectionFactory.getConnection().flushDb();
+		} catch (Exception e) {
+			// Ignore if redis isn't connected or flush has issue
+		}
+
+		playerLeagueRepository.deleteAll();
+		gameRepository.deleteAll();
+		weekRepository.deleteAll();
+		leagueRepository.deleteAll();
+		seasonRepository.deleteAll();
+		playerRepository.deleteAll();
+
+		dataInitializer.run();
+	}
 }
+

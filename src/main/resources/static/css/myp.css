@@ -149,7 +149,18 @@ p a:hover { color: #F16428; }
 	.gamebox {width:320px; margin-bottom:20px;}
 	.gametime {text-align:center; clear:both; font-family:Arial, Helvetica, sans-serif; font-weight:bold; font-size:14px; margin: 0 0 15px; border-bottom:2px dashed #333333; padding:30px 0 5px; color:#ccc;}
 	
-	.scoreboard {background-color:#000000; height:60px; border-top:solid 1px #CCCCCC; border-bottom:solid 1px #CCCCCC; margin:0 0 15px 0 !important;}
+	.scoreboard {
+		background-color: rgba(18, 18, 18, 0.8) !important;
+		height: 72px;
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		border-radius: 8px;
+		backdrop-filter: blur(10px);
+		-webkit-backdrop-filter: blur(10px);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+		overflow: hidden;
+		margin: 0 0 20px 0 !important;
+		position: relative;
+	}
 	.team-icon { width:40px; height:30px; background-repeat:no-repeat; background-position:center top;}
 	.pickbox {width:50px; height:50px; float:left; padding:5px;}
 	.win .pickbox { background-image:url(../img/team-glow.png);}
@@ -157,16 +168,105 @@ p a:hover { color: #F16428; }
 	
 	.long-name { display:none; font-size:12px;}
 	
-	.win .pick-selection { color:#00CC00; padding-top:5px; font-size:17px;}
-	.loss .pick-selection {color:#FF0000;  padding-top:5px; font-size:15px;}
-	
-	
+	.win .pick-selection { color:#00CC00; padding-top:0; font-size:17px;}
+	.loss .pick-selection {color:#FF0000;  padding-top:0; font-size:15px;}
 	
 	.pick {width:40px; height:40px; background-repeat:no-repeat;}
 	
-	.scorerow {height:30px; padding:0; line-height:28px; border-bottom:1px solid #333; color:#FFFFFF;}
+	/* Re-architected scoreboard structure with custom flex elements */
+	.scoreboard-content {
+		padding-right: 52px;
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+	}
+	
+	.scorerow {
+		height: 36px;
+		line-height: 35px;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+		color: #FFFFFF;
+		display: flex;
+		align-items: center;
+		padding: 0 8px;
+		box-sizing: border-box;
+		transition: background-color 0.2s ease, border-left-color 0.2s ease;
+	}
+	
 	.scoreboard .scorerow:last-child {
 		border-bottom:none;
+	}
+	
+	.pick-selection {
+		width: 24px;
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-right: 4px;
+	}
+	
+	.team-icon-container {
+		width: 44px;
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	
+	.scorerow .team-icon {
+		background-position: center;
+		background-size: contain;
+	}
+	
+	.team-name-container {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		align-items: center;
+		padding-left: 8px;
+	}
+	
+	.team-name-container span.short-name,
+	.team-name-container span.long-name {
+		font-family: Arial, Helvetica, sans-serif;
+		font-size: 13px;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		font-weight: 500;
+	}
+	
+	.spread-container {
+		width: 50px;
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		padding-right: 6px;
+		box-sizing: border-box;
+	}
+	
+	.spread-container .spread {
+		font-family: Arial, Helvetica, sans-serif;
+		font-size: 11px;
+		color: #00ccff;
+		font-weight: bold;
+	}
+	
+	.score-container {
+		width: 32px;
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-left: 1px solid rgba(255, 255, 255, 0.1);
+		height: 100%;
+		font-family: Arial, Helvetica, sans-serif;
+		font-size: 12px;
+		font-weight: bold;
+		color: #ffffff;
+		box-sizing: border-box;
 	}
 	
 		.teamname {	float:left; padding:5px 0 0 5px;
@@ -203,7 +303,7 @@ p a:hover { color: #F16428; }
 .loss {border-color:#FF0000;}
 
 .loser {color:#999;}
-.double {background-color:#0c253f; border-width:3px;}
+/* Legacy .double border-width and background removed to keep styling uniform */
 
 
 
@@ -443,11 +543,7 @@ box-shadow: 0 0 5px #000000;
 	transform: scale(0.9);
 }
 
-/* Premium Double Pick Styles */
-.scoreboard.double {
-	background-color: #0c253f !important;
-	border-color: #FFB415 !important;
-}
+/* Premium Double Pick Styles - background-color override removed to match regular cards */
 
 .scoreboard .scorerow {
 	margin-right: 0 !important;
@@ -578,16 +674,50 @@ box-shadow: 0 0 5px #000000;
 
 /* Scoreboard Card Left Highlight Accent Treatments */
 .scoreboard {
-	border-left: 4px solid transparent;
-	transition: border-left-color 0.25s ease, background-color 0.25s ease;
+	border: 2px solid transparent;
+	transition: border-color 0.25s ease, border-width 0.25s ease, background-color 0.25s ease;
 }
 
-.scoreboard.unpicked {
-	border-left: 4px solid #ef4444; /* subtle solid crimson alert bar */
+/* Full-border status indicator styling */
+.scoreboard.status-not-started {
+	border: 2px solid #4b5563 !important; /* Grey border */
 }
 
-.scoreboard.double {
-	border-left: 4px solid #FFB415 !important; /* premium brand gold bar */
+.scoreboard.status-in-progress {
+	border: 2px solid #eab308 !important; /* Yellow border */
+}
+
+.scoreboard.status-win {
+	border: 2px solid #10b981 !important; /* Green border */
+}
+
+.scoreboard.status-loss {
+	border: 2px solid #ef4444 !important; /* Red border */
+}
+
+/* Thicker border for double picks - must look EXACTLY like regular cards but with at least twice the thickness (5px) */
+.scoreboard.status-double {
+	border-width: 5px !important;
+}
+
+.scoreboard.status-double.status-not-started,
+.scoreboard.double.status-not-started {
+	border: 5px solid #4b5563 !important;
+}
+
+.scoreboard.status-double.status-in-progress,
+.scoreboard.double.status-in-progress {
+	border: 5px solid #eab308 !important;
+}
+
+.scoreboard.status-double.status-win,
+.scoreboard.double.status-win {
+	border: 5px solid #10b981 !important;
+}
+
+.scoreboard.status-double.status-loss,
+.scoreboard.double.status-loss {
+	border: 5px solid #ef4444 !important;
 }
 
 /* ==========================================================================
@@ -729,7 +859,513 @@ box-shadow: 0 0 5px #000000;
 	text-align: center;
 	font-weight: bold;
 	font-size: 13px;
-	min-height: 20px;
 	margin-top: 15px;
 	line-height: 1.4;
+}
+
+/* VIEW PICKS 2X2 MATRIX PREMIUM CUSTOM STYLES */
+.matrix-table-container {
+	margin-top: 20px;
+	margin-bottom: 40px;
+	border-radius: 12px;
+	overflow: hidden;
+	background: rgba(30, 30, 30, 0.45);
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
+}
+
+.matrix-table {
+	margin-bottom: 0 !important;
+	background: transparent !important;
+	table-layout: fixed; /* Force equal-width columns for all games */
+	width: 100%;
+}
+
+.matrix-table th {
+	background: rgba(20, 20, 20, 0.8) !important;
+	color: #fff !important;
+	border: 1px solid rgba(255, 255, 255, 0.08) !important;
+	text-align: center;
+	vertical-align: middle !important;
+	font-weight: 600;
+	letter-spacing: 0.3px;
+}
+
+.matrix-table td {
+	vertical-align: middle !important;
+	border: 1px solid rgba(255, 255, 255, 0.08) !important;
+	position: relative;
+	padding: 6px 1px !important; /* Extremely tight padding for cell density */
+	color: #e5e5e5;
+	font-size: 12px;
+	background: transparent;
+}
+
+.player-column-title {
+	width: 90px !important;
+	min-width: 90px !important;
+	max-width: 90px !important;
+	font-size: 11px !important;
+	letter-spacing: 0.5px;
+	text-transform: uppercase;
+	background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.player-header-text {
+	color: #fff;
+	font-weight: 700;
+}
+
+.player-row-header {
+	text-align: left !important;
+	padding-left: 8px !important;
+	padding-right: 4px !important;
+	font-weight: bold;
+	color: #FFB415 !important;
+	background: rgba(255, 255, 255, 0.03) !important;
+	width: 90px !important;
+	min-width: 90px !important;
+	max-width: 90px !important;
+	overflow: hidden;
+}
+
+.wins-column-title {
+	width: 46px !important;
+	min-width: 46px !important;
+	max-width: 46px !important;
+	font-size: 11px !important;
+	letter-spacing: 0.5px;
+	text-transform: uppercase;
+	background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.player-wins-cell {
+	font-weight: 800;
+	font-size: 14px !important;
+	color: #FFB415 !important;
+	background: rgba(255, 255, 255, 0.03) !important;
+	width: 46px !important;
+	min-width: 46px !important;
+	max-width: 46px !important;
+	vertical-align: middle !important;
+	border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+	text-align: center !important;
+}
+
+.player-name-text {
+	display: block;
+	width: 100%;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
+
+.game-header-col {
+	padding: 6px 1px !important; /* Extra narrow cell padding */
+	text-align: center !important;
+	vertical-align: top !important;
+}
+
+.game-header-matchup {
+	color: #FFB415;
+	margin-bottom: 3px;
+	text-transform: uppercase;
+}
+
+.stacked-matchup {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	line-height: 1.1;
+}
+
+.team-abbr {
+	font-size: 10.5px;
+	font-weight: 700;
+	letter-spacing: 0.3px;
+}
+
+.team-abbr.fav {
+	color: #FFB415;
+}
+
+.team-abbr.dog {
+	color: #fff;
+}
+
+.vs-divider {
+	font-size: 8px;
+	font-weight: 400;
+	color: rgba(255, 255, 255, 0.4);
+	margin: 1px 0;
+	text-transform: lowercase;
+}
+
+.unstacked-matchup {
+	font-size: 11px;
+	font-weight: 700;
+}
+
+.game-header-time {
+	color: rgba(255, 255, 255, 0.45);
+	line-height: 1.2;
+	margin-bottom: 3px;
+	display: block;
+}
+
+.game-date {
+	font-size: 8.5px;
+	font-weight: 600;
+	display: block;
+}
+
+.game-time {
+	font-size: 7.5px;
+	display: block;
+}
+
+.game-header-score {
+	display: block;
+	margin-top: 3px;
+}
+
+.score-box {
+	background: rgba(16, 185, 129, 0.15);
+	border: 1px solid rgba(16, 185, 129, 0.25);
+	color: #10B981;
+	font-size: 8px;
+	font-weight: bold;
+	padding: 1px 3px;
+	border-radius: 3px;
+	display: inline-block;
+	line-height: 1;
+}
+
+.matrix-pick-cell {
+	transition: background-color 0.25s ease, border 0.2s ease;
+	text-align: center !important;
+}
+
+.matrix-pick-cell.win-cell {
+	background-color: rgba(46, 117, 89, 0.25) !important; /* Soft, beautiful custom green */
+}
+
+.matrix-pick-cell.loss-cell {
+	background-color: rgba(185, 28, 28, 0.2) !important; /* Soft, premium custom red */
+}
+
+.matrix-team-icon-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	position: relative;
+	height: 25px; /* Shrunken height to maximize real estate */
+	width: 100%;
+}
+
+.matrix-team-logo {
+	width: 28px !important; /* Shrunken helmet size to fit easily side-by-side */
+	height: 21px !important;
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+	display: block;
+	transition: transform 0.2s ease;
+}
+
+.matrix-team-logo:hover {
+	transform: scale(1.15);
+}
+
+.matrix-team-logo.is-double {
+	filter: drop-shadow(0 0 4px rgba(255, 180, 21, 0.8));
+	border: 1.2px solid #FFB415;
+	border-radius: 3px;
+	padding: 0.5px;
+	background-color: rgba(255, 180, 21, 0.05);
+}
+
+.pick-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	pointer-events: none; /* Crucial so hover/click on helmet is untouched */
+	z-index: 5;
+}
+
+.win-overlay {
+	font-size: 22px;
+	color: #10B981;
+	text-shadow: 0 0 3px #000, 0 0 8px rgba(16, 185, 129, 0.85);
+}
+
+.loss-overlay {
+	font-size: 24px;
+	color: #ef4444;
+	text-shadow: 0 0 3px #000, 0 0 8px rgba(239, 68, 68, 0.85);
+}
+
+.double-win-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	pointer-events: none;
+	z-index: 5;
+}
+
+.double-win-overlay i {
+	position: absolute;
+	font-size: 17px;
+	color: #10B981;
+}
+
+.double-win-overlay .check-one {
+	transform: translate(-3px, -2px);
+	text-shadow: 0 0 3px #000, 0 0 6px rgba(16, 185, 129, 0.85);
+}
+
+.double-win-overlay .check-two {
+	transform: translate(3px, 2px);
+	text-shadow: 0 0 3px #000, 0 0 6px rgba(16, 185, 129, 0.85);
+}
+
+.double-pick-badge {
+	position: absolute;
+	top: -8px;
+	right: 50%;
+	margin-right: -18px; /* Perfectly centered offset for the shrunken 28px logo */
+	background: linear-gradient(135deg, #FFB415, #f59e0b);
+	color: #000;
+	font-size: 7px;
+	font-weight: 800;
+	padding: 0.5px 3px;
+	border-radius: 4px;
+	box-shadow: 0 0 4px rgba(255, 180, 21, 0.7);
+	line-height: 1;
+	z-index: 10;
+	text-transform: uppercase;
+	white-space: nowrap;
+}
+
+.double-pick-badge i {
+	font-size: 6px;
+	margin-right: 0.5px;
+}
+
+.neutral-hyphen {
+	font-size: 16px;
+	color: rgba(255, 255, 255, 0.2);
+	font-weight: bold;
+	display: inline-block;
+}
+
+.no-pick-text {
+	font-size: 9px;
+	color: rgba(255, 255, 255, 0.35);
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.3px;
+}
+
+.matrix-pick-cell.loss-cell .no-pick-text {
+	color: rgba(255, 220, 220, 0.8) !important;
+	font-weight: 600;
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* ==========================================================================
+   FLUID RESPONSIVE SCALING MEDIA QUERIES FOR MATRIX VIEW
+   ========================================================================== */
+@media (max-width: 992px) {
+	.player-column-title, .player-row-header {
+		width: 75px !important;
+		min-width: 75px !important;
+		max-width: 75px !important;
+		font-size: 10px !important;
+		padding-left: 5px !important;
+		padding-right: 3px !important;
+	}
+	.wins-column-title, .player-wins-cell {
+		width: 38px !important;
+		min-width: 38px !important;
+		max-width: 38px !important;
+		font-size: 10px !important;
+	}
+	.win-overlay {
+		font-size: 18px;
+	}
+	.loss-overlay {
+		font-size: 20px;
+	}
+	.double-win-overlay i {
+		font-size: 14px;
+	}
+	.double-win-overlay .check-one {
+		transform: translate(-2px, -1.5px);
+	}
+	.double-win-overlay .check-two {
+		transform: translate(2px, 1.5px);
+	}
+	.team-abbr {
+		font-size: 9.5px !important;
+	}
+	.game-date {
+		font-size: 8px !important;
+	}
+	.game-time {
+		font-size: 7px !important;
+	}
+	.matrix-team-logo {
+		width: 24px !important;
+		height: 18px !important;
+	}
+	.double-pick-badge {
+		margin-right: -15px;
+		font-size: 6px;
+	}
+	.neutral-hyphen {
+		font-size: 14px;
+	}
+	.no-pick-text {
+		font-size: 8px;
+	}
+}
+
+@media (max-width: 768px) {
+	.player-column-title, .player-row-header {
+		width: 62px !important;
+		min-width: 62px !important;
+		max-width: 62px !important;
+		font-size: 9px !important;
+		padding-left: 3px !important;
+		padding-right: 2px !important;
+	}
+	.wins-column-title, .player-wins-cell {
+		width: 32px !important;
+		min-width: 32px !important;
+		max-width: 32px !important;
+		font-size: 9px !important;
+	}
+	.win-overlay {
+		font-size: 14px;
+	}
+	.loss-overlay {
+		font-size: 16px;
+	}
+	.double-win-overlay i {
+		font-size: 11px;
+	}
+	.double-win-overlay .check-one {
+		transform: translate(-1.5px, -1px);
+	}
+	.double-win-overlay .check-two {
+		transform: translate(1.5px, 1px);
+	}
+	.team-abbr {
+		font-size: 8.5px !important;
+	}
+	.vs-divider {
+		display: none; /* Hide 'vs' label to save vertical line space on tiny viewports */
+	}
+	.game-date {
+		font-size: 7.5px !important;
+	}
+	.game-time {
+		display: none; /* Hide time to conserve spacing */
+	}
+	.matrix-team-logo {
+		width: 20px !important;
+		height: 15px !important;
+	}
+	.double-pick-badge {
+		margin-right: -12px;
+		font-size: 5.5px;
+		padding: 0 2px;
+	}
+	.neutral-hyphen {
+		font-size: 12px;
+	}
+	.no-pick-text {
+		font-size: 7.5px;
+		letter-spacing: 0;
+	}
+}
+
+/* Standings / Points section */
+.standings-section {
+	margin-top: 40px;
+	background: rgba(30, 30, 30, 0.45);
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	border-radius: 12px;
+	padding: 20px;
+	box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4);
+}
+
+.standings-title {
+	color: #FFB415;
+	font-weight: bold;
+	text-transform: uppercase;
+	font-size: 15px;
+	letter-spacing: 0.8px;
+	margin-bottom: 15px;
+	display: flex;
+	align-items: center;
+}
+
+.standings-title i {
+	margin-right: 8px;
+}
+
+.standings-table {
+	margin-bottom: 0 !important;
+	background: transparent !important;
+}
+
+.standings-table th {
+	background: rgba(20, 20, 20, 0.5) !important;
+	color: rgba(255, 255, 255, 0.7) !important;
+	font-weight: 600;
+	font-size: 12px;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	border: none !important;
+	padding: 10px 15px !important;
+}
+
+.standings-table td {
+	border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+	padding: 12px 15px !important;
+	font-size: 14px;
+	color: #e5e5e5;
+	vertical-align: middle !important;
+}
+
+.standings-rank {
+	font-weight: bold;
+	color: #FFB415;
+	width: 80px;
+}
+
+.standings-points {
+	font-weight: bold;
+	color: #10B981;
+}
+
+.standings-row:hover {
+	background: rgba(255, 255, 255, 0.02) !important;
 }

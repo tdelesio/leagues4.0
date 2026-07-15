@@ -105,13 +105,26 @@ public class LeaderService {
 			Map<Integer, String> weekWinners = new HashMap<>();
 
 			for (Week week : weeks) {
+				List<Game> games = gameService.getGamesByWeek(week.getId());
+				boolean gamesCompleted = false;
+				for (Game game : games) {
+					if (game.getHasGameStarted() && game.getHasScoresEntered()) {
+						gamesCompleted = true;
+						break;
+					}
+				}
+
+				if (!gamesCompleted) {
+					weekWinners.put(week.getWeekNumber(), "No games completed yet");
+					continue;
+				}
+
 				int highestScore = -1;
 				List<String> winners = new ArrayList<>();
 
 				for (String playerId : players) {
 					Map<String, Pick> picks = pickService.getPicksByWeekAndPlayer(leagueId, week.getId(), playerId);
 					com.makeurpicks.domain.DoublePick doublePick = pickService.getDoublePickForPlayer(leagueId, week.getId(), playerId);
-					List<Game> games = gameService.getGamesByWeek(week.getId());
 
 					int score = 0;
 					for (Game game : games) {
@@ -126,12 +139,21 @@ public class LeaderService {
 							}
 						}
 					}
+
+					if (score > highestScore) {
+						highestScore = score;
+						winners.clear();
+						winners.add(playerId);
+					} else if (score == highestScore) {
+						winners.add(playerId);
+					}
 				}
 
-				if (highestScore > 0) {
-					weekWinners.put(week.getWeekNumber(), String.join(", ", winners));
+				if (highestScore >= 0 && !winners.isEmpty()) {
+					String winText = (highestScore == 1) ? "1 win" : highestScore + " wins";
+					weekWinners.put(week.getWeekNumber(), String.join(", ", winners) + " (" + winText + ")");
 				} else {
-					weekWinners.put(week.getWeekNumber(), "No picks or games completed yet");
+					weekWinners.put(week.getWeekNumber(), "No picks made");
 				}
 			}
 

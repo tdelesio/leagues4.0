@@ -80,6 +80,8 @@ public class GatewayController {
 
             @Override
             public void onError(Throwable throwable) {
+                log.error("Error retrieving player picks matrix", throwable);
+                result.setErrorResult(throwable);
             }
 
             @Override

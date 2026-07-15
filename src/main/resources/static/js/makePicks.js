@@ -1,16 +1,18 @@
 (function () {
 	var app = angular.module('makepicks', ['leagueservice']);
 	
-	app.controller('MakePicksController', function ($scope, $http, $window, $log, leagueService) { 
+	app.controller('MakePicksController', function ($scope, $http, $window, $log, $q, leagueService) { 
 		
 		$scope.pickMap = {};
 		$scope.gameMetaMap = {};
 		$scope.showGS = true;
+		$scope.picksLoaded = false;
 		
 		var loadGamesAndPicks = function() {
 			if (!$scope.week || !$scope.week.weekId) {
 				return;
 			}
+			$scope.picksLoaded = false;
 			$log.debug('MakePickController: loadGamesAndPicks weekId=' + $scope.week.weekId);
 			
 			//load all the games
@@ -19,17 +21,25 @@
 				$scope.games = games;
 			});
 			
-			//load all the picks
+			//load all the picks and double pick concurrently to prevent race conditions
 			var leagueId = ($scope.league && $scope.league.id) ? $scope.league.id : ($scope.leagues && $scope.leagues.length > 0 ? $scope.leagues[0].id : null);
-			leagueService.getMyPicks(leagueId, $scope.week.weekId).then(function(picks) {
-				$log.debug('MakePickController:picks=' + JSON.stringify(picks));
-				$scope.pickMap = picks;
+			
+			var picksPromise = leagueService.getMyPicks(leagueId, $scope.week.weekId);
+			var doublePickPromise = leagueService.getDoublePick(leagueId, $scope.week.weekId);
+			
+			$q.all([picksPromise, doublePickPromise]).then(function(results) {
+				var picks = results[0];
+				var doublePick = results[1];
 				
-				// Fetch the active double pick once the picks map has loaded
-				leagueService.getDoublePick(leagueId, $scope.week.weekId).then(function(doublePick) {
-					$log.debug('MakePickController:doublePick=' + JSON.stringify(doublePick));
-					$scope.doublePick = doublePick;
-				});
+				$log.debug('MakePickController:picks=' + JSON.stringify(picks));
+				$log.debug('MakePickController:doublePick=' + JSON.stringify(doublePick));
+				
+				$scope.pickMap = picks;
+				$scope.doublePick = doublePick;
+				$scope.picksLoaded = true;
+			}, function(error) {
+				$log.error('MakePickController: failed to load picks or double pick', error);
+				$scope.picksLoaded = true; // Fallback to allow rendering
 			});
 		};
 		
@@ -52,6 +62,54 @@
 				var msg = (error && error.data && error.data.message) ? error.data.message : 'Double pick update failed.';
 				alert(msg);
 			});
+		};
+		
+		$scope.getGameStatusClass = function(game) {
+			if (!game) return 'status-not-started';
+			
+			var classes = [];
+			
+			// Check if double pick (using loose comparison to prevent type mismatch issues)
+			if ($scope.doublePick && $scope.doublePick.gameId == game.id) {
+				classes.push('status-double');
+			}
+			
+			// 1. Check if game started
+			if (!game.hasGameStarted) {
+				classes.push('status-not-started');
+				return classes.join(' ');
+			}
+			
+			// 2. Check if in progress (started but both scores are 0)
+			if (game.favScore === 0 && game.dogScore === 0) {
+				classes.push('status-in-progress');
+				return classes.join(' ');
+			}
+			
+			// 3. Completed - check win/loss
+			// Prevent flash on initial load while picks are still loading
+			if (!$scope.picksLoaded) {
+				return classes.join(' ');
+			}
+			
+			var pick = $scope.pickMap[game.id];
+			if (!pick) {
+				// No pick made is counted as a loss
+				classes.push('status-loss');
+			} else {
+				// Determine winner client-side for maximum reliability (robust numeric parsing)
+				var dogScore = Number(game.dogScore);
+				var favScore = Number(game.favScore);
+				var spread = Number(game.spread);
+				var winnerId = (dogScore + spread > favScore) ? game.dogId : game.favId;
+				if (pick.teamId === winnerId) {
+					classes.push('status-win');
+				} else {
+					classes.push('status-loss');
+				}
+			}
+			
+			return classes.join(' ');
 		};
 		
 		// Load immediately if week is already loaded (e.g., returning from another tab/state)
@@ -129,8 +187,11 @@
 		};
 	});
 
-	app.controller('ViewPicksController', function ($scope, $http, $log) {
+	app.controller('ViewPicksController', function ($scope, $http, $log, $q, leagueService) {
 		$scope.viewPicksGrid = [];
+		$scope.transposedColumns = [];
+		$scope.transposedRows = [];
+		$scope.playerStandings = [];
 		$scope.loading = false;
 
 		$scope.loadViewPicks = function() {
@@ -152,15 +213,192 @@
 			var weekId = $scope.week.weekId;
 
 			$scope.loading = true;
-			$http.get('/viewpicks/leagueid/' + leagueId + '/weekid/' + weekId)
-				.success(function(data) {
-					$scope.viewPicksGrid = data;
+			
+			var gamesPromise = leagueService.getGames(weekId);
+			var viewPicksPromise = $http.get('/viewpicks/leagueid/' + leagueId + '/weekid/' + weekId);
+
+			$q.all([gamesPromise, viewPicksPromise]).then(function(results) {
+				var games = results[0];
+				var viewPicksResponse = results[1];
+				var viewPicksData = viewPicksResponse.data;
+
+				$scope.viewPicksGrid = viewPicksData;
+
+				if (!viewPicksData || viewPicksData.length === 0 || !viewPicksData[0] || viewPicksData[0].length === 0) {
+					$scope.transposedColumns = [];
+					$scope.transposedRows = [];
+					$scope.playerStandings = [];
 					$scope.loading = false;
-				})
-				.error(function(err) {
-					$log.error('Error loading view picks:', err);
-					$scope.loading = false;
+					return;
+				}
+
+				// Helper to parse long date "Sun 06-28-2026 09:00:00 AM" to short structures
+				function makeCompactTime(formattedTime) {
+					if (!formattedTime) return { day: '', date: '', time: '' };
+					var parts = formattedTime.split(' ');
+					if (parts.length < 4) return { day: formattedTime, date: '', time: '' };
+					
+					var day = parts[0]; // e.g. "Sun"
+					var dateStr = parts[1]; // e.g. "06-28-2026"
+					var timeStr = parts[2]; // e.g. "09:00:00"
+					var ampm = parts[3]; // e.g. "AM"
+					
+					// Convert "06-28-2026" to "6/28"
+					var dateParts = dateStr.split('-');
+					var compactDate = '';
+					if (dateParts.length >= 2) {
+						compactDate = parseInt(dateParts[0], 10) + '/' + parseInt(dateParts[1], 10);
+					}
+					
+					// Convert "09:00:00" to "9:00 AM" or "9 AM"
+					var timeParts = timeStr.split(':');
+					var compactTime = '';
+					if (timeParts.length >= 2) {
+						var hour = parseInt(timeParts[0], 10);
+						var minute = timeParts[1];
+						if (minute === '00') {
+							compactTime = hour;
+						} else {
+							compactTime = hour + ':' + minute;
+						}
+					}
+					
+					return {
+						day: day,
+						date: compactDate,
+						time: compactTime + ' ' + ampm
+					};
+				}
+
+				// Build a map of gameId to game details
+				var gameMap = {};
+				if (games && games.length) {
+					for (var g = 0; g < games.length; g++) {
+						var game = games[g];
+						gameMap[game.id] = game;
+					}
+				}
+
+				var originalRowsCount = viewPicksData.length;
+				var originalColsCount = viewPicksData[0].length;
+
+				// 1. Build game columns (transposed columns)
+				var colHeaders = [
+					{ value: 'Player', isPlayerHeader: true }
+				];
+
+				for (var r = 1; r < originalRowsCount; r++) {
+					var originalRow = viewPicksData[r];
+					var gameId = null;
+					// Search for gameId on columns 1 to N
+					for (var c = 1; c < originalRow.length; c++) {
+						if (originalRow[c] && originalRow[c].gameId) {
+							gameId = originalRow[c].gameId;
+							break;
+						}
+					}
+
+					var gameObj = gameId ? gameMap[gameId] : null;
+					var matchup = originalRow[0] ? originalRow[0].value : 'Game';
+
+					var hasStarted = gameObj ? gameObj.hasGameStarted : false;
+					var scoresEntered = gameObj ? (gameObj.hasScoresEntered || (gameObj.favScore !== 0 || gameObj.dogScore !== 0)) : false;
+
+					colHeaders.push({
+						gameId: gameId,
+						matchup: matchup,
+						favShortName: gameObj ? gameObj.favShortName : '',
+						dogShortName: gameObj ? gameObj.dogShortName : '',
+						gameStartFormated: gameObj ? gameObj.gameStartFormated : '',
+						gameStartShort: makeCompactTime(gameObj ? gameObj.gameStartFormated : ''),
+						hasGameStarted: hasStarted,
+						hasScoresEntered: scoresEntered,
+						favScore: gameObj ? gameObj.favScore : 0,
+						dogScore: gameObj ? gameObj.dogScore : 0,
+						spread: gameObj ? gameObj.spread : 0.5
+					});
+				}
+				$scope.transposedColumns = colHeaders;
+
+				// 2. Build player rows (transposed rows)
+				var playerRows = [];
+				for (var c = 1; c < originalColsCount; c++) {
+					var playerHeaderCell = viewPicksData[0][c];
+					var headerVal = playerHeaderCell ? playerHeaderCell.value : '';
+					var playerName = headerVal;
+					var parenIndex = headerVal.indexOf('(');
+					if (parenIndex !== -1) {
+						playerName = headerVal.substring(0, parenIndex);
+					}
+
+					var playerRow = {
+						playerName: playerName,
+						picks: [],
+						totalPoints: 0,
+						totalWins: 0
+					};
+
+					for (var r = 1; r < originalRowsCount; r++) {
+						var pickCell = viewPicksData[r][c];
+						var colHeaderObj = colHeaders[r]; // mapped 1-to-1 index with transposedColumns
+
+						var pickObj = {
+							value: pickCell ? pickCell.value : '-',
+							attribute: pickCell ? pickCell.attribute : 'ns',
+							gameId: colHeaderObj.gameId,
+							playerId: playerHeaderCell ? playerHeaderCell.playerId : '',
+							hasGameStarted: colHeaderObj.hasGameStarted,
+							hasScoresEntered: colHeaderObj.hasScoresEntered,
+							isDoublePick: pickCell ? (pickCell.attribute === 'dw' || pickCell.attribute === 'dl') : false,
+							isWin: pickCell ? (pickCell.attribute === 'w' || pickCell.attribute === 'dw') : false,
+							isLoss: pickCell ? (pickCell.attribute === 'l' || pickCell.attribute === 'dl') : false
+						};
+
+						playerRow.picks.push(pickObj);
+
+						// Points summation (1 for win, 2 for double pick win)
+						if (pickObj.hasScoresEntered && pickObj.isWin) {
+							if (pickObj.isDoublePick) {
+								playerRow.totalWins += 2;
+								playerRow.totalPoints += 2;
+							} else {
+								playerRow.totalWins += 1;
+								playerRow.totalPoints += 1;
+							}
+						}
+					}
+
+					playerRows.push(playerRow);
+				}
+
+				// Sort player rows descending by totalWins (primary) and totalPoints (secondary)
+				playerRows.sort(function(a, b) {
+					if (b.totalWins !== a.totalWins) {
+						return b.totalWins - a.totalWins;
+					}
+					return b.totalPoints - a.totalPoints;
 				});
+
+				$scope.transposedRows = playerRows;
+
+				// 3. Build player standings list sorted descending
+				var standings = [];
+				for (var p = 0; p < playerRows.length; p++) {
+					standings.push({
+						playerName: playerRows[p].playerName,
+						totalPoints: playerRows[p].totalPoints
+					});
+				}
+				standings.sort(function(a, b) {
+					return b.totalPoints - a.totalPoints;
+				});
+				$scope.playerStandings = standings;
+
+				$scope.loading = false;
+			}, function(err) {
+				$log.error('Error loading view picks transpose data:', err);
+				$scope.loading = false;
+			});
 		};
 
 		$scope.$on('weekLoaded', function() {

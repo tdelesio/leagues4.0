@@ -39,6 +39,7 @@
 	app.directive('makePicks', function() {
 		return {
 			restrict: 'E',
+			replace: true,
 			templateUrl: 'partials/makePicks.html'
 		};
 	});
