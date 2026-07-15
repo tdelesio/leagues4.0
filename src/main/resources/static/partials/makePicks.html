@@ -18,13 +18,13 @@
 
 				<!-- TEAM NAME -->
 				<div class="team-name-container">
-					<span class="short-name" ng-class="game.favHome ? 'home' : ''">{{game.favShortName}}</span>
-					<span class="long-name" ng-class="game.favHome ? 'home' : ''">{{game.favFullName}}</span>
+					<span class="short-name" ng-class="game.favHome ? 'home' : ''">{{game.favHome ? '@' : ''}}{{game.favShortName}}</span>
+					<span class="long-name" ng-class="game.favHome ? 'home' : ''">{{game.favHome ? '@' : ''}}{{game.favFullName}}</span>
 				</div>
 
 				<!-- SPREAD -->
 				<div class="spread-container">
-					<span class="spread">({{game.spread}})</span>
+					<span class="spread">(-{{game.spread}})</span>
 				</div>
 
 				<!-- SCORE -->
@@ -48,13 +48,13 @@
 
 				<!-- TEAM NAME -->
 				<div class="team-name-container">
-					<span class="short-name" ng-class="game.favHome ? '' : 'home'">{{game.dogShortName}}</span>
-					<span class="long-name" ng-class="game.favHome ? '' : 'home'">{{game.dogFullName}}</span>
+					<span class="short-name" ng-class="game.favHome ? '' : 'home'">{{game.favHome ? '' : '@'}}{{game.dogShortName}}</span>
+					<span class="long-name" ng-class="game.favHome ? '' : 'home'">{{game.favHome ? '' : '@'}}{{game.dogFullName}}</span>
 				</div>
 
 				<!-- SPREAD -->
 				<div class="spread-container">
-					<span class="spread">&nbsp;</span>
+					<span class="spread">(+{{game.spread}})</span>
 				</div>
 	
 				<!-- SCORE -->
