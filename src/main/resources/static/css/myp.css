@@ -408,13 +408,13 @@ box-shadow: 0 0 5px #000000;
 .NO { background-image:url(../img/teams/NO.svg);}
 .NYG { background-image:url(../img/teams/NYG.svg);}
 .NYJ { background-image:url(../img/teams/NYJ.svg);}
-.OAK { background-image:url(../img/teams/OAK.svg);}
+.OAK, .LV { background-image:url(../img/teams/LV.svg);}
 .PHI { background-image:url(../img/teams/PHI.svg);}
 .PIT { background-image:url(../img/teams/PIT.svg);}
-.SD { background-image:url(../img/teams/SD.svg);}
+.SD, .LAC { background-image:url(../img/teams/LAC.svg);}
 .SEA { background-image:url(../img/teams/SEA.svg);}
 .SF { background-image:url(../img/teams/SF.svg);}
-.STL { background-image:url(../img/teams/STL.svg);}
+.STL, .LAR { background-image:url(../img/teams/LAR.svg);}
 .TB { background-image:url(../img/teams/TB.svg);}
 .TEN { background-image:url(../img/teams/TEN.svg);}
 .WAS { background-image:url(../img/teams/WAS.svg);}

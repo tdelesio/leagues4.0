@@ -65,15 +65,27 @@ public class Game extends AbstractModel{
 		this.favHome = favHome;
 	}
 	public String getFavId() {
+		if ("sd".equals(favId)) return "lac";
+		if ("oak".equals(favId)) return "lv";
+		if ("stl".equals(favId)) return "lar";
 		return favId;
 	}
 	public void setFavId(String favId) {
+		if ("sd".equals(favId)) favId = "lac";
+		else if ("oak".equals(favId)) favId = "lv";
+		else if ("stl".equals(favId)) favId = "lar";
 		this.favId = favId;
 	}
 	public String getDogId() {
+		if ("sd".equals(dogId)) return "lac";
+		if ("oak".equals(dogId)) return "lv";
+		if ("stl".equals(dogId)) return "lar";
 		return dogId;
 	}
 	public void setDogId(String dogId) {
+		if ("sd".equals(dogId)) dogId = "lac";
+		else if ("oak".equals(dogId)) dogId = "lv";
+		else if ("stl".equals(dogId)) dogId = "lar";
 		this.dogId = dogId;
 	}
 
@@ -91,12 +103,26 @@ public class Game extends AbstractModel{
 		this.weekId = weekId;
 	}
 	public String getFavFullName() {
+		if ("lac".equals(getFavId()) || "sd".equals(favId) || "SD".equalsIgnoreCase(favShortName)) {
+			return "Los Angeles Chargers";
+		} else if ("lv".equals(getFavId()) || "oak".equals(favId) || "OAK".equalsIgnoreCase(favShortName)) {
+			return "Las Vegas Raiders";
+		} else if ("lar".equals(getFavId()) || "stl".equals(favId) || "STL".equalsIgnoreCase(favShortName)) {
+			return "Los Angeles Rams";
+		}
 		return favFullName;
 	}
 	public void setFavFullName(String favFullName) {
 		this.favFullName = favFullName;
 	}
 	public String getDogFullName() {
+		if ("lac".equals(getDogId()) || "sd".equals(dogId) || "SD".equalsIgnoreCase(dogShortName)) {
+			return "Los Angeles Chargers";
+		} else if ("lv".equals(getDogId()) || "oak".equals(dogId) || "OAK".equalsIgnoreCase(dogShortName)) {
+			return "Las Vegas Raiders";
+		} else if ("lar".equals(getDogId()) || "stl".equals(dogId) || "STL".equalsIgnoreCase(dogShortName)) {
+			return "Los Angeles Rams";
+		}
 		return dogFullName;
 	}
 	public void setDogFullName(String dogFullName) {
@@ -116,12 +142,26 @@ public class Game extends AbstractModel{
 		return gameStart.withZoneSameInstant(java.time.ZoneId.of("America/New_York")).format(DateTimeFormatter.ofPattern("EEE MM-dd-yyy hh:mm:ss a"));
 	}
 	public String getDogShortName() {
+		if ("lac".equals(getDogId()) || "sd".equals(dogId) || "SD".equalsIgnoreCase(dogShortName)) {
+			return "LAC";
+		} else if ("lv".equals(getDogId()) || "oak".equals(dogId) || "OAK".equalsIgnoreCase(dogShortName)) {
+			return "LV";
+		} else if ("lar".equals(getDogId()) || "stl".equals(dogId) || "STL".equalsIgnoreCase(dogShortName)) {
+			return "LAR";
+		}
 		return dogShortName;
 	}
 	public void setDogShortName(String dogShortName) {
 		this.dogShortName = dogShortName;
 	}
 	public String getFavShortName() {
+		if ("lac".equals(getFavId()) || "sd".equals(favId) || "SD".equalsIgnoreCase(favShortName)) {
+			return "LAC";
+		} else if ("lv".equals(getFavId()) || "oak".equals(favId) || "OAK".equalsIgnoreCase(favShortName)) {
+			return "LV";
+		} else if ("lar".equals(getFavId()) || "stl".equals(favId) || "STL".equalsIgnoreCase(favShortName)) {
+			return "LAR";
+		}
 		return favShortName;
 	}
 	public void setFavShortName(String favShortName) {

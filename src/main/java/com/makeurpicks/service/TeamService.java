@@ -146,12 +146,12 @@ public class TeamService {
 					.withTeamName("Chiefs").build();
 			createTeam(team);
 	
-			team = new TeamBuilder().withCity("Oakland").withShortName("OAK")
+			team = new TeamBuilder().withCity("Las Vegas").withShortName("LV")
 					.withTeamName("Raiders").build();
 			
 			createTeam(team);
 	
-			team = new TeamBuilder().withCity("San Diego").withShortName("SD")
+			team = new TeamBuilder().withCity("Los Angeles").withShortName("LAC")
 					.withTeamName("Chargers").build();
 			
 			createTeam(team);
@@ -226,7 +226,7 @@ public class TeamService {
 			
 			createTeam(team);
 	
-			team = new TeamBuilder().withCity("St. Loius").withShortName("STL")
+			team = new TeamBuilder().withCity("Los Angeles").withShortName("LAR")
 					.withTeamName("Rams").build();
 			
 			createTeam(team);

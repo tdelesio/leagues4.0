@@ -14,10 +14,16 @@ public class Pick extends AbstractModel {
 	enum PickStatus { double_won, won, double_loss, loss, double_pick, unpicked, picked, opponent_pick};
 	
 	public String getTeamId() {
+		if ("sd".equals(teamId)) return "lac";
+		if ("oak".equals(teamId)) return "lv";
+		if ("stl".equals(teamId)) return "lar";
 		return teamId;
 	}
 
 	public void setTeamId(String teamId) {
+		if ("sd".equals(teamId)) teamId = "lac";
+		else if ("oak".equals(teamId)) teamId = "lv";
+		else if ("stl".equals(teamId)) teamId = "lar";
 		this.teamId = teamId;
 	}
 

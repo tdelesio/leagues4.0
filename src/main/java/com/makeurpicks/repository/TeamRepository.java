@@ -15,7 +15,17 @@ import com.makeurpicks.domain.Team;
 @Component
 public class TeamRepository {
 
-	private static Map<String, Team> teams = new HashMap<>(33);
+	private static Map<String, Team> teams = new HashMap<String, Team>(33) {
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public Team get(Object key) {
+			if ("sd".equals(key)) return super.get("lac");
+			if ("oak".equals(key)) return super.get("lv");
+			if ("stl".equals(key)) return super.get("lar");
+			return super.get(key);
+		}
+	};
 	
 	public void save(Team team)
 	{
