@@ -185,6 +185,24 @@
 		$scope.isDoublePickSelected = function() {
 			return !!($scope.doublePick && $scope.doublePick.gameId);
 		};
+
+		$scope.submitPicksVerification = function() {
+			var remainingCount = $scope.getRemainingPicksCount();
+			var doubleSelected = $scope.isDoublePickSelected();
+			
+			if (remainingCount === 0 && doubleSelected) {
+				alert("Success! All of your picks have been successfully made and your Double Pick is active. You are 100% good to go!");
+			} else {
+				var missing = [];
+				if (remainingCount > 0) {
+					missing.push("• You still have " + remainingCount + " game(s) left to pick.");
+				}
+				if (!doubleSelected) {
+					missing.push("• You have not selected a Double Pick yet.");
+				}
+				alert("Picks Verification Incomplete:\n\n" + missing.join("\n") + "\n\nPlease complete these before you are fully locked in!");
+			}
+		};
 	});
 
 	app.controller('ViewPicksController', function ($scope, $http, $log, $q, leagueService) {
