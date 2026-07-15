@@ -569,7 +569,7 @@
 					leagueService.getGames($scope.add_game_model.weekId).then(function(data) {
 						$log.debug('SetupController:Games='+JSON.stringify(data.data))
 						$scope.games = data.data;
-						
+						$scope.resetAvailableTeamsSelection();
 					});
 				}
 				else
@@ -579,11 +579,44 @@
 			});
 		});
 	
+		$scope.getAvailableTeams = function(selectedTeamId) {
+			if (!$scope.teams) return [];
+			
+			var unavailableIds = {};
+			if ($scope.games) {
+				for (var i = 0; i < $scope.games.length; i++) {
+					var g = $scope.games[i];
+					if (g.favId) unavailableIds[g.favId] = true;
+					if (g.dogId) unavailableIds[g.dogId] = true;
+				}
+			}
+			
+			if (selectedTeamId) {
+				unavailableIds[selectedTeamId] = true;
+			}
+			
+			return $scope.teams.filter(function(team) {
+				return !unavailableIds[team.id];
+			});
+		};
+
+		$scope.resetAvailableTeamsSelection = function() {
+			var available = $scope.getAvailableTeams();
+			if (available && available.length >= 2) {
+				$scope.add_game_model.favId = available[0].id;
+				$scope.add_game_model.dogId = available[1].id;
+			} else if (available && available.length >= 1) {
+				$scope.add_game_model.favId = available[0].id;
+				$scope.add_game_model.dogId = null;
+			} else {
+				$scope.add_game_model.favId = null;
+				$scope.add_game_model.dogId = null;
+			}
+		};
 		
 		$http.get('/admin/teams/leaguetype/pickem').success(function(data) {
 			$scope.teams = data;
-			$scope.add_game_model.favId = data[0].id;
-			$scope.add_game_model.dogId = data[0].id;
+			$scope.resetAvailableTeamsSelection();
 		});
 		
 //		$log.debug('AddGame='+JSON.stringify($scope.addgame));
@@ -611,6 +644,7 @@
 				//$scope.$digest();
 				
 				$scope.games.push(angular.copy(res));
+				$scope.resetAvailableTeamsSelection();
 			}).error(function(res) {
 				alert('fail');
 			});
@@ -761,6 +795,7 @@
 				alert('Game deleted successfully!');
 				leagueService.getGames($scope.add_game_model.weekId).then(function(data) {
 					$scope.games = data.data;
+					$scope.resetAvailableTeamsSelection();
 				});
 			}).error(function(res) {
 				alert('Failed to delete game');
@@ -778,6 +813,7 @@
 					
 					leagueService.getGames($scope.add_game_model.weekId).then(function(data) {
 						$scope.games = data.data;
+						$scope.resetAvailableTeamsSelection();
 					});
 				} else {
 					$scope.weeksSetup = false;
@@ -801,6 +837,7 @@
 			leagueService.getGames(args).then(function(data) {
 				$log.debug('SetupController:weekChanged='+JSON.stringify(data.data))
 				$scope.games = data.data;
+				$scope.resetAvailableTeamsSelection();
 			
 			});
 			

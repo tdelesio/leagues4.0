@@ -15,7 +15,7 @@
 			<label for="favorite-select" class="col-lg-2 control-label">Favorite</label>
 			<div class="col-lg-10">
 				<select ng-model="add_game_model.favId" required id="favorite-select" class="form-control">
-					<option ng-repeat="team in teams | orderBy:['city', 'teamName']" value="{{team.id}}">
+					<option ng-repeat="team in getAvailableTeams(add_game_model.dogId) | orderBy:['city', 'teamName']" value="{{team.id}}">
 						 {{team.city}}&nbsp;{{team.teamName}}
 					</option>
 				</select>
@@ -25,7 +25,7 @@
 			<label for="dog-select" class="col-lg-2 control-label">Dog</label>
 			<div class="col-lg-10">
 				<select ng-model="add_game_model.dogId" required id="dog-select" class="form-control">
-					<option ng-repeat="team in teams | orderBy:['city', 'teamName']" value="{{team.id}}">
+					<option ng-repeat="team in getAvailableTeams(add_game_model.favId) | orderBy:['city', 'teamName']" value="{{team.id}}">
 						 {{team.city}}&nbsp;{{team.teamName}}
 					</option>
 				</select>
