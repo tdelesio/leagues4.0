@@ -15,7 +15,7 @@ FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
 # Copy executable fat jar from build stage
-COPY --from=build /app/target/leagues-mono-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=build /app/target/leagues-mono-*.jar app.jar
 
 # Expose server port
 EXPOSE 8080
