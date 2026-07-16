@@ -14,9 +14,10 @@
 				<table class="table table-bordered picks-matrix-table">
 					<thead>
 						<tr>
-							<th class="text-center header-cell" style="width: 20%;">Place</th>
-							<th class="header-cell" style="width: 50%;">Player</th>
-							<th class="text-center header-cell" style="width: 30%;">Wins</th>
+							<th class="text-center header-cell" style="width: 15%;">Place</th>
+							<th class="header-cell" style="width: 45%;">Player</th>
+							<th class="text-center header-cell" style="width: 20%;">Wins</th>
+							<th class="text-center header-cell" style="width: 20%;">Winnings</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -29,6 +30,9 @@
 							</td>
 							<td class="text-center pick-cell font-weight-bold" style="color: #4ade80;">
 								{{row.numberOfWins}}
+							</td>
+							<td class="text-center pick-cell font-weight-bold" style="color: #38bdf8;">
+								{{row.winnings | currency:"$"}}
 							</td>
 						</tr>
 					</tbody>

@@ -37,6 +37,8 @@ services:
   app:
     image: tdelesio/leagues-app:0.0.2
     container_name: leagues-app
+    ports:
+      - "8080:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/leagues_mono?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: dbuser

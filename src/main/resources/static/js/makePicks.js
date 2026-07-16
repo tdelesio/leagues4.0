@@ -433,6 +433,86 @@
 		$scope.weekWinners = [];
 		$scope.loading = false;
 
+		$scope.calculateWinnings = function() {
+			if (!$scope.standings || !$scope.standings.length || !$scope.weekWinners) {
+				return;
+			}
+			
+			var N = $scope.standings.length;
+			// Weekly payout is $100 if N >= 20, else scaled to $5 * N
+			var W = Math.min(100, 5 * N);
+			
+			// Season pool is the remaining pot after 17 weeks of payouts
+			var seasonPool = N >= 20 ? (N * 100 - 1700) : (15 * N);
+			
+			var winningsMap = {};
+			angular.forEach($scope.standings, function(player) {
+				winningsMap[player.playerId] = 0;
+			});
+			
+			// 1. Process weekly winners and split tied prizes
+			angular.forEach($scope.weekWinners, function(weekData) {
+				if (!weekData.winners) return;
+				// Format is typically: "player1, player2 (12 wins)" or "No games completed yet"
+				var winTextIndex = weekData.winners.indexOf(' (');
+				if (winTextIndex !== -1) {
+					var winnersPart = weekData.winners.substring(0, winTextIndex);
+					var winners = winnersPart.split(',').map(function(s) { return s.trim(); });
+					var validWinners = winners.filter(function(w) { return w.length > 0; });
+					if (validWinners.length > 0) {
+						var splitPrize = W / validWinners.length;
+						angular.forEach(validWinners, function(winnerId) {
+							if (winningsMap[winnerId] !== undefined) {
+								winningsMap[winnerId] += splitPrize;
+							} else {
+								winningsMap[winnerId] = splitPrize;
+							}
+						});
+					}
+				}
+			});
+			
+			// 2. Process season-end prizes (1st: 60%, 2nd: 30%, 3rd: 10%) with tie splitting
+			var placeGroups = {};
+			angular.forEach($scope.standings, function(player) {
+				var p = player.place;
+				if (!placeGroups[p]) {
+					placeGroups[p] = [];
+				}
+				placeGroups[p].push(player);
+			});
+			
+			var uniquePlaces = Object.keys(placeGroups).map(Number).sort(function(a, b) { return a - b; });
+			var shares = [0.60, 0.30, 0.10];
+			var currentShareIndex = 0;
+			
+			angular.forEach(uniquePlaces, function(place) {
+				var playersInPlace = placeGroups[place];
+				var numPlayers = playersInPlace.length;
+				
+				var totalShareForPlace = 0;
+				for (var i = 0; i < numPlayers; i++) {
+					if (currentShareIndex < shares.length) {
+						totalShareForPlace += shares[currentShareIndex];
+						currentShareIndex++;
+					}
+				}
+				
+				if (totalShareForPlace > 0) {
+					var individualShare = totalShareForPlace / numPlayers;
+					var prize = individualShare * seasonPool;
+					angular.forEach(playersInPlace, function(player) {
+						winningsMap[player.playerId] += prize;
+					});
+				}
+			});
+			
+			// Map winnings back to standings array
+			angular.forEach($scope.standings, function(player) {
+				player.winnings = winningsMap[player.playerId] || 0;
+			});
+		};
+
 		$scope.loadStandings = function() {
 			if (!$scope.leagues || !$scope.week || !$scope.week.weekId) {
 				return;
@@ -455,6 +535,7 @@
 				.success(function(data) {
 					$scope.standings = data;
 					$scope.loading = false;
+					$scope.calculateWinnings();
 				})
 				.error(function(err) {
 					$log.error('Error loading standings:', err);
@@ -471,6 +552,7 @@
 						return parseInt(b.weekNumber) - parseInt(a.weekNumber);
 					});
 					$scope.weekWinners = list;
+					$scope.calculateWinnings();
 				})
 				.error(function(err) {
 					$log.error('Error loading week winners:', err);

@@ -22,7 +22,7 @@ public class SecurityConfig {
 			.cors().and()
 			.authorizeRequests()
 				// Permit static frontend assets needed for login/registration
-				.antMatchers("/login.html", "/register.html", "/css/**", "/js/**", "/partials/**", "/img/**", "/favicon.ico", "/assets/**", "/jquery-1.7.1.min.js").permitAll()
+				.antMatchers("/login.html", "/register.html", "/rules.html", "/css/**", "/js/**", "/partials/**", "/img/**", "/favicon.ico", "/assets/**", "/jquery-1.7.1.min.js").permitAll()
 				// Permit player registration, password initiation, login
 				.antMatchers(HttpMethod.POST, "/players/").permitAll()
 				.antMatchers(HttpMethod.POST, "/players/login").permitAll()
