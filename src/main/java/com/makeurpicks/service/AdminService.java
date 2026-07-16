@@ -548,4 +548,24 @@ public class AdminService {
 			playerRepository.delete(player);
 		}
 	}
+
+	public String resetPlayerPassword(String username) {
+		Player player = playerRepository.findByUsername(username);
+		if (player == null) {
+			throw new RuntimeException("Player not found");
+		}
+		
+		String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+		StringBuilder sb = new StringBuilder();
+		java.security.SecureRandom random = new java.security.SecureRandom();
+		for (int i = 0; i < 8; i++) {
+			sb.append(chars.charAt(random.nextInt(chars.length())));
+		}
+		String tempPassword = sb.toString();
+		
+		player.setPassword(passwordEncoder.encode(tempPassword));
+		playerRepository.save(player);
+		
+		return tempPassword;
+	}
 }

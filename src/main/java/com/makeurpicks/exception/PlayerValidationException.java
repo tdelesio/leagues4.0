@@ -28,7 +28,7 @@ public class PlayerValidationException extends RuntimeException {
 	
 	public PlayerValidationException(PlayerExceptions... playerExceptions)
 	{
-		log.debug(playerExceptions);
+		log.debug(Arrays.toString(playerExceptions));
 		exceptions = new ArrayList<PlayerExceptions>(Arrays.asList(playerExceptions));
 	}
 	

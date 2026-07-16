@@ -209,6 +209,17 @@
 			});
 		};
 
+		$scope.resetPassword = function(player) {
+			$window.customConfirm('Are you sure you want to reset the password for ' + player.username + '? This will immediately generate a new temporary password and save it in the database.', function() {
+				$http.post('/admin/players/reset-password', { username: player.username }).success(function(response) {
+					$window.alert('SUCCESS!\n\nTemporary password generated for ' + player.username + ':\n\n' + response.tempPassword + '\n\nPlease copy this password and share it with the player manually.');
+				}).error(function(err) {
+					$window.alert('Error resetting password: ' + (err.message || 'unknown error'));
+					$log.error('Error resetting password:', err);
+				});
+			});
+		};
+
 		$scope.loadPlayers();
 	});
 	

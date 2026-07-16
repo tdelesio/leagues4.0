@@ -178,6 +178,16 @@ public class AdminController {
 		return true;
 	}
 
+	@RequestMapping(value = "/players/reset-password", method = RequestMethod.POST)
+	public @ResponseBody Map<String, String> resetPassword(@RequestBody Map<String, String> request) {
+		String username = request.get("username");
+		String tempPassword = adminService.resetPlayerPassword(username);
+		Map<String, String> response = new HashMap<>();
+		response.put("username", username);
+		response.put("tempPassword", tempPassword);
+		return response;
+	}
+
 	@RequestMapping(value = "/leagues/seasons/", method = RequestMethod.POST)
 	public @ResponseBody Season createSeason(@RequestBody Season season) {
 		return seasonService.createSeason(season);
