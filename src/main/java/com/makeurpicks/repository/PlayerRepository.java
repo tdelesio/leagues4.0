@@ -11,4 +11,6 @@ public interface PlayerRepository extends JpaRepository<Player, String> {
 	default Player findByUsername(String username) {
 		return findById(username).orElse(null);
 	}
+
+	Player findByEmail(String email);
 }

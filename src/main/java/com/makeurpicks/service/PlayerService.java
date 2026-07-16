@@ -33,7 +33,11 @@ public class PlayerService implements UserDetailsService {
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		Player player = playerRepository.findByUsername(username);
+		String trimmedUsername = username != null ? username.trim() : "";
+		Player player = playerRepository.findByUsername(trimmedUsername);
+		if (player == null) {
+			player = playerRepository.findByEmail(trimmedUsername);
+		}
 		if (player == null) {
 			throw new UsernameNotFoundException("User not found: " + username);
 		}
@@ -55,7 +59,11 @@ public class PlayerService implements UserDetailsService {
 	}
 
 	public Player login(Player user) {
-		Player player = playerRepository.findByUsername(user.getUsername());
+		String trimmedUsername = user.getUsername() != null ? user.getUsername().trim() : "";
+		Player player = playerRepository.findByUsername(trimmedUsername);
+		if (player == null) {
+			player = playerRepository.findByEmail(trimmedUsername);
+		}
 		if (player == null) {
 			throw new PlayerValidationException(PlayerExceptions.USER_NOT_FOUND);
 		}
