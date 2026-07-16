@@ -2,7 +2,7 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-xs-3 col-sm-2 col-lg-1">
-				<img src="img/myp.svg" width="75" height="75" id="logo" />
+				<a href="/"><img src="img/myp.svg" width="75" height="75" id="logo" style="cursor: pointer; transition: transform 0.2s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" /></a>
 			</div>
 			<div class="col-xs-9 col-sm-9">
 				<div class="row" id="navrow">
@@ -58,7 +58,7 @@
 				</p>
 				<p>
 					<label for="modal-password-input">Password (Optional)</label>
-					<input type="password" id="modal-password-input" ng-model="joinLeagueData.password" placeholder="Enter league password if required" />
+					<input type="text" id="modal-password-input" ng-model="joinLeagueData.password" placeholder="Enter league password if required" />
 				</p>
 				<div class="error-msg" ng-bind="joinLeagueError"></div>
 				<div>

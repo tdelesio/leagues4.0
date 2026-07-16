@@ -100,14 +100,14 @@
 		$scope.availableLeagues = [];
 		$scope.joinLeagueData = {
 			leagueId: '',
-			password: ''
+			password: 'giants'
 		};
 		$scope.joinLeagueError = '';
 
 		$scope.openJoinLeagueModal = function() {
 			$scope.showJoinModal = true;
 			$scope.joinLeagueData.leagueId = '';
-			$scope.joinLeagueData.password = '';
+			$scope.joinLeagueData.password = 'giants';
 			$scope.joinLeagueError = '';
 			$scope.availableLeagues = [];
 
