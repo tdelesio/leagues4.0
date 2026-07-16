@@ -256,7 +256,6 @@
 				});
 			});
 		};
-		}
 		
 		this.addSeason = function() {
 
