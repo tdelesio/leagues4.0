@@ -136,18 +136,24 @@ public class AdminController {
 		private String email;
 		private List<String> leagues;
 		private boolean admin;
+		private String venmoId;
+		private boolean paid;
 
-		public PlayerAdminView(String username, String email, List<String> leagues, boolean admin) {
+		public PlayerAdminView(String username, String email, List<String> leagues, boolean admin, String venmoId, boolean paid) {
 			this.username = username;
 			this.email = email;
 			this.leagues = leagues;
 			this.admin = admin;
+			this.venmoId = venmoId;
+			this.paid = paid;
 		}
 
 		public String getUsername() { return username; }
 		public String getEmail() { return email; }
 		public List<String> getLeagues() { return leagues; }
 		public boolean isAdmin() { return admin; }
+		public String getVenmoId() { return venmoId; }
+		public boolean isPaid() { return paid; }
 	}
 
 	@RequestMapping(value = "/players/", method = RequestMethod.GET)
@@ -167,7 +173,7 @@ public class AdminController {
 				// Ignore or log
 			}
 			boolean isAdmin = "admin".equalsIgnoreCase(player.getAccountLevel());
-			views.add(new PlayerAdminView(player.getUsername(), player.getEmail(), leagueNames, isAdmin));
+			views.add(new PlayerAdminView(player.getUsername(), player.getEmail(), leagueNames, isAdmin, player.getVenmoId(), player.isPaid()));
 		}
 		return views;
 	}
@@ -176,6 +182,24 @@ public class AdminController {
 	public @ResponseBody boolean deletePlayer(@PathVariable String username) {
 		adminService.deletePlayer(username);
 		return true;
+	}
+
+	@RequestMapping(value = "/players/update-profile", method = RequestMethod.POST)
+	public @ResponseBody boolean updatePlayerProfile(@RequestBody Map<String, Object> request) {
+		String username = (String) request.get("username");
+		String venmoId = (String) request.get("venmoId");
+		Boolean paid = (Boolean) request.get("paid");
+		
+		com.makeurpicks.domain.Player player = playerRepository.findByUsername(username);
+		if (player != null) {
+			player.setVenmoId(venmoId);
+			if (paid != null) {
+				player.setPaid(paid);
+			}
+			playerRepository.save(player);
+			return true;
+		}
+		return false;
 	}
 
 	@RequestMapping(value = "/players/reset-password", method = RequestMethod.POST)

@@ -220,6 +220,20 @@
 			});
 		};
 
+		$scope.updatePlayer = function(player) {
+			var payload = {
+				username: player.username,
+				venmoId: player.venmoId,
+				paid: !!player.paid
+			};
+			$http.post('/admin/players/update-profile', payload).success(function() {
+				// Success, silently updated!
+			}).error(function(err) {
+				$window.alert('Error updating player settings: ' + (err.message || 'unknown error'));
+				$log.error('Error updating player settings:', err);
+			});
+		};
+
 		$scope.loadPlayers();
 	});
 	

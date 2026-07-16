@@ -34,6 +34,8 @@ public class Player implements UserDetails, Serializable {
 	private boolean enabled = true;
 	private boolean accountNonLocked = true;
 	private String accountLevel = "user";
+	private String venmoId;
+	private boolean paid = false;
 	
 	private PlayerStatus status = PlayerStatus.ACTIVE;
 	private MemberLevel memberLevel = MemberLevel.USER;
@@ -240,5 +242,21 @@ public class Player implements UserDetails, Serializable {
 	@Override
 	public boolean isCredentialsNonExpired() {
 		return true;
+	}
+
+	public String getVenmoId() {
+		return venmoId;
+	}
+
+	public void setVenmoId(String venmoId) {
+		this.venmoId = venmoId;
+	}
+
+	public boolean isPaid() {
+		return paid;
+	}
+
+	public void setPaid(boolean paid) {
+		this.paid = paid;
 	}
 }

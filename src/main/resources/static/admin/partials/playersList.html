@@ -18,7 +18,9 @@
                     <th style="color: #aaa; border: none; padding: 12px 15px;">Username</th>
                     <th style="color: #aaa; border: none; padding: 12px 15px;">Email</th>
                     <th style="color: #aaa; border: none; padding: 12px 15px;">Leagues</th>
-                    <th style="color: #aaa; border: none; padding: 12px 15px; text-align: center; width: 150px;">Admin Status</th>
+                    <th style="color: #aaa; border: none; padding: 12px 15px; text-align: center; width: 160px;">Venmo ID</th>
+                    <th style="color: #aaa; border: none; padding: 12px 15px; text-align: center; width: 100px;">Paid?</th>
+                    <th style="color: #aaa; border: none; padding: 12px 15px; text-align: center; width: 140px;">Admin Status</th>
                     <th style="color: #aaa; border: none; padding: 12px 15px; text-align: center; width: 120px;">Actions</th>
                 </tr>
             </thead>
@@ -41,6 +43,12 @@
                         </div>
                     </td>
                     <td style="padding: 12px 15px; border-color: #222; text-align: center; vertical-align: middle;">
+                        <input type="text" class="form-control" ng-model="player.venmoId" ng-blur="updatePlayer(player)" placeholder="@venmo_id" style="background-color: #111; color: #fff; border: 1px solid #444; border-radius: 4px; padding: 4px 8px; text-align: center; font-size: 13px; display: inline-block; width: 100%; max-width: 130px;" />
+                    </td>
+                    <td style="padding: 12px 15px; border-color: #222; text-align: center; vertical-align: middle;">
+                        <input type="checkbox" ng-model="player.paid" ng-change="updatePlayer(player)" style="width: 20px; height: 20px; cursor: pointer; accent-color: #FFB415; margin: 0 auto; display: block;" />
+                    </td>
+                    <td style="padding: 12px 15px; border-color: #222; text-align: center; vertical-align: middle;">
                         <span ng-if="player.admin" class="label label-warning" style="background-color: rgba(240, 173, 78, 0.15); color: #f0ad4e; border: 1px solid rgba(240, 173, 78, 0.3); font-size: 12px; padding: 4px 10px; border-radius: 12px; font-weight: 500; display: inline-block;">
                             <i class="fa fa-star" style="margin-right: 4px;"></i>Admin
                         </span>
@@ -58,13 +66,13 @@
                     </td>
                 </tr>
                 <tr ng-if="loading">
-                    <td colspan="5" style="text-align: center; padding: 40px; background-color: transparent;">
+                    <td colspan="7" style="text-align: center; padding: 40px; background-color: transparent;">
                         <i class="fa fa-spinner fa-spin fa-2x" style="color: #FFB415; margin-bottom: 10px;"></i>
                         <p style="color: #888; margin: 0; font-size: 14px;">Retrieving registered players list...</p>
                     </td>
                 </tr>
                 <tr ng-if="!loading && (players | filter:searchText).length === 0">
-                    <td colspan="5" style="text-align: center; padding: 40px; color: #666; font-style: italic; background-color: transparent;">
+                    <td colspan="7" style="text-align: center; padding: 40px; color: #666; font-style: italic; background-color: transparent;">
                         <i class="fa fa-users" style="font-size: 24px; color: #444; margin-bottom: 10px; display: block;"></i>
                         No registered players found matching your query.
                     </td>
