@@ -377,9 +377,53 @@ public class AdminController {
 	@Autowired
 	private org.springframework.data.redis.connection.RedisConnectionFactory redisConnectionFactory;
 
-	@RequestMapping(value = "/cache/clear", method = RequestMethod.POST)
-	public void clearCache() {
-		redisConnectionFactory.getConnection().flushDb();
+	@Autowired
+	private com.makeurpicks.repository.PickRepository pickRepository;
+
+	@Autowired
+	private com.makeurpicks.repository.DoublePickRepository doublePickRepository;
+
+	@RequestMapping(value = "/clean/picks", method = RequestMethod.POST)
+	@org.springframework.transaction.annotation.Transactional
+	public void cleanPicks() {
+		pickRepository.deleteAll();
+		doublePickRepository.deleteAll();
+	}
+
+	@RequestMapping(value = "/clean/games", method = RequestMethod.POST)
+	@org.springframework.transaction.annotation.Transactional
+	public void cleanGames() {
+		pickRepository.deleteAll();
+		doublePickRepository.deleteAll();
+		gameRepository.deleteAll();
+	}
+
+	@RequestMapping(value = "/clean/weeks", method = RequestMethod.POST)
+	@org.springframework.transaction.annotation.Transactional
+	public void cleanWeeks() {
+		pickRepository.deleteAll();
+		doublePickRepository.deleteAll();
+		gameRepository.deleteAll();
+		weekRepository.deleteAll();
+	}
+
+	@RequestMapping(value = "/clean/seasons", method = RequestMethod.POST)
+	@org.springframework.transaction.annotation.Transactional
+	public void cleanSeasons() {
+		pickRepository.deleteAll();
+		doublePickRepository.deleteAll();
+		gameRepository.deleteAll();
+		weekRepository.deleteAll();
+		seasonRepository.deleteAll();
+	}
+
+	@RequestMapping(value = "/clean/leagues", method = RequestMethod.POST)
+	@org.springframework.transaction.annotation.Transactional
+	public void cleanLeagues() {
+		pickRepository.deleteAll();
+		doublePickRepository.deleteAll();
+		playerLeagueRepository.deleteAll();
+		leagueRepository.deleteAll();
 	}
 
 	@RequestMapping(value = "/db/reset", method = RequestMethod.POST)

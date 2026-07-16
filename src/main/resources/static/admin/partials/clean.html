@@ -1,0 +1,149 @@
+<div class="row" ng-controller="CleanController" style="padding: 20px; color: #ccc; font-family: 'Inter', 'Roboto', sans-serif;">
+    <!-- Header -->
+    <div class="col-xs-12" style="margin-bottom: 30px;">
+        <h1 style="color: #FFB415; font-weight: 700; margin: 0 0 10px 0; font-size: 28px; display: flex; align-items: center; gap: 10px;">
+            <i class="fa fa-trash-o"></i> Clean Database Entities
+        </h1>
+        <p style="color: #aaa; font-size: 15px; margin: 0; max-width: 800px; line-height: 1.6;">
+            Perform administrative cleanup operations. Purging higher-level database objects will automatically and securely delete all of their dependent systems to maintain strict database referential integrity.
+        </p>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="col-xs-12 col-md-10" style="margin-bottom: 40px;">
+        <!-- Status Messages -->
+        <div ng-if="status.success" style="background: rgba(40, 167, 69, 0.15); border-left: 4px solid #28a745; color: #2ecc71; padding: 15px; border-radius: 6px; margin-bottom: 25px; font-weight: 500; font-size: 15px; animation: fadeIn 0.3s ease-in-out;">
+            <i class="fa fa-check-circle" style="margin-right: 8px;"></i> {{status.success}}
+        </div>
+        <div ng-if="status.error" style="background: rgba(220, 53, 69, 0.15); border-left: 4px solid #dc3545; color: #e74c3c; padding: 15px; border-radius: 6px; margin-bottom: 25px; font-weight: 500; font-size: 15px; animation: fadeIn 0.3s ease-in-out;">
+            <i class="fa fa-exclamation-triangle" style="margin-right: 8px;"></i> {{status.error}}
+        </div>
+        <div ng-if="status.loading" style="background: rgba(255, 180, 21, 0.15); border-left: 4px solid #FFB415; color: #FFB415; padding: 15px; border-radius: 6px; margin-bottom: 25px; font-weight: 500; font-size: 15px;">
+            <i class="fa fa-spinner fa-spin" style="margin-right: 8px;"></i> Deleting records from server... Please wait...
+        </div>
+
+        <!-- Clean Options Cards List -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <!-- Picks Card -->
+            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 10px; padding: 20px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px; transition: all 0.2s;" onmouseover="this.style.borderColor='rgba(255, 180, 21, 0.2)'; this.style.backgroundColor='rgba(255,255,255,0.05)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.05)'; this.style.backgroundColor='rgba(255,255,255,0.03)';">
+                <div style="flex: 1; min-width: 280px;">
+                    <h3 style="color: #FFB415; font-size: 18px; margin: 0 0 8px 0; font-weight: 600;">Picks & Double Picks</h3>
+                    <p style="color: #aaa; margin: 0; font-size: 14px; line-height: 1.5;">Permanently delete all player picks and double predictions across all leagues and weeks.</p>
+                </div>
+                <div>
+                    <button ng-click="openModal('picks')" class="btn btn-warning" style="background: linear-gradient(135deg, #FFB415, #f39c12); border: none; font-weight: 600; padding: 10px 24px; border-radius: 6px; box-shadow: 0 4px 15px rgba(243, 156, 18, 0.2); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
+                        <i class="fa fa-trash" style="margin-right: 6px;"></i> Clear Picks
+                    </button>
+                </div>
+            </div>
+
+            <!-- Games Card -->
+            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 10px; padding: 20px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px; transition: all 0.2s;" onmouseover="this.style.borderColor='rgba(255, 180, 21, 0.2)'; this.style.backgroundColor='rgba(255,255,255,0.05)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.05)'; this.style.backgroundColor='rgba(255,255,255,0.03)';">
+                <div style="flex: 1; min-width: 280px;">
+                    <h3 style="color: #FFB415; font-size: 18px; margin: 0 0 8px 0; font-weight: 600;">Games</h3>
+                    <p style="color: #aaa; margin: 0; font-size: 14px; line-height: 1.5;">Permanently delete all schedule match records. This automatically wipes all player **Picks** that depend on them.</p>
+                </div>
+                <div>
+                    <button ng-click="openModal('games')" class="btn btn-warning" style="background: linear-gradient(135deg, #FF9515, #e67e22); border: none; font-weight: 600; padding: 10px 24px; border-radius: 6px; box-shadow: 0 4px 15px rgba(230, 126, 34, 0.2); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
+                        <i class="fa fa-trash" style="margin-right: 6px;"></i> Clear Games
+                    </button>
+                </div>
+            </div>
+
+            <!-- Weeks Card -->
+            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 10px; padding: 20px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px; transition: all 0.2s;" onmouseover="this.style.borderColor='rgba(255, 180, 21, 0.2)'; this.style.backgroundColor='rgba(255,255,255,0.05)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.05)'; this.style.backgroundColor='rgba(255,255,255,0.03)';">
+                <div style="flex: 1; min-width: 280px;">
+                    <h3 style="color: #FFB415; font-size: 18px; margin: 0 0 8px 0; font-weight: 600;">Weeks</h3>
+                    <p style="color: #aaa; margin: 0; font-size: 14px; line-height: 1.5;">Permanently delete all week partitions. This automatically wipes all dependent **Games** and **Picks**.</p>
+                </div>
+                <div>
+                    <button ng-click="openModal('weeks')" class="btn btn-warning" style="background: linear-gradient(135deg, #FF7015, #d35400); border: none; font-weight: 600; padding: 10px 24px; border-radius: 6px; box-shadow: 0 4px 15px rgba(211, 84, 0, 0.2); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
+                        <i class="fa fa-trash" style="margin-right: 6px;"></i> Clear Weeks
+                    </button>
+                </div>
+            </div>
+
+            <!-- Seasons Card -->
+            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 10px; padding: 20px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px; transition: all 0.2s;" onmouseover="this.style.borderColor='rgba(255, 180, 21, 0.2)'; this.style.backgroundColor='rgba(255,255,255,0.05)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.05)'; this.style.backgroundColor='rgba(255,255,255,0.03)';">
+                <div style="flex: 1; min-width: 280px;">
+                    <h3 style="color: #FF5555; font-size: 18px; margin: 0 0 8px 0; font-weight: 600;">Seasons</h3>
+                    <p style="color: #aaa; margin: 0; font-size: 14px; line-height: 1.5;">Permanently delete seasons. This cascades to delete all associated **Weeks**, **Games**, and **Picks**.</p>
+                </div>
+                <div>
+                    <button ng-click="openModal('seasons')" class="btn btn-danger" style="background: linear-gradient(135deg, #FF5555, #c0392b); border: none; font-weight: 600; padding: 10px 24px; border-radius: 6px; box-shadow: 0 4px 15px rgba(192, 57, 43, 0.2); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
+                        <i class="fa fa-trash" style="margin-right: 6px;"></i> Clear Seasons
+                    </button>
+                </div>
+            </div>
+
+            <!-- Leagues Card -->
+            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 10px; padding: 20px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px; transition: all 0.2s;" onmouseover="this.style.borderColor='rgba(255, 180, 21, 0.2)'; this.style.backgroundColor='rgba(255,255,255,0.05)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.05)'; this.style.backgroundColor='rgba(255,255,255,0.03)';">
+                <div style="flex: 1; min-width: 280px;">
+                    <h3 style="color: #FF5555; font-size: 18px; margin: 0 0 8px 0; font-weight: 600;">Leagues</h3>
+                    <p style="color: #aaa; margin: 0; font-size: 14px; line-height: 1.5;">Permanently delete leagues. This cascades to delete all **Player Enrollments** and **Picks** registered to those leagues.</p>
+                </div>
+                <div>
+                    <button ng-click="openModal('leagues')" class="btn btn-danger" style="background: linear-gradient(135deg, #FF5555, #c0392b); border: none; font-weight: 600; padding: 10px 24px; border-radius: 6px; box-shadow: 0 4px 15px rgba(192, 57, 43, 0.2); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
+                        <i class="fa fa-trash" style="margin-right: 6px;"></i> Clear Leagues
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Premium Confirmation Modal Overlay (Mobile Friendly & Accessible) -->
+    <div ng-if="modal.show" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 1050; padding: 15px; animation: fadeIn 0.2s ease-out;">
+        <div style="background: #1e1e1e; border: 1px solid rgba(255, 255, 255, 0.08); width: 100%; max-width: 500px; border-radius: 12px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); overflow: hidden; animation: scaleUp 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+            <!-- Modal Header -->
+            <div style="background: #181818; padding: 18px 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="color: #FFB415; margin: 0; font-size: 19px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa fa-exclamation-triangle" style="color: #e74c3c;"></i> Warning: Confirm Action
+                </h3>
+                <button ng-click="closeModal()" style="background: none; border: none; color: #888; font-size: 20px; cursor: pointer; padding: 0;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888'">&times;</button>
+            </div>
+
+            <!-- Modal Body -->
+            <div style="padding: 24px;">
+                <p style="color: #fff; font-size: 15px; font-weight: 500; margin: 0 0 15px 0; line-height: 1.5;">
+                    {{modal.message}}
+                </p>
+
+                <!-- Dependent Systems Deletion Log -->
+                <div style="background: rgba(220, 53, 69, 0.08); border: 1px solid rgba(220, 53, 69, 0.15); border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+                    <h4 style="color: #FF5555; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 10px 0;">
+                        Dependent Data That Will Be Deleted:
+                    </h4>
+                    <ul style="color: #ccc; font-size: 13.5px; margin: 0; padding-left: 20px; line-height: 1.6;">
+                        <li ng-repeat="dep in modal.dependencies" style="margin-bottom: 4px;">{{dep}}</li>
+                    </ul>
+                </div>
+
+                <p style="color: #888; font-size: 12.5px; margin: 0; line-height: 1.4; font-style: italic;">
+                    Caution: This is a destructive administrative database action and cannot be undone.
+                </p>
+            </div>
+
+            <!-- Modal Footer (Touch Target Friendly Buttons) -->
+            <div style="background: #181818; padding: 15px 24px; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid rgba(255, 255, 255, 0.05);">
+                <button ng-click="closeModal()" class="btn" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); color: #fff; font-weight: 600; padding: 12px 20px; border-radius: 6px; min-width: 100px;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+                    Cancel
+                </button>
+                <button ng-click="confirmPurge()" class="btn" style="background: linear-gradient(135deg, #FF5555, #d9534f); border: none; color: #fff; font-weight: 700; padding: 12px 24px; border-radius: 6px; min-width: 140px; box-shadow: 0 4px 15px rgba(217, 83, 79, 0.3);" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                    Yes, Purge Data
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inject CSS Keyframe Animations Directly -->
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes scaleUp {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</div>

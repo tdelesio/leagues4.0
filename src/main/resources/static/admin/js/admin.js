@@ -40,6 +40,10 @@
 		   .state('backup', {
 		      url: "/backup",
 		      templateUrl: "backup.html"
+		    })
+		   .state('clean', {
+		      url: "/clean",
+		      templateUrl: "clean.html"
 		    });
 		});
 	
@@ -54,6 +58,13 @@
 		return {
 			restrict: 'E',
 			templateUrl: 'partials/backup.html'
+		};
+	});
+
+	app.directive('cleanData', function() {
+		return {
+			restrict: 'E',
+			templateUrl: 'partials/clean.html'
 		};
 	});
 
@@ -1446,6 +1457,92 @@
 					$scope.status.error = "Failed to restore database: " + (data || "Unknown Error") + " (Status: " + status + ")";
 				});
 			});
+		};
+	});
+
+	app.controller('CleanController', function ($scope, $http, $log) {
+		$log.debug('CleanController initialized');
+
+		$scope.status = {
+			loading: false,
+			success: null,
+			error: null
+		};
+
+		// Modal state
+		$scope.modal = {
+			show: false,
+			title: '',
+			target: '', // 'picks', 'games', 'weeks', 'seasons', 'leagues'
+			message: '',
+			dependencies: []
+		};
+
+		// Dependency map for each target
+		var dependencyMap = {
+			'picks': {
+				title: 'Clear Picks & Double Picks',
+				message: 'Are you sure you want to clear all picks and double picks?',
+				dependencies: ['All player predictions and pick history']
+			},
+			'games': {
+				title: 'Clear Games',
+				message: 'Are you sure you want to delete all games? This will also clear all dependent objects.',
+				dependencies: ['All Games', 'All Picks & Double Picks placed on those games']
+			},
+			'weeks': {
+				title: 'Clear Weeks',
+				message: 'Are you sure you want to delete all weeks? This will cascade delete games and picks.',
+				dependencies: ['All Weeks', 'All Games inside those weeks', 'All Picks & Double Picks placed on those games']
+			},
+			'seasons': {
+				title: 'Clear Seasons',
+				message: 'Are you sure you want to delete all seasons? This will cascade delete weeks, games, and picks.',
+				dependencies: ['All Seasons', 'All Weeks in those seasons', 'All Games in those weeks', 'All Picks & Double Picks']
+			},
+			'leagues': {
+				title: 'Clear Leagues',
+				message: 'Are you sure you want to delete all leagues? This will cascade delete player memberships and picks.',
+				dependencies: ['All Leagues', 'All Player-League Registrations / Enrollments', 'All Picks & Double Picks inside those leagues']
+			}
+		};
+
+		$scope.openModal = function(target) {
+			var config = dependencyMap[target];
+			if (!config) return;
+
+			$scope.modal.target = target;
+			$scope.modal.title = config.title;
+			$scope.modal.message = config.message;
+			$scope.modal.dependencies = config.dependencies;
+			$scope.modal.show = true;
+
+			$scope.status.success = null;
+			$scope.status.error = null;
+		};
+
+		$scope.closeModal = function() {
+			$scope.modal.show = false;
+		};
+
+		$scope.confirmPurge = function() {
+			var target = $scope.modal.target;
+			if (!target) return;
+
+			$scope.closeModal();
+			$scope.status.loading = true;
+			$scope.status.success = null;
+			$scope.status.error = null;
+
+			$http.post('/admin/clean/' + target)
+				.success(function() {
+					$scope.status.loading = false;
+					$scope.status.success = "Successfully cleaned " + target + " and all of its dependent objects!";
+				})
+				.error(function(data, status) {
+					$scope.status.loading = false;
+					$scope.status.error = "Failed to clean " + target + ": " + (data || "Unknown Error") + " (Status: " + status + ")";
+				});
 		};
 	});
 })();
