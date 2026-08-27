@@ -154,6 +154,9 @@ public class PlayerService implements UserDetailsService {
 		validatePlayerForRegistration(player);
 		player.setPassword(passwordEncoder.encode(player.getPassword()));
 		player.setMemberLevel(MemberLevel.USER);
+		player.setAccountLevel("user"); // CRITICAL SECURITY: Stop Mass-Assignment Admin Privilege Escalation!
+		player.setEnabled(true);
+		player.setAccountNonLocked(true);
 		playerRepository.save(player);
 		return player;
 	}
