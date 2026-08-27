@@ -72,6 +72,9 @@ public class AdminController {
 	@Autowired
 	private com.makeurpicks.repository.PlayerRepository playerRepository;
 
+	@javax.persistence.PersistenceContext
+	private javax.persistence.EntityManager entityManager;
+
 	@Autowired
 	private com.makeurpicks.service.EmailService emailService;
 
@@ -142,14 +145,16 @@ public class AdminController {
 		private boolean admin;
 		private String venmoId;
 		private boolean paid;
+		private String notes;
 
-		public PlayerAdminView(String username, String email, List<String> leagues, boolean admin, String venmoId, boolean paid) {
+		public PlayerAdminView(String username, String email, List<String> leagues, boolean admin, String venmoId, boolean paid, String notes) {
 			this.username = username;
 			this.email = email;
 			this.leagues = leagues;
 			this.admin = admin;
 			this.venmoId = venmoId;
 			this.paid = paid;
+			this.notes = notes;
 		}
 
 		public String getUsername() { return username; }
@@ -158,6 +163,7 @@ public class AdminController {
 		public boolean isAdmin() { return admin; }
 		public String getVenmoId() { return venmoId; }
 		public boolean isPaid() { return paid; }
+		public String getNotes() { return notes; }
 	}
 
 	@RequestMapping(value = "/players/", method = RequestMethod.GET)
@@ -177,7 +183,7 @@ public class AdminController {
 				// Ignore or log
 			}
 			boolean isAdmin = "admin".equalsIgnoreCase(player.getAccountLevel());
-			views.add(new PlayerAdminView(player.getUsername(), player.getEmail(), leagueNames, isAdmin, player.getVenmoId(), player.isPaid()));
+			views.add(new PlayerAdminView(player.getUsername(), player.getEmail(), leagueNames, isAdmin, player.getVenmoId(), player.isPaid(), player.getNotes()));
 		}
 		return views;
 	}
@@ -189,13 +195,43 @@ public class AdminController {
 	}
 
 	@RequestMapping(value = "/players/update-profile", method = RequestMethod.POST)
+	@org.springframework.transaction.annotation.Transactional
 	public @ResponseBody boolean updatePlayerProfile(@RequestBody Map<String, Object> request) {
 		String username = (String) request.get("username");
+		String newUsername = (String) request.get("newUsername");
+		String email = (String) request.get("email");
 		String venmoId = (String) request.get("venmoId");
 		Boolean paid = (Boolean) request.get("paid");
+		String notes = (String) request.get("notes");
+		
+		if (newUsername != null && !newUsername.trim().isEmpty() && !newUsername.equalsIgnoreCase(username)) {
+			// Check for username collision
+			if (playerRepository.findByUsername(newUsername) != null) {
+				return false;
+			}
+			
+			// Perform native SQL update to rename primary key and relationship keys safely
+			entityManager.createNativeQuery("UPDATE player_league SET player_id = :newUsername WHERE player_id = :oldUsername")
+				.setParameter("newUsername", newUsername)
+				.setParameter("oldUsername", username)
+				.executeUpdate();
+				
+			entityManager.createNativeQuery("UPDATE player SET username = :newUsername WHERE username = :oldUsername")
+				.setParameter("newUsername", newUsername)
+				.setParameter("oldUsername", username)
+				.executeUpdate();
+				
+			username = newUsername; // Update reference to fetch renamed player
+		}
 		
 		com.makeurpicks.domain.Player player = playerRepository.findByUsername(username);
 		if (player != null) {
+			if (email != null) {
+				player.setEmail(email);
+			}
+			if (notes != null) {
+				player.setNotes(notes);
+			}
 			player.setVenmoId(venmoId);
 			if (paid != null) {
 				player.setPaid(paid);

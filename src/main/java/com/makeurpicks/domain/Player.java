@@ -39,6 +39,7 @@ public class Player implements UserDetails, Serializable {
 	private boolean passwordResetRequired = false;
 	private String resetToken;
 	private java.time.LocalDateTime resetTokenExpiry;
+	private String notes;
 	
 	private PlayerStatus status = PlayerStatus.ACTIVE;
 	private MemberLevel memberLevel = MemberLevel.USER;
@@ -285,5 +286,13 @@ public class Player implements UserDetails, Serializable {
 
 	public void setResetTokenExpiry(java.time.LocalDateTime resetTokenExpiry) {
 		this.resetTokenExpiry = resetTokenExpiry;
+	}
+
+	public String getNotes() {
+		return notes;
+	}
+
+	public void setNotes(String notes) {
+		this.notes = notes;
 	}
 }

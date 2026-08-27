@@ -205,6 +205,17 @@
 			copied: false
 		};
 
+		// Edit Player modal state
+		$scope.editModal = {
+			show: false,
+			originalUsername: '',
+			newUsername: '',
+			email: '',
+			notes: '',
+			saving: false,
+			error: ''
+		};
+
 		$http.get('/admin/user').success(function(data) {
 			$scope.currentUser = data.name;
 		});
@@ -318,6 +329,45 @@
 			}).error(function(err) {
 				$scope.broadcastModal.sending = false;
 				$scope.broadcastModal.error = 'Failed to send emails: ' + (err.message || 'unknown error');
+			});
+		$scope.openEditModal = function(player) {
+			$scope.editModal.originalUsername = player.username;
+			$scope.editModal.newUsername = player.username;
+			$scope.editModal.email = player.email;
+			$scope.editModal.notes = player.notes || '';
+			$scope.editModal.saving = false;
+			$scope.editModal.error = '';
+			$scope.editModal.show = true;
+		};
+
+		$scope.closeEditModal = function() {
+			if (!$scope.editModal.saving) {
+				$scope.editModal.show = false;
+			}
+		};
+
+		$scope.savePlayerEdit = function() {
+			$scope.editModal.saving = true;
+			$scope.editModal.error = '';
+
+			var payload = {
+				username: $scope.editModal.originalUsername,
+				newUsername: $scope.editModal.newUsername,
+				email: $scope.editModal.email,
+				notes: $scope.editModal.notes
+			};
+
+			$http.post('/admin/players/update-profile', payload).success(function(success) {
+				$scope.editModal.saving = false;
+				if (success) {
+					$scope.editModal.show = false;
+					$scope.loadPlayers(); // Reload table to reflect edits
+				} else {
+					$scope.editModal.error = 'Failed to update player. Username might already be in use.';
+				}
+			}).error(function(err) {
+				$scope.editModal.saving = false;
+				$scope.editModal.error = 'Error updating player: ' + (err.message || 'unknown error');
 			});
 		};
 

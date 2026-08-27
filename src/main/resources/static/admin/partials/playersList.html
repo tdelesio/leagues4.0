@@ -31,6 +31,9 @@
                 <tr ng-repeat="player in players | filter:searchText" style="border-bottom: 1px solid #222;">
                     <td style="padding: 12px 15px; border-color: #222; vertical-align: middle;">
                         <strong style="color: #FFB415; font-size: 15px;">{{player.username}}</strong>
+                        <div ng-if="player.notes" style="font-size: 12px; color: #888; font-style: italic; margin-top: 4px; display: flex; align-items: center; gap: 4px;">
+                            <i class="fa fa-commenting-o" style="color: #FFB415;"></i> {{player.notes}}
+                        </div>
                     </td>
                     <td style="padding: 12px 15px; border-color: #222; vertical-align: middle;">
                         <a href="mailto:{{player.email}}" style="color: #aaa; text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#FFB415'" onmouseout="this.style.color='#aaa'">
@@ -60,6 +63,9 @@
                         </span>
                     </td>
                     <td style="padding: 12px 15px; border-color: #222; text-align: center; vertical-align: middle;">
+                        <button ng-click="openEditModal(player)" class="btn btn-xs" style="background-color: rgba(155, 197, 255, 0.1); border: 1px solid rgba(155, 197, 255, 0.3); color: #9bc5ff; padding: 4px 10px; border-radius: 4px; font-weight: 500; transition: all 0.2s; margin-right: 6px;" onmouseover="this.style.backgroundColor='#337ab7'; this.style.color='#fff'" onmouseout="this.style.backgroundColor='rgba(155, 197, 255, 0.1)'; this.style.color='#9bc5ff'">
+                            <i class="fa fa-pencil" style="margin-right: 4px;"></i>Edit
+                        </button>
                         <button ng-click="resetPassword(player)" class="btn btn-xs" style="background-color: rgba(240, 173, 78, 0.1); border: 1px solid rgba(240, 173, 78, 0.3); color: #f0ad4e; padding: 4px 10px; border-radius: 4px; font-weight: 500; transition: all 0.2s; margin-right: 6px;" onmouseover="this.style.backgroundColor='#f0ad4e'; this.style.color='#fff'" onmouseout="this.style.backgroundColor='rgba(240, 173, 78, 0.1)'; this.style.color='#f0ad4e'">
                             <i class="fa fa-key" style="margin-right: 4px;"></i>Reset
                         </button>
@@ -151,6 +157,47 @@
                     <button type="submit" class="btn" style="background: linear-gradient(135deg, #FFB415, #f39c12); border: none; color: #000; font-weight: 700; padding: 10px 24px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 15px rgba(243, 156, 18, 0.2);" ng-disabled="broadcastModal.sending">
                         <span ng-if="!broadcastModal.sending"><i class="fa fa-paper-plane"></i> Send Broadcast</span>
                         <span ng-if="broadcastModal.sending"><i class="fa fa-spinner fa-spin"></i> Sending...</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Player Modal Overlay -->
+    <div ng-if="editModal.show" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 1050; padding: 15px;">
+        <div style="background: #1e1e1e; border: 1px solid rgba(255, 255, 255, 0.08); width: 100%; max-width: 500px; border-radius: 12px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); overflow: hidden;">
+            <div style="background: #181818; padding: 18px 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="color: #FFB415; margin: 0; font-size: 19px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa fa-pencil" style="color: #FFB415;"></i> Edit Player Account
+                </h3>
+                <button ng-click="closeEditModal()" style="background: none; border: none; color: #888; font-size: 20px; cursor: pointer; padding: 0;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888'">&times;</button>
+            </div>
+            <form ng-submit="savePlayerEdit()" style="margin: 0;">
+                <div style="padding: 24px;">
+                    <p style="color: #aaa; font-size: 13px; margin: 0 0 20px 0; line-height: 1.5;">
+                        Modify details for player <strong style="color: #fff;">{{editModal.originalUsername}}</strong>.
+                    </p>
+                    <div style="margin-bottom: 15px;">
+                        <label for="edit-username" style="color: #bbb; font-weight: 600; display: block; margin-bottom: 6px; font-size: 13px;">Display Name (Username)</label>
+                        <input type="text" id="edit-username" ng-model="editModal.newUsername" required style="width: 100%; padding: 10px; background: #111; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 14px;" />
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label for="edit-email" style="color: #bbb; font-weight: 600; display: block; margin-bottom: 6px; font-size: 13px;">Email Address</label>
+                        <input type="email" id="edit-email" ng-model="editModal.email" required style="width: 100%; padding: 10px; background: #111; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 14px;" />
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label for="edit-notes" style="color: #bbb; font-weight: 600; display: block; margin-bottom: 6px; font-size: 13px;">Admin Notes (Only shown here)</label>
+                        <textarea id="edit-notes" ng-model="editModal.notes" rows="4" style="width: 100%; padding: 10px; background: #111; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 14px; line-height: 1.5; resize: vertical;" placeholder="Add private notes..."></textarea>
+                    </div>
+                    <div ng-if="editModal.error" style="color: #ff5555; font-size: 13px; font-weight: 600; margin-bottom: 15px;"><i class="fa fa-times-circle"></i> {{editModal.error}}</div>
+                </div>
+                <div style="background: #181818; padding: 15px 24px; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid rgba(255, 255, 255, 0.05);">
+                    <button type="button" ng-click="closeEditModal()" class="btn" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); color: #fff; font-weight: 600; padding: 10px 20px; border-radius: 6px;" ng-disabled="editModal.saving">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn" style="background: linear-gradient(135deg, #FFB415, #f39c12); border: none; color: #000; font-weight: 700; padding: 10px 24px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 15px rgba(243, 156, 18, 0.2);" ng-disabled="editModal.saving">
+                        <span ng-if="!editModal.saving"><i class="fa fa-save"></i> Save Changes</span>
+                        <span ng-if="editModal.saving"><i class="fa fa-spinner fa-spin"></i> Saving...</span>
                     </button>
                 </div>
             </form>
