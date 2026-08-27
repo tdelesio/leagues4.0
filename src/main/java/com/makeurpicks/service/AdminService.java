@@ -87,26 +87,8 @@ public class AdminService {
 		return seasonService.getCurrentSeasons();
 	}
 
-	private void ensureAdminPlayerExists() {
-		String adminUsername = "admin";
-		Player player = playerRepository.findByUsername(adminUsername);
-		if (player == null) {
-			player = new Player();
-			player.setUsername(adminUsername);
-			player.setPassword(passwordEncoder.encode("admin"));
-			player.setEmail("admin@admin.com");
-			player.setAccountLevel("admin");
-			player.setMemberLevel(MemberLevel.ADMIN);
-			player.setStatus(PlayerStatus.ACTIVE);
-			player.setEnabled(true);
-			player.setAccountNonLocked(true);
-			playerRepository.save(player);
-		}
-	}
-	
 	public Dummy createDummyWeeks()
 	{
-		ensureAdminPlayerExists();
 		teamService.getTeamMap(); // ensures teams are initialized
 		
 		Dummy dummy = new Dummy();
@@ -477,17 +459,15 @@ public class AdminService {
 
 	@org.springframework.transaction.annotation.Transactional
 	public void deletePlayer(String username) {
-		if (username == null || username.trim().isEmpty() || "admin".equals(username)) {
+		if (username == null || username.trim().isEmpty() || "tdelesio".equals(username)) {
 			return;
 		}
 
-		ensureAdminPlayerExists();
-
-		// 1. League Admin Ownership Transfer: reassign leagues owned by username to admin
+		// 1. League Admin Ownership Transfer: reassign leagues owned by username to tdelesio
 		List<League> leaguesOwned = leagueRepository.findByAdminId(username);
 		if (leaguesOwned != null) {
 			for (League league : leaguesOwned) {
-				league.setAdminId("admin");
+				league.setAdminId("tdelesio");
 				leagueRepository.save(league);
 			}
 		}

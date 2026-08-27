@@ -44,12 +44,6 @@ public class DataInitializer implements CommandLineRunner {
 			log.info("Default admin player already exists. Verifying details...");
 			boolean updated = false;
 			
-			// Always enforce the requested password
-			if (!passwordEncoder.matches("rage311", player.getPassword())) {
-				player.setPassword(passwordEncoder.encode("rage311"));
-				updated = true;
-			}
-			
 			// Always enforce the requested email
 			if (!"tdelesio@gmail.com".equalsIgnoreCase(player.getEmail())) {
 				player.setEmail("tdelesio@gmail.com");
