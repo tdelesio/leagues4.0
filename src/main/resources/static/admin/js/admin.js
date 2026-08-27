@@ -330,6 +330,8 @@
 				$scope.broadcastModal.sending = false;
 				$scope.broadcastModal.error = 'Failed to send emails: ' + (err.message || 'unknown error');
 			});
+		};
+
 		$scope.openEditModal = function(player) {
 			$scope.editModal.originalUsername = player.username;
 			$scope.editModal.newUsername = player.username;
