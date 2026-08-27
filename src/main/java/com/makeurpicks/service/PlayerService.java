@@ -31,6 +31,9 @@ public class PlayerService implements UserDetailsService {
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
+	@Autowired
+	private EmailService emailService;
+
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		String trimmedUsername = username != null ? username.trim() : "";
@@ -91,8 +94,56 @@ public class PlayerService implements UserDetailsService {
 			throw new PlayerValidationException(PlayerExceptions.PLAYER_IS_NULL);
 		}
 		player.setPassword(passwordEncoder.encode(user.getPassword()));
+		player.setPasswordResetRequired(false);
 		playerRepository.save(player);
 		return user;
+	}
+
+	public boolean initiateForgotPassword(String identifier, String baseUrl) {
+		String trimmed = identifier != null ? identifier.trim() : "";
+		Player player = playerRepository.findByUsername(trimmed);
+		if (player == null) {
+			player = playerRepository.findByEmail(trimmed);
+		}
+		if (player == null) {
+			// Fail silently for security to prevent username harvesting
+			return true;
+		}
+
+		String token = java.util.UUID.randomUUID().toString();
+		player.setResetToken(token);
+		player.setResetTokenExpiry(java.time.LocalDateTime.now().plusHours(24));
+		playerRepository.save(player);
+
+		String resetLink = baseUrl + "/login.html?token=" + token;
+		emailService.sendPasswordResetEmail(player.getEmail(), player.getUsername(), resetLink);
+		return true;
+	}
+
+	public boolean resetPasswordWithToken(String token, String newPassword) {
+		validatePassword(newPassword);
+		
+		java.util.List<Player> players = playerRepository.findAll();
+		Player targetPlayer = null;
+		for (Player p : players) {
+			if (token.equals(p.getResetToken())) {
+				if (p.getResetTokenExpiry() != null && p.getResetTokenExpiry().isAfter(java.time.LocalDateTime.now())) {
+					targetPlayer = p;
+					break;
+				}
+			}
+		}
+
+		if (targetPlayer == null) {
+			throw new RuntimeException("Invalid or expired password reset token.");
+		}
+
+		targetPlayer.setPassword(passwordEncoder.encode(newPassword));
+		targetPlayer.setResetToken(null);
+		targetPlayer.setResetTokenExpiry(null);
+		targetPlayer.setPasswordResetRequired(false);
+		playerRepository.save(targetPlayer);
+		return true;
 	}
 
 	public boolean initiateUpdatePasswordRequest(Player user) {

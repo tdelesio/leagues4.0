@@ -23,10 +23,12 @@ public class SecurityConfig {
 			.authorizeRequests()
 				// Permit static frontend assets needed for login/registration
 				.antMatchers("/login.html", "/register.html", "/rules.html", "/css/**", "/js/**", "/partials/**", "/img/**", "/favicon.ico", "/assets/**", "/jquery-1.7.1.min.js").permitAll()
-				// Permit player registration, password initiation, login
+				// Permit player registration, password initiation, login, and forgot/reset flows
 				.antMatchers(HttpMethod.POST, "/players/").permitAll()
 				.antMatchers(HttpMethod.POST, "/players/login").permitAll()
 				.antMatchers(HttpMethod.POST, "/players/password").permitAll()
+				.antMatchers(HttpMethod.POST, "/players/forgot-password").permitAll()
+				.antMatchers(HttpMethod.POST, "/players/reset-password-with-token").permitAll()
 				// Protect admin dashboard
 				.antMatchers("/admin", "/admin/**").hasRole("ADMIN")
 				// All other requests require authentication

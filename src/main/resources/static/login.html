@@ -4,16 +4,139 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 <link rel="stylesheet" href="css/myp.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
 <script src="jquery-1.7.1.min.js" type="text/javascript"></script>
 <title>Make Your Picks Mobile</title>
+<style>
+	body {
+		background: url('img/bg.jpg') no-repeat center center fixed; 
+		background-size: cover; 
+		font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+		margin: 0;
+		padding: 0;
+		color: #fff;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 100vh;
+	}
+	.card-container {
+		width: 100%;
+		max-width: 360px;
+		margin: 20px;
+		perspective: 1000px;
+	}
+	.glass-card {
+		background: rgba(10, 10, 10, 0.82);
+		backdrop-filter: blur(16px);
+		-webkit-backdrop-filter: blur(16px);
+		padding: 30px;
+		border-radius: 16px;
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+		transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+	}
+	.glass-card:hover {
+		border-color: rgba(255, 180, 21, 0.25);
+		box-shadow: 0 25px 60px rgba(255, 180, 21, 0.08);
+	}
+	.form-label {
+		display: block;
+		color: #ccc;
+		font-weight: 600;
+		font-size: 13px;
+		margin-bottom: 6px;
+		text-align: left;
+	}
+	.form-input {
+		width: 100%;
+		padding: 12px 14px;
+		border-radius: 8px;
+		border: 1px solid rgba(255, 255, 255, 0.15);
+		background: rgba(0, 0, 0, 0.4);
+		color: #fff;
+		font-size: 14.5px;
+		box-sizing: border-box;
+		transition: all 0.2s ease;
+	}
+	.form-input:focus {
+		outline: none;
+		border-color: #FFB415;
+		box-shadow: 0 0 0 3px rgba(255, 180, 21, 0.15);
+		background: rgba(0, 0, 0, 0.6);
+	}
+	.btn-primary {
+		background: linear-gradient(135deg, #FFB415, #f39c12);
+		color: #000;
+		border: none;
+		padding: 12px;
+		border-radius: 8px;
+		font-weight: 700;
+		font-size: 15px;
+		cursor: pointer;
+		width: 100%;
+		box-shadow: 0 4px 15px rgba(243, 156, 18, 0.25);
+		transition: all 0.2s ease;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+	}
+	.btn-primary:hover {
+		transform: translateY(-1px);
+		box-shadow: 0 6px 20px rgba(243, 156, 18, 0.35);
+		opacity: 0.95;
+	}
+	.btn-primary:active {
+		transform: translateY(0);
+	}
+	.link-gold {
+		color: #FFB415;
+		text-decoration: none;
+		font-weight: bold;
+		font-size: 13.5px;
+		transition: color 0.2s;
+	}
+	.link-gold:hover {
+		color: #fff;
+	}
+	.link-secondary {
+		color: #aaa;
+		text-decoration: none;
+		font-weight: 600;
+		font-size: 13.5px;
+		transition: color 0.2s;
+	}
+	.link-secondary:hover {
+		color: #fff;
+	}
+	.feedback-msg {
+		font-weight: 600;
+		font-size: 13px;
+		margin-top: 15px;
+		text-align: center;
+		min-height: 20px;
+	}
+	.feedback-success {
+		color: #2ecc71;
+	}
+	.feedback-error {
+		color: #ff5555;
+	}
+	.hidden-card {
+		display: none;
+	}
+</style>
 <script type="text/javascript">
 function login() {
-	$('#errorbox').text('');
+	var errorBox = $('#login-error');
+	errorBox.text('').removeClass('feedback-error');
+	
 	var username = $('input[name="username"]').val();
 	var password = $('input[name="password"]').val();
 	
 	if (!username || !password) {
-		$('#errorbox').text("Please enter both Display Name/Email and password.");
+		errorBox.text("Please enter both Display Name/Email and password.").addClass('feedback-error');
 		return;
 	}
 
@@ -21,6 +144,8 @@ function login() {
 		username: username,
 		password: password
 	};
+
+	$('#login-btn').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Logging in...');
 
 	$.ajax({
 		type : "POST",
@@ -35,47 +160,234 @@ function login() {
 			window.location.replace('index.html');
 		},
 		error : function(res) {
-			$('#errorbox').text("Invalid Display Name/Email or password.");
+			$('#login-btn').prop('disabled', false).html('Login');
+			errorBox.text("Invalid Display Name/Email or password.").addClass('feedback-error');
 		}
 	});
 }
 
+function sendResetLink() {
+	var errorBox = $('#forgot-feedback');
+	errorBox.text('').removeClass('feedback-error feedback-success');
+	
+	var identifier = $('input[name="forgot-identifier"]').val();
+	if (!identifier) {
+		errorBox.text("Please enter your Display Name or Email.").addClass('feedback-error');
+		return;
+	}
+
+	$('#forgot-btn').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Sending Link...');
+
+	$.ajax({
+		type : "POST",
+		url : "/players/forgot-password",
+		contentType : "application/json",
+		dataType : "json",
+		data : JSON.stringify({ identifier: identifier }),
+		success : function() {
+			$('#forgot-btn').prop('disabled', false).html('Send Recovery Link');
+			errorBox.text("If an account matches, a recovery email has been sent. Check your inbox!").addClass('feedback-success');
+			$('input[name="forgot-identifier"]').val('');
+		},
+		error : function(err) {
+			$('#forgot-btn').prop('disabled', false).html('Send Recovery Link');
+			errorBox.text("An error occurred. Please try again.").addClass('feedback-error');
+		}
+	});
+}
+
+function updatePasswordWithToken() {
+	var errorBox = $('#reset-feedback');
+	errorBox.text('').removeClass('feedback-error feedback-success');
+	
+	var newPassword = $('input[name="reset-password"]').val();
+	var confirmPassword = $('input[name="reset-confirm"]').val();
+	var token = getQueryParam('token');
+
+	if (!newPassword || !confirmPassword) {
+		errorBox.text("Please fill in both fields.").addClass('feedback-error');
+		return;
+	}
+
+	if (newPassword !== confirmPassword) {
+		errorBox.text("Passwords do not match.").addClass('feedback-error');
+		return;
+	}
+
+	if (newPassword.length < 5) {
+		errorBox.text("Password must be at least 5 characters long.").addClass('feedback-error');
+		return;
+	}
+
+	$('#reset-btn').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Updating...');
+
+	var data = {
+		token: token,
+		password: newPassword
+	};
+
+	$.ajax({
+		type : "POST",
+		url : "/players/reset-password-with-token",
+		contentType : "application/json",
+		dataType : "json",
+		data : JSON.stringify(data),
+		success : function() {
+			$('#reset-btn').prop('disabled', false).html('Update Password');
+			errorBox.text("Password reset successful! Redirecting to login...").addClass('feedback-success');
+			setTimeout(function() {
+				window.location.replace('login.html');
+			}, 2000);
+		},
+		error : function(err) {
+			$('#reset-btn').prop('disabled', false).html('Update Password');
+			errorBox.text("Invalid or expired reset token. Please request another.").addClass('feedback-error');
+		}
+	});
+}
+
+function getQueryParam(param) {
+	var urlParams = new URLSearchParams(window.location.search);
+	return urlParams.get(param);
+}
+
+function showForgotCard() {
+	$('#login-card').addClass('hidden-card');
+	$('#forgot-card').removeClass('hidden-card');
+	$('#forgot-feedback').text('').removeClass('feedback-error feedback-success');
+}
+
+function showLoginCard() {
+	$('#forgot-card').addClass('hidden-card');
+	$('#login-card').removeClass('hidden-card');
+	$('#login-error').text('').removeClass('feedback-error');
+}
+
 $(document).ready(function() {
+	var token = getQueryParam('token');
+	if (token) {
+		$('#login-card').addClass('hidden-card');
+		$('#forgot-card').addClass('hidden-card');
+		$('#reset-card').removeClass('hidden-card');
+	}
+
 	$('#loginform').keydown(function(event) {
 		if (event.keyCode == 13) {
 			login();
 		}
 	});
+
+	$('#forgotform').keydown(function(event) {
+		if (event.keyCode == 13) {
+			sendResetLink();
+		}
+	});
+
+	$('#resetform').keydown(function(event) {
+		if (event.keyCode == 13) {
+			updatePasswordWithToken();
+		}
+	});
 });
 </script>
 </head>
-<body style="background: url('img/bg.jpg') no-repeat center center fixed; background-size: cover; font-family: sans-serif;">
-<div style="width:300px; margin:80px auto;">
-	<div style="text-align: center; margin-bottom: 20px;">
-		<img src="img/myp.svg" style="width:250px; height:auto;" />
+<body>
+
+<div class="card-container">
+	<div style="text-align: center; margin-bottom: 25px;">
+		<img src="img/myp.svg" style="width:230px; height:auto;" />
 	</div>
-	<div class="login shadow" style="background: rgba(0, 0, 0, 0.7); padding: 25px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+
+	<!-- LOGIN CARD -->
+	<div id="login-card" class="glass-card">
 		<form id="loginform">
-			<p style="text-align:center; color:#fff; font-weight:bold; margin-bottom: 15px;">
-				Display Name or Email: <br/>
-				<input type="text" name="username" style="width: 100%; padding: 8px; margin-top: 5px; border-radius: 4px; border: 1px solid #ccc; color: #000; box-sizing: border-box;"/>
+			<h3 style="text-align: center; margin: 0 0 20px 0; color: #fff; font-size: 20px; font-weight: 700; letter-spacing: 0.5px;">Sign In</h3>
+			
+			<div style="margin-bottom: 16px;">
+				<label class="form-label">Display Name or Email</label>
+				<input type="text" name="username" class="form-input" placeholder="e.g. John Doe" required autofocus />
+			</div>
+			
+			<div style="margin-bottom: 22px;">
+				<label class="form-label">Password</label>
+				<input type="password" name="password" class="form-input" placeholder="Enter your password" required />
+			</div>
+			
+			<div style="margin-bottom: 20px;">
+				<button type="button" id="login-btn" onclick="login()" class="btn-primary">Login</button>
+			</div>
+			
+			<div style="text-align: center; margin-bottom: 12px;">
+				<a href="register.html" class="link-gold">Need an account? Register</a>
+			</div>
+
+			<div style="text-align: center; margin-bottom: 12px;">
+				<a href="#" onclick="showForgotCard()" class="link-gold"><i class="fa fa-question-circle" style="margin-right: 4px;"></i> Forgot Password?</a>
+			</div>
+			
+			<div style="text-align: center; margin-bottom: 5px;">
+				<a href="rules.html" class="link-secondary">View League Rules</a>
+			</div>
+			
+			<div id="login-error" class="feedback-msg"></div>
+		</form>
+	</div>
+
+	<!-- FORGOT PASSWORD CARD -->
+	<div id="forgot-card" class="glass-card hidden-card">
+		<form id="forgotform">
+			<h3 style="text-align: center; margin: 0 0 10px 0; color: #fff; font-size: 20px; font-weight: 700; letter-spacing: 0.5px;">Forgot Password</h3>
+			<p style="text-align: center; font-size: 13px; color: #aaa; margin: 0 0 20px 0; line-height: 1.4;">
+				Enter your registered Display Name or Email. We'll send you an automated password reset recovery link instantly.
 			</p>
-			<p style="text-align:center; color:#fff; font-weight:bold; margin-bottom: 20px;">
-				Password: <br/>
-				<input type="password" name="password" style="width: 100%; padding: 8px; margin-top: 5px; border-radius: 4px; border: 1px solid #ccc; color: #000; box-sizing: border-box;"/>
+			
+			<div style="margin-bottom: 22px;">
+				<label class="form-label">Display Name or Email</label>
+				<input type="text" name="forgot-identifier" class="form-input" placeholder="e.g. player@example.com" required />
+			</div>
+			
+			<div style="margin-bottom: 20px;">
+				<button type="button" id="forgot-btn" onclick="sendResetLink()" class="btn-primary">Send Recovery Link</button>
+			</div>
+			
+			<div style="text-align: center; margin-bottom: 5px;">
+				<a href="#" onclick="showLoginCard()" class="link-secondary"><i class="fa fa-arrow-left" style="margin-right: 4px;"></i> Back to Login</a>
+			</div>
+			
+			<div id="forgot-feedback" class="feedback-msg"></div>
+		</form>
+	</div>
+
+	<!-- RESET PASSWORD CARD (URL-TOKEN ACTIVATED) -->
+	<div id="reset-card" class="glass-card hidden-card">
+		<form id="resetform">
+			<h3 style="text-align: center; margin: 0 0 10px 0; color: #fff; font-size: 20px; font-weight: 700; letter-spacing: 0.5px;">Reset Password</h3>
+			<p style="text-align: center; font-size: 13px; color: #aaa; margin: 0 0 20px 0; line-height: 1.4;">
+				Set a secure new password for your account below.
 			</p>
-			<div style="text-align: center; margin-bottom: 15px;">
-				<input type="button" onclick="login()" value="Login" style="background: #FFB415; color: #000; border: none; padding: 10px 30px; border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%; transition: background 0.3s;"/>
+			
+			<div style="margin-bottom: 16px;">
+				<label class="form-label">New Password</label>
+				<input type="password" name="reset-password" class="form-input" placeholder="At least 5 characters" required />
 			</div>
-			<div style="text-align: center; margin-bottom: 12px; font-size: 14px;">
-				<a href="register.html" style="color: #FFB415; text-decoration: none; font-weight: bold;">Need an account? Register</a>
+
+			<div style="margin-bottom: 22px;">
+				<label class="form-label">Confirm New Password</label>
+				<input type="password" name="reset-confirm" class="form-input" placeholder="Re-enter password" required />
 			</div>
-			<div style="text-align: center; margin-bottom: 10px; font-size: 14px;">
-				<a href="rules.html" style="color: #ffffff; text-decoration: none; font-weight: bold; opacity: 0.85; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.85'">View League Rules</a>
+			
+			<div style="margin-bottom: 20px;">
+				<button type="button" id="reset-btn" onclick="updatePasswordWithToken()" class="btn-primary">Update Password</button>
 			</div>
-			<div id="errorbox" style="color: #ff5555; text-align: center; font-weight: bold; font-size: 14px; min-height: 20px;"></div>
+			
+			<div style="text-align: center; margin-bottom: 5px;">
+				<a href="login.html" class="link-secondary"><i class="fa fa-arrow-left" style="margin-right: 4px;"></i> Cancel</a>
+			</div>
+			
+			<div id="reset-feedback" class="feedback-msg"></div>
 		</form>
 	</div>
 </div>
+
 </body>
 </html>

@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.makeurpicks.domain.Game;
 import com.makeurpicks.domain.League;
 import com.makeurpicks.domain.LeagueType;
+import com.makeurpicks.domain.Player;
 import com.makeurpicks.domain.Season;
 import com.makeurpicks.domain.Team;
 import com.makeurpicks.domain.Week;
@@ -70,6 +71,9 @@ public class AdminController {
 
 	@Autowired
 	private com.makeurpicks.repository.PlayerRepository playerRepository;
+
+	@Autowired
+	private com.makeurpicks.service.EmailService emailService;
 
 	@RequestMapping(value = {"", "/"}, method = RequestMethod.GET)
 	public void forwardToAdminIndex(HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -240,7 +244,42 @@ public class AdminController {
 
 	@RequestMapping(value = "/weeks/", method = RequestMethod.POST)
 	public @ResponseBody Week createWeek(@RequestBody Week week) {
-		return weekService.createWeek(week);
+		Week created = weekService.createWeek(week);
+		
+		try {
+			Iterable<Player> players = playerRepository.findAll();
+			for (Player player : players) {
+				if (player.getEmail() != null && !"".equals(player.getEmail().trim())) {
+					emailService.sendWeeklySetupEmail(player.getEmail(), player.getUsername(), created.getWeekNumber());
+				}
+			}
+		} catch (Exception e) {
+			// Fail silently to avoid breaking the transaction if SMTP fails
+			e.printStackTrace();
+		}
+		
+		return created;
+	}
+
+	@RequestMapping(value = "/players/email-all", method = RequestMethod.POST)
+	public @ResponseBody boolean emailAllPlayers(@RequestBody java.util.Map<String, String> request) {
+		String subject = request.get("subject");
+		String body = request.get("body");
+		
+		if (subject == null || "".equals(subject.trim())) {
+			throw new RuntimeException("Subject cannot be empty");
+		}
+		if (body == null || "".equals(body.trim())) {
+			throw new RuntimeException("Message body cannot be empty");
+		}
+		
+		Iterable<Player> players = playerRepository.findAll();
+		for (Player player : players) {
+			if (player.getEmail() != null && !"".equals(player.getEmail().trim())) {
+				emailService.sendBroadcastEmail(player.getEmail(), player.getUsername(), subject, body);
+			}
+		}
+		return true;
 	}
 
 	@RequestMapping(value = "/weeks/{id}", method = RequestMethod.DELETE)

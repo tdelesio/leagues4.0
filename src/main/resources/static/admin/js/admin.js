@@ -187,6 +187,24 @@
 		$scope.loading = true;
 		$scope.currentUser = '';
 
+		// Broadcast Email state
+		$scope.broadcastModal = {
+			show: false,
+			subject: '',
+			body: '',
+			sending: false,
+			error: '',
+			success: ''
+		};
+
+		// Reset Success modal state
+		$scope.resetSuccessModal = {
+			show: false,
+			username: '',
+			tempPassword: '',
+			copied: false
+		};
+
 		$http.get('/admin/user').success(function(data) {
 			$scope.currentUser = data.name;
 		});
@@ -223,11 +241,83 @@
 		$scope.resetPassword = function(player) {
 			$window.customConfirm('Are you sure you want to reset the password for ' + player.username + '? This will immediately generate a new temporary password and save it in the database.', function() {
 				$http.post('/admin/players/reset-password', { username: player.username }).success(function(response) {
-					$window.alert('SUCCESS!\n\nTemporary password generated for ' + player.username + ':\n\n' + response.tempPassword + '\n\nPlease copy this password and share it with the player manually.');
+					$scope.resetSuccessModal.username = player.username;
+					$scope.resetSuccessModal.tempPassword = response.tempPassword || response.password || '';
+					$scope.resetSuccessModal.copied = false;
+					$scope.resetSuccessModal.show = true;
 				}).error(function(err) {
 					$window.alert('Error resetting password: ' + (err.message || 'unknown error'));
 					$log.error('Error resetting password:', err);
 				});
+			});
+		};
+
+		$scope.copyResetPassword = function() {
+			var text = $scope.resetSuccessModal.tempPassword;
+			if (navigator.clipboard && navigator.clipboard.writeText) {
+				navigator.clipboard.writeText(text).then(function() {
+					$scope.$apply(function() {
+						$scope.resetSuccessModal.copied = true;
+					});
+				});
+			} else {
+				// Fallback
+				var textArea = document.createElement("textarea");
+				textArea.value = text;
+				textArea.style.position = "fixed";  // Avoid scrolling to bottom
+				document.body.appendChild(textArea);
+				textArea.focus();
+				textArea.select();
+				try {
+					document.execCommand('copy');
+					$scope.resetSuccessModal.copied = true;
+				} catch (err) {
+					$log.error('Fallback: Oops, unable to copy', err);
+				}
+				document.body.removeChild(textArea);
+			}
+		};
+
+		$scope.closeResetSuccessModal = function() {
+			$scope.resetSuccessModal.show = false;
+		};
+
+		$scope.openBroadcastModal = function() {
+			$scope.broadcastModal.subject = '';
+			$scope.broadcastModal.body = '';
+			$scope.broadcastModal.sending = false;
+			$scope.broadcastModal.error = '';
+			$scope.broadcastModal.success = '';
+			$scope.broadcastModal.show = true;
+		};
+
+		$scope.closeBroadcastModal = function() {
+			if (!$scope.broadcastModal.sending) {
+				$scope.broadcastModal.show = false;
+			}
+		};
+
+		$scope.sendBroadcastEmail = function() {
+			$scope.broadcastModal.sending = true;
+			$scope.broadcastModal.error = '';
+			$scope.broadcastModal.success = '';
+
+			var payload = {
+				subject: $scope.broadcastModal.subject,
+				body: $scope.broadcastModal.body
+			};
+
+			$http.post('/admin/players/email-all', payload).success(function() {
+				$scope.broadcastModal.sending = false;
+				$scope.broadcastModal.success = 'Emails have been successfully sent to all players!';
+				setTimeout(function() {
+					$scope.$apply(function() {
+						$scope.broadcastModal.show = false;
+					});
+				}, 1800);
+			}).error(function(err) {
+				$scope.broadcastModal.sending = false;
+				$scope.broadcastModal.error = 'Failed to send emails: ' + (err.message || 'unknown error');
 			});
 		};
 

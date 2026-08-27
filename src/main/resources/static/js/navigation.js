@@ -10,6 +10,16 @@
 		$scope.leagues = [];
 		$scope.isAdminOfAnyLeague = false;
 
+		// Force Password Reset modal state
+		$scope.forceResetModal = {
+			show: false,
+			newPassword: '',
+			confirmPassword: '',
+			updating: false,
+			error: '',
+			success: ''
+		};
+
 		function checkAdminStatus() {
 			if ($scope.username && $scope.leagues && $scope.leagues.length > 0) {
 				for (var i = 0; i < $scope.leagues.length; i++) {
@@ -87,8 +97,13 @@
 			$scope.username = userData.name;
 			
 			$http.get('/players/username/' + $scope.username).success(function(player) {
-				if (player && (player.accountLevel === 'admin' || player.memberLevel === 'ADMIN')) {
-					$scope.isAdminOfAnyLeague = true;
+				if (player) {
+					if (player.accountLevel === 'admin' || player.memberLevel === 'ADMIN') {
+						$scope.isAdminOfAnyLeague = true;
+					}
+					if (player.passwordResetRequired) {
+						$scope.forceResetModal.show = true;
+					}
 				}
 			});
 			
@@ -174,6 +189,46 @@
 			if (stateName) {
 				$state.go(stateName);
 			}
+		};
+
+		$scope.submitForcePasswordChange = function() {
+			$scope.forceResetModal.error = '';
+			$scope.forceResetModal.success = '';
+			
+			if (!$scope.forceResetModal.newPassword || !$scope.forceResetModal.confirmPassword) {
+				$scope.forceResetModal.error = 'Please enter and confirm your password.';
+				return;
+			}
+			
+			if ($scope.forceResetModal.newPassword !== $scope.forceResetModal.confirmPassword) {
+				$scope.forceResetModal.error = 'Passwords do not match.';
+				return;
+			}
+			
+			if ($scope.forceResetModal.newPassword.length < 5) {
+				$scope.forceResetModal.error = 'Password must be at least 5 characters long.';
+				return;
+			}
+			
+			$scope.forceResetModal.updating = true;
+			
+			var payload = {
+				username: $scope.username,
+				password: $scope.forceResetModal.newPassword
+			};
+			
+			$http.put('/players/password', payload).success(function() {
+				$scope.forceResetModal.updating = false;
+				$scope.forceResetModal.success = 'Password successfully updated!';
+				setTimeout(function() {
+					$scope.$apply(function() {
+						$scope.forceResetModal.show = false;
+					});
+				}, 1500);
+			}).error(function(err) {
+				$scope.forceResetModal.updating = false;
+				$scope.forceResetModal.error = 'Failed to update password: ' + (err.message || 'unknown error');
+			});
 		};
 
 		$scope.logout = function() {

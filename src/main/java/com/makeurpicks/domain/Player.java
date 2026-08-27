@@ -36,6 +36,9 @@ public class Player implements UserDetails, Serializable {
 	private String accountLevel = "user";
 	private String venmoId;
 	private boolean paid = false;
+	private boolean passwordResetRequired = false;
+	private String resetToken;
+	private java.time.LocalDateTime resetTokenExpiry;
 	
 	private PlayerStatus status = PlayerStatus.ACTIVE;
 	private MemberLevel memberLevel = MemberLevel.USER;
@@ -258,5 +261,29 @@ public class Player implements UserDetails, Serializable {
 
 	public void setPaid(boolean paid) {
 		this.paid = paid;
+	}
+
+	public boolean isPasswordResetRequired() {
+		return passwordResetRequired;
+	}
+
+	public void setPasswordResetRequired(boolean passwordResetRequired) {
+		this.passwordResetRequired = passwordResetRequired;
+	}
+
+	public String getResetToken() {
+		return resetToken;
+	}
+
+	public void setResetToken(String resetToken) {
+		this.resetToken = resetToken;
+	}
+
+	public java.time.LocalDateTime getResetTokenExpiry() {
+		return resetTokenExpiry;
+	}
+
+	public void setResetTokenExpiry(java.time.LocalDateTime resetTokenExpiry) {
+		this.resetTokenExpiry = resetTokenExpiry;
 	}
 }

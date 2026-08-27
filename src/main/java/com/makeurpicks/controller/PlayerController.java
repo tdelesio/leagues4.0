@@ -1,6 +1,7 @@
 package com.makeurpicks.controller;
 
 import java.security.Principal;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,6 +35,38 @@ public class PlayerController {
 	public @ResponseBody boolean initiateUpdatePasswordRequest(@RequestBody Player user) {
 		playerService.initiateUpdatePasswordRequest(user);
 		return true;
+	}
+
+	@RequestMapping(method=RequestMethod.POST, value="/forgot-password")
+	public @ResponseBody boolean forgotPassword(@RequestBody Map<String, String> request, javax.servlet.http.HttpServletRequest servletRequest) {
+		String identifier = request.get("identifier");
+		if (identifier == null || "".equals(identifier.trim())) {
+			throw new RuntimeException("Identifier cannot be empty");
+		}
+		
+		String scheme = servletRequest.getScheme();
+		String serverName = servletRequest.getServerName();
+		int serverPort = servletRequest.getServerPort();
+		
+		String baseUrl = scheme + "://" + serverName;
+		if (serverPort != 80 && serverPort != 443) {
+			baseUrl += ":" + serverPort;
+		}
+		
+		return playerService.initiateForgotPassword(identifier, baseUrl);
+	}
+
+	@RequestMapping(method=RequestMethod.POST, value="/reset-password-with-token")
+	public @ResponseBody boolean resetPasswordWithToken(@RequestBody Map<String, String> request) {
+		String token = request.get("token");
+		String password = request.get("password");
+		if (token == null || "".equals(token.trim())) {
+			throw new RuntimeException("Reset token is missing.");
+		}
+		if (password == null || "".equals(password.trim())) {
+			throw new RuntimeException("Password cannot be empty.");
+		}
+		return playerService.resetPasswordWithToken(token, password);
 	}
 	
 	@RequestMapping(method=RequestMethod.GET, value="/{id}")

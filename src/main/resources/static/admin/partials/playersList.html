@@ -1,13 +1,16 @@
 <div class="players-container">
     <div class="row" style="margin-bottom: 20px;">
-        <div class="col-md-6">
-            <h3 style="margin-top: 0; color: #fff;">Registered Players ({{(players | filter:searchText).length}})</h3>
+        <div class="col-md-5">
+            <h3 style="margin-top: 0; color: #fff; font-weight: 700; letter-spacing: 0.5px;">Registered Players ({{(players | filter:searchText).length}})</h3>
         </div>
-        <div class="col-md-6">
-            <div class="input-group">
-                <span class="input-group-addon" style="background-color: #222; border-color: #444; color: #aaa;"><i class="fa fa-search"></i></span>
-                <input type="text" class="form-control" placeholder="Search players, emails or leagues..." ng-model="searchText" style="background-color: #111; color: #fff; border-color: #444;">
+        <div class="col-md-7" style="display: flex; justify-content: flex-end; align-items: center; gap: 10px;">
+            <div class="input-group" style="flex: 1; max-width: 320px; margin-bottom: 0;">
+                <span class="input-group-addon" style="background-color: #1a1a1a; border-color: #333; color: #888;"><i class="fa fa-search"></i></span>
+                <input type="text" class="form-control" placeholder="Search players, emails, leagues..." ng-model="searchText" style="background-color: #111; color: #fff; border-color: #333;">
             </div>
+            <button ng-click="openBroadcastModal()" class="btn" style="background: linear-gradient(135deg, #FFB415, #f39c12); border: none; color: #000; font-weight: 700; padding: 8px 18px; border-radius: 6px; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(243, 156, 18, 0.2); transition: all 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                <i class="fa fa-paper-plane"></i> Broadcast Email
+            </button>
         </div>
     </div>
 
@@ -79,5 +82,78 @@
                 </tr>
             </tbody>
         </table>
+    </div>
+
+    <!-- Persistent Admin Password Reset Display Modal -->
+    <div ng-if="resetSuccessModal.show" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 1050; padding: 15px;">
+        <div style="background: #1e1e1e; border: 1px solid rgba(255, 255, 255, 0.08); width: 100%; max-width: 480px; border-radius: 12px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); overflow: hidden;">
+            <div style="background: #181818; padding: 18px 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="color: #FFB415; margin: 0; font-size: 19px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa fa-key" style="color: #FFB415;"></i> Password Reset Success
+                </h3>
+                <button ng-click="closeResetSuccessModal()" style="background: none; border: none; color: #888; font-size: 20px; cursor: pointer; padding: 0;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888'">&times;</button>
+            </div>
+            <div style="padding: 24px; text-align: center;">
+                <p style="color: #ccc; font-size: 14px; margin: 0 0 20px 0; line-height: 1.5;">
+                    A temporary password has been successfully generated for player <strong style="color: #fff;">{{resetSuccessModal.username}}</strong>.
+                </p>
+                <div style="background: rgba(255, 180, 21, 0.06); border: 1px solid rgba(255, 180, 21, 0.2); border-radius: 8px; padding: 18px; margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;">
+                    <span style="color: #aaa; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">Temporary Password</span>
+                    <strong style="color: #FFB415; font-family: 'Courier New', Courier, monospace; font-size: 26px; letter-spacing: 2px; word-break: break-all;">{{resetSuccessModal.tempPassword}}</strong>
+                </div>
+                <p style="color: #888; font-size: 12.5px; margin: 0 0 20px 0; line-height: 1.5; font-style: italic;">
+                    The user will be strictly forced to update this password upon their very first login.
+                </p>
+                <div ng-if="resetSuccessModal.copied" style="color: #2ecc71; font-size: 13px; font-weight: 600; margin-bottom: 15px;">
+                    <i class="fa fa-check-circle" style="margin-right: 4px;"></i> Copied temporary password to clipboard!
+                </div>
+            </div>
+            <div style="background: #181818; padding: 15px 24px; display: flex; justify-content: center; gap: 12px; border-top: 1px solid rgba(255, 255, 255, 0.05);">
+                <button ng-click="copyResetPassword()" class="btn" style="background: linear-gradient(135deg, #FFB415, #f39c12); border: none; color: #000; font-weight: 700; padding: 12px 24px; border-radius: 6px; min-width: 160px; box-shadow: 0 4px 15px rgba(243, 156, 18, 0.2); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                    <i class="fa fa-copy" style="margin-right: 6px;"></i> Copy Password
+                </button>
+                <button ng-click="closeResetSuccessModal()" class="btn" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); color: #fff; font-weight: 600; padding: 12px 24px; border-radius: 6px; min-width: 100px;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Broadcast Email Modal Overlay -->
+    <div ng-if="broadcastModal.show" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 1050; padding: 15px;">
+        <div style="background: #1e1e1e; border: 1px solid rgba(255, 255, 255, 0.08); width: 100%; max-width: 550px; border-radius: 12px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); overflow: hidden;">
+            <div style="background: #181818; padding: 18px 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="color: #FFB415; margin: 0; font-size: 19px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa fa-paper-plane" style="color: #FFB415;"></i> Broadcast Email to League
+                </h3>
+                <button ng-click="closeBroadcastModal()" style="background: none; border: none; color: #888; font-size: 20px; cursor: pointer; padding: 0;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888'">&times;</button>
+            </div>
+            <form ng-submit="sendBroadcastEmail()" style="margin: 0;">
+                <div style="padding: 24px;">
+                    <p style="color: #aaa; font-size: 13px; margin: 0 0 20px 0; line-height: 1.5;">
+                        This will send an email to all <strong style="color: #fff;">{{players.length}}</strong> registered players in your database. This is great for testing SMTP connections and announcing league updates!
+                    </p>
+                    <div style="margin-bottom: 15px;">
+                        <label for="email-subject" style="color: #bbb; font-weight: 600; display: block; margin-bottom: 6px; font-size: 13px;">Subject</label>
+                        <input type="text" id="email-subject" ng-model="broadcastModal.subject" required style="width: 100%; padding: 10px; background: #111; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 14px;" placeholder="e.g. Welcome to the 2026 Season!" />
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label for="email-body" style="color: #bbb; font-weight: 600; display: block; margin-bottom: 6px; font-size: 13px;">Message Body</label>
+                        <textarea id="email-body" ng-model="broadcastModal.body" required rows="6" style="width: 100%; padding: 10px; background: #111; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 14px; line-height: 1.5; resize: vertical;" placeholder="Type your email broadcast message here..."></textarea>
+                    </div>
+                    <div ng-if="broadcastModal.error" style="color: #ff5555; font-size: 13px; font-weight: 600; margin-bottom: 15px;"><i class="fa fa-times-circle"></i> {{broadcastModal.error}}</div>
+                    <div ng-if="broadcastModal.success" style="color: #2ecc71; font-size: 13px; font-weight: 600; margin-bottom: 15px;"><i class="fa fa-check-circle"></i> {{broadcastModal.success}}</div>
+                </div>
+                <div style="background: #181818; padding: 15px 24px; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid rgba(255, 255, 255, 0.05);">
+                    <button type="button" ng-click="closeBroadcastModal()" class="btn" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); color: #fff; font-weight: 600; padding: 10px 20px; border-radius: 6px;" ng-disabled="broadcastModal.sending">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn" style="background: linear-gradient(135deg, #FFB415, #f39c12); border: none; color: #000; font-weight: 700; padding: 10px 24px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 15px rgba(243, 156, 18, 0.2);" ng-disabled="broadcastModal.sending">
+                        <span ng-if="!broadcastModal.sending"><i class="fa fa-paper-plane"></i> Send Broadcast</span>
+                        <span ng-if="broadcastModal.sending"><i class="fa fa-spinner fa-spin"></i> Sending...</span>
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>

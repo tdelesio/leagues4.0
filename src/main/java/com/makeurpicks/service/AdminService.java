@@ -564,6 +564,7 @@ public class AdminService {
 		String tempPassword = sb.toString();
 		
 		player.setPassword(passwordEncoder.encode(tempPassword));
+		player.setPasswordResetRequired(true);
 		playerRepository.save(player);
 		
 		return tempPassword;
