@@ -232,6 +232,9 @@
 		};
 
 		$scope.logout = function() {
+			if ($window.localStorage) {
+				delete $window.localStorage['username'];
+			}
 			$http.post('/logout', {}).then(function() {
 				$window.location.href = '/login.html';
 			}, function(err) {

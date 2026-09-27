@@ -171,15 +171,13 @@
 		});
 		
 		$scope.logout = function () {
-//			   console.log("I am here"+JSON.stringify($location));
-			   $http.post('/admin/logout', {}).success(function() {
-				   				console.log("logout sucess...");
-			        }).error(function(data) {
-			          console.log("Logout failed");
-			          
-			        });
-			   
-			    }
+			if ($window.localStorage) {
+				delete $window.localStorage['username'];
+			}
+			$http.post('/logout', {}).finally(function() {
+				$window.location.href = '/login.html';
+			});
+		};
 	});
 
 	app.controller('PlayersController', function ($scope, $http, $window, $log) {

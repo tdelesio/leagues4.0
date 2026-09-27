@@ -81,7 +81,7 @@ public class PlayerService implements UserDetailsService {
 		}		
 		player.setAuthorities(auth);
 		
-		UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(player, null, auth);
+		UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(player, player.getPassword(), auth);
 		SecurityContextHolder.getContext().setAuthentication(authToken);
 		
 		return player;

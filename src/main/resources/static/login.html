@@ -269,6 +269,20 @@ $(document).ready(function() {
 		$('#login-card').addClass('hidden-card');
 		$('#forgot-card').addClass('hidden-card');
 		$('#reset-card').removeClass('hidden-card');
+	} else {
+		// If already authenticated via remember-me cookie or session, redirect directly to dashboard
+		$.ajax({
+			type: "GET",
+			url: "/players/userinfo",
+			success: function(username) {
+				if (username && typeof username === 'string' && username.trim() !== '' && username.indexOf('<') === -1) {
+					if (window.localStorage) {
+						localStorage['username'] = username.trim();
+					}
+					window.location.replace('index.html');
+				}
+			}
+		});
 	}
 
 	$('#loginform').keydown(function(event) {
