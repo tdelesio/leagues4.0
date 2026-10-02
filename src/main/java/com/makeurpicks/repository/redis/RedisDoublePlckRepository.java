@@ -68,7 +68,15 @@ public class RedisDoublePlckRepository implements DoublePickRepository {
 		if (doublePicks==null || doublePicks.isEmpty())
 			return null;
 		
-		return doublePicks.get(playerId);
+		DoublePick dp = doublePicks.get(playerId);
+		if (dp == null && playerId != null) {
+			for (Map.Entry<String, DoublePick> entry : doublePicks.entrySet()) {
+				if (entry.getKey() != null && entry.getKey().trim().equalsIgnoreCase(playerId.trim())) {
+					return entry.getValue();
+				}
+			}
+		}
+		return dp;
 		
 	}
 	

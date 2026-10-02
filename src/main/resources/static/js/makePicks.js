@@ -174,12 +174,28 @@
 			}
 			var count = 0;
 			for (var i = 0; i < $scope.games.length; i++) {
-				var gameId = $scope.games[i].id;
-				if (!$scope.pickMap || !$scope.pickMap[gameId] || !$scope.pickMap[gameId].teamId) {
+				var game = $scope.games[i];
+				// Only count upcoming games that have not yet started and are not picked
+				if (!game.hasGameStarted && (!$scope.pickMap || !$scope.pickMap[game.id] || !$scope.pickMap[game.id].teamId)) {
 					count++;
 				}
 			}
 			return count;
+		};
+
+		$scope.getMissedPicksCount = function() {
+			if (!$scope.games) {
+				return 0;
+			}
+			var missed = 0;
+			for (var i = 0; i < $scope.games.length; i++) {
+				var game = $scope.games[i];
+				// Games that already started without a pick
+				if (game.hasGameStarted && (!$scope.pickMap || !$scope.pickMap[game.id] || !$scope.pickMap[game.id].teamId)) {
+					missed++;
+				}
+			}
+			return missed;
 		};
 
 		$scope.isDoublePickSelected = function() {
@@ -188,14 +204,19 @@
 
 		$scope.submitPicksVerification = function() {
 			var remainingCount = $scope.getRemainingPicksCount();
+			var missedCount = $scope.getMissedPicksCount();
 			var doubleSelected = $scope.isDoublePickSelected();
 			
 			if (remainingCount === 0 && doubleSelected) {
-				alert("Success! All of your picks have been successfully made and your Double Pick is active. You are 100% good to go!");
+				var message = "Success! All of your available picks have been successfully made and your Double Pick is active. You are 100% good to go!";
+				if (missedCount > 0) {
+					message += "\n\n(Note: " + missedCount + " earlier game(s) had already started and could not be picked, but all remaining eligible games are locked in.)";
+				}
+				alert(message);
 			} else {
 				var missing = [];
 				if (remainingCount > 0) {
-					missing.push("• You still have " + remainingCount + " game(s) left to pick.");
+					missing.push("• You still have " + remainingCount + " upcoming game(s) left to pick.");
 				}
 				if (!doubleSelected) {
 					missing.push("• You have not selected a Double Pick yet.");
@@ -212,22 +233,49 @@
 		$scope.playerStandings = [];
 		$scope.loading = false;
 
+		$scope.isCurrentUser = function(playerName) {
+			if (!playerName) {
+				return false;
+			}
+			var current = $scope.username;
+			if (!current && $window.localStorage) {
+				current = $window.localStorage['username'];
+			}
+			if (!current) {
+				return false;
+			}
+			var cleanName = playerName.trim().toLowerCase();
+			var cleanUser = current.trim().toLowerCase();
+			return cleanName === cleanUser;
+		};
+
 		$scope.loadViewPicks = function() {
 			if (!$scope.leagues || !$scope.week || !$scope.week.weekId) {
 				return;
 			}
 			
 			var activeLeague = null;
-			if ($scope.leagues) {
+			if ($scope.league && $scope.league.id && $scope.leagues) {
 				for (var i = 0; i < $scope.leagues.length; i++) {
-					if ($scope.leagues[i].seasonId === $scope.league.seasonId) {
+					if ($scope.leagues[i].id === $scope.league.id) {
+						activeLeague = $scope.leagues[i];
+						break;
+					}
+				}
+			}
+			if (!activeLeague && $scope.leagues) {
+				for (var i = 0; i < $scope.leagues.length; i++) {
+					if ($scope.league && $scope.leagues[i].seasonId === $scope.league.seasonId) {
 						activeLeague = $scope.leagues[i];
 						break;
 					}
 				}
 			}
 			
-			var leagueId = activeLeague ? activeLeague.id : $scope.leagues[0].id;
+			var leagueId = activeLeague ? activeLeague.id : (($scope.league && $scope.league.id) ? $scope.league.id : ($scope.leagues && $scope.leagues.length > 0 ? $scope.leagues[0].id : null));
+			if (!leagueId) {
+				return;
+			}
 			var weekId = $scope.week.weekId;
 
 			$scope.loading = true;
@@ -421,6 +469,18 @@
 
 		$scope.$on('weekLoaded', function() {
 			$scope.loadViewPicks();
+		});
+
+		$scope.$watch('league.id', function(newVal, oldVal) {
+			if (newVal && newVal !== oldVal) {
+				$scope.loadViewPicks();
+			}
+		});
+
+		$scope.$watch('week.weekId', function(newVal, oldVal) {
+			if (newVal && newVal !== oldVal) {
+				$scope.loadViewPicks();
+			}
 		});
 
 		if ($scope.leagues && $scope.week && $scope.week.weekId) {

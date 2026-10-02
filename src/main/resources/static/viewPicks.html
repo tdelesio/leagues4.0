@@ -48,10 +48,13 @@
 				</tr>
 			</thead>
 			<tbody>
-				<tr ng-repeat="row in transposedRows" class="standings-row">
+				<tr ng-repeat="row in transposedRows" class="standings-row" ng-class="{'current-user-row': isCurrentUser(row.playerName)}">
 					<!-- Player Name Header Cell -->
 					<td class="player-row-header">
-						<span class="player-name-text" title="{{row.playerName}}">{{row.playerName}}</span>
+						<span class="player-name-text" title="{{row.playerName}}">
+							{{row.playerName}}
+							<span ng-if="isCurrentUser(row.playerName)" class="current-user-tag">(You)</span>
+						</span>
 					</td>
 					
 					<!-- Wins Column Cell -->
@@ -124,12 +127,13 @@
 					</tr>
 				</thead>
 				<tbody>
-					<tr ng-repeat="player in playerStandings" class="standings-row">
+					<tr ng-repeat="player in playerStandings" class="standings-row" ng-class="{'current-user-row': isCurrentUser(player.playerName)}">
 						<td class="standings-rank">
 							#{{$index + 1}}
 						</td>
 						<td style="font-weight: 600; color: #fff;">
 							{{player.playerName}}
+							<span ng-if="isCurrentUser(player.playerName)" class="current-user-tag">(You)</span>
 						</td>
 						<td class="text-right standings-points" style="font-size: 15px; padding-right: 25px !important;">
 							{{player.totalPoints}} {{player.totalPoints === 1 ? 'Point' : 'Points'}}

@@ -78,7 +78,7 @@ public class GatewayService {
 					
 					for (PlayerView player : players)
 					{
-						Map<String, PickView> picksForAllPlayers = picks.get(player.getId());
+						Map<String, PickView> picksForAllPlayers = getPicksForPlayer(picks, player.getId());
 //						columns = new ArrayList<>(players.size());
 						
 						//init player wins to handle non-pickers
@@ -100,7 +100,7 @@ public class GatewayService {
 							PickView pick = picksForAllPlayers != null ? picksForAllPlayers.get(game.getId()) : null;
 							if (pick != null)
 							{
-								DoublePickView dpv = doublePicks.get(player.getId());
+								DoublePickView dpv = getDoublePickForPlayer(doublePicks, player.getId());
 								boolean isDouble = false;
 								if (dpv!=null && dpv.getGameId().equals(game.getId()))
 									isDouble = true;
@@ -197,5 +197,37 @@ public class GatewayService {
 					return row;
 				});
 		
+	}
+
+	private Map<String, PickView> getPicksForPlayer(Map<String, Map<String, PickView>> picks, String playerId) {
+		if (picks == null || playerId == null) {
+			return null;
+		}
+		Map<String, PickView> playerPicks = picks.get(playerId);
+		if (playerPicks != null) {
+			return playerPicks;
+		}
+		for (Map.Entry<String, Map<String, PickView>> entry : picks.entrySet()) {
+			if (entry.getKey() != null && entry.getKey().trim().equalsIgnoreCase(playerId.trim())) {
+				return entry.getValue();
+			}
+		}
+		return null;
+	}
+
+	private DoublePickView getDoublePickForPlayer(Map<String, DoublePickView> doublePicks, String playerId) {
+		if (doublePicks == null || playerId == null) {
+			return null;
+		}
+		DoublePickView dpv = doublePicks.get(playerId);
+		if (dpv != null) {
+			return dpv;
+		}
+		for (Map.Entry<String, DoublePickView> entry : doublePicks.entrySet()) {
+			if (entry.getKey() != null && entry.getKey().trim().equalsIgnoreCase(playerId.trim())) {
+				return entry.getValue();
+			}
+		}
+		return null;
 	}
 }

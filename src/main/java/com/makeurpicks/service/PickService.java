@@ -67,7 +67,7 @@ public class PickService {
 		Pick pickFromDS = pickRepository.findById(pick.getId()).orElse(null);
 		if (pickFromDS == null)
 			throw new PickValidationException(PickExceptions.PICK_IS_NULL);
-		if (!pickFromDS.getPlayerId().equals(pick.getPlayerId()))
+		if (!pickFromDS.getPlayerId().equalsIgnoreCase(pick.getPlayerId()))
 			throw new PickValidationException(PickExceptions.UNAUTHORIZED_USER);
 		//check to see if the pick is the existing double pick
 //		DoublePick doublePick = doublePickRepository.findDoubleForPlayer(pick.getLeagueId(), pick.getWeekId(), pick.getPlayerId());
@@ -81,6 +81,7 @@ public class PickService {
 		
 		//save pick by pick id
 		pickRepository.save(pick);
+		picksByWeekRepository.createPick(pick);
 		
 		return pick;
 	}
@@ -107,6 +108,14 @@ public class PickService {
 		if (map==null || map.isEmpty())
 			return Collections.emptyMap();
 		Map<String, String> games = map.get(playerId);
+		if (games == null && playerId != null) {
+			for (Map.Entry<String, Map<String, String>> entry : map.entrySet()) {
+				if (entry.getKey() != null && entry.getKey().trim().equalsIgnoreCase(playerId.trim())) {
+					games = entry.getValue();
+					break;
+				}
+			}
+		}
 		Set<String> subkeys = new TreeSet<>();
 		if (games != null)
 			subkeys = games.keySet();
@@ -255,7 +264,7 @@ public class PickService {
 			throw new PickValidationException(PickExceptions.GAME_HAS_ALREADY_STARTED);
 		}
 		
-		if (!pick.isAdminOverride() && !pick.getPlayerId().equals(loggedInPlayerId))
+		if (!pick.isAdminOverride() && !pick.getPlayerId().equalsIgnoreCase(loggedInPlayerId))
 			throw new PickValidationException(PickExceptions.UNAUTHORIZED_USER);
 		
 		//	Picks oldPick = getDoublePickForPlayerLeagueAndWeek(pick.getName(), pick.getLeague(), pick.getWeek());
