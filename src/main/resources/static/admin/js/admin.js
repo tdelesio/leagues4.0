@@ -165,7 +165,17 @@
 		return service;
 	});
 	
-	app.controller('ChromeController', function ($http, $scope) {
+	app.controller('ChromeController', function ($http, $scope, $window) {
+		$scope.mobileMenuOpen = false;
+		
+		$scope.toggleMobileMenu = function () {
+			$scope.mobileMenuOpen = !$scope.mobileMenuOpen;
+		};
+		
+		$scope.closeMobileMenu = function () {
+			$scope.mobileMenuOpen = false;
+		};
+
 		$http.get('/admin/user').success(function(data) {
 			$scope.user = data.name;
 		});

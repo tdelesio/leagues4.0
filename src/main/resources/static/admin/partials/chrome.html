@@ -1,23 +1,37 @@
-<div class=dashboard-page> 
-	<div class=container-fluid> 
-		<div class=row> 
-			<div class="col-sm-3 col-md-2 sidebar"> 
-				<div class="text-center" ng-controller="ChromeController"> 
-					<h2 class=brand>MYP Admin</h2>
-					<h3>{{user}}</h3><br/>  
-					<a ng-click ="logout()">Logout</a>
+<div class="dashboard-page" ng-controller="ChromeController"> 
+	<!-- Mobile Header Bar for Admin on Phone/Small Tablet -->
+	<div class="admin-mobile-header visible-xs">
+		<button type="button" class="btn btn-link admin-menu-btn" ng-click="toggleMobileMenu()" aria-label="Toggle Navigation">
+			<i class="fa fa-bars"></i>
+		</button>
+		<span class="admin-mobile-title">MYP Admin</span>
+		<a href="../index.html" class="admin-mobile-back-btn">
+			<i class="fa fa-reply" style="margin-right: 4px;"></i>App
+		</a>
+	</div>
+
+	<!-- Mobile Sidebar Overlay Backdrop -->
+	<div class="mobile-sidebar-backdrop visible-xs" ng-if="mobileMenuOpen" ng-click="closeMobileMenu()"></div>
+
+	<div class="container-fluid"> 
+		<div class="row"> 
+			<div class="col-sm-3 col-md-2 sidebar" ng-class="{'mobile-open': mobileMenuOpen}"> 
+				<div class="text-center"> 
+					<h2 class="brand">MYP Admin</h2>
+					<h3>{{user}}</h3><br/> 
+					<a ng-click="logout()" style="cursor: pointer;"><i class="fa fa-sign-out" style="margin-right: 4px;"></i>Logout</a>
 				</div> 
 				
 				<ul class="nav nav-sidebar"> 
-					<li ng-class="{active: $state.includes('players')}"><a ui-sref="players">Players</a></li>
-					<li ng-class="{active: $state.includes('seasons')}"><a ui-sref="seasons">Seasons</a></li> 
-					<li ng-class="{active: $state.includes('leagues')}"><a ui-sref="leagues">Leagues</a></li>
-					<li ng-class="{active: $state.includes('create')}"><a ui-sref="create">Weeks</a></li>
-					<li ng-class="{active: $state.includes('setup')}"><a ui-sref="setup">Setup Week</a></li>
-					<li ng-class="{active: $state.includes('games')}"><a ui-sref="games">Games</a></li>
-					<li ng-class="{active: $state.includes('addScore')}"><a ui-sref="addScore">Add Score</a></li>
-					<li ng-class="{active: $state.includes('backup')}"><a ui-sref="backup">Backup & Restore</a></li>
-					<li ng-class="{active: $state.includes('clean')}"><a ui-sref="clean">Clean Data</a></li> 
+					<li ng-class="{active: $state.includes('players')}"><a ui-sref="players" ng-click="closeMobileMenu()"><i class="fa fa-users" style="width: 20px;"></i> Players</a></li>
+					<li ng-class="{active: $state.includes('seasons')}"><a ui-sref="seasons" ng-click="closeMobileMenu()"><i class="fa fa-calendar" style="width: 20px;"></i> Seasons</a></li> 
+					<li ng-class="{active: $state.includes('leagues')}"><a ui-sref="leagues" ng-click="closeMobileMenu()"><i class="fa fa-trophy" style="width: 20px;"></i> Leagues</a></li>
+					<li ng-class="{active: $state.includes('create')}"><a ui-sref="create" ng-click="closeMobileMenu()"><i class="fa fa-plus-square" style="width: 20px;"></i> Weeks</a></li>
+					<li ng-class="{active: $state.includes('setup')}"><a ui-sref="setup" ng-click="closeMobileMenu()"><i class="fa fa-cog" style="width: 20px;"></i> Setup Week</a></li>
+					<li ng-class="{active: $state.includes('games')}"><a ui-sref="games" ng-click="closeMobileMenu()"><i class="fa fa-shield" style="width: 20px;"></i> Games</a></li>
+					<li ng-class="{active: $state.includes('addScore')}"><a ui-sref="addScore" ng-click="closeMobileMenu()"><i class="fa fa-check-square-o" style="width: 20px;"></i> Add Score</a></li>
+					<li ng-class="{active: $state.includes('backup')}"><a ui-sref="backup" ng-click="closeMobileMenu()"><i class="fa fa-database" style="width: 20px;"></i> Backup & Restore</a></li>
+					<li ng-class="{active: $state.includes('clean')}"><a ui-sref="clean" ng-click="closeMobileMenu()"><i class="fa fa-trash" style="width: 20px;"></i> Clean Data</a></li> 
 					<li style="margin-top: 20px; border-top: 1px solid #444; padding-top: 15px;">
 						<a href="../index.html" style="color: #FFB415;"><i class="fa fa-reply" style="margin-right: 8px;"></i>Back to Main App</a>
 					</li>

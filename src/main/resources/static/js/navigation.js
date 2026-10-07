@@ -22,8 +22,10 @@
 
 		function checkAdminStatus() {
 			if ($scope.username && $scope.leagues && $scope.leagues.length > 0) {
+				var curUser = ($scope.username || '').toLowerCase().trim();
 				for (var i = 0; i < $scope.leagues.length; i++) {
-					if ($scope.leagues[i].adminId === $scope.username) {
+					var adminId = ($scope.leagues[i].adminId || '').toLowerCase().trim();
+					if (adminId && curUser && adminId === curUser) {
 						$scope.isAdminOfAnyLeague = true;
 						break;
 					}
@@ -96,18 +98,24 @@
 		$http.get('/user').success(function(userData) {
 			$scope.username = userData.name;
 			
-			$http.get('/players/username/' + $scope.username).success(function(player) {
+			$http.get('/players/username/' + encodeURIComponent($scope.username)).success(function(player) {
 				if (player) {
-					if (player.accountLevel === 'admin' || player.memberLevel === 'ADMIN') {
+					if (player.username) {
+						$scope.username = player.username;
+					}
+					var acc = (player.accountLevel || '').toLowerCase();
+					var mem = (player.memberLevel || '').toUpperCase();
+					if (acc === 'admin' || mem === 'ADMIN' || mem === 'LEAGUE_ADMIN') {
 						$scope.isAdminOfAnyLeague = true;
 					}
 					if (player.passwordResetRequired) {
 						$scope.forceResetModal.show = true;
 					}
 				}
+				loadPlayerLeagues($scope.username);
+			}).error(function() {
+				loadPlayerLeagues($scope.username);
 			});
-			
-			loadPlayerLeagues($scope.username);
 		});
 
 		// Join League Modal Logic

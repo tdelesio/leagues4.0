@@ -1,0 +1,119 @@
+@charset "UTF-8";
+/* Responsive Admin Dashboard Styles */
+
+@media (max-width: 767px) {
+	.admin-mobile-header {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 50px;
+		background-color: #1a252f;
+		color: #fff;
+		display: flex !important;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0 15px;
+		z-index: 1040;
+		box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+	}
+
+	.admin-menu-btn {
+		color: #FFB415 !important;
+		font-size: 20px;
+		padding: 6px 10px;
+		margin-right: 10px;
+		background: transparent;
+		border: none;
+		outline: none;
+		cursor: pointer;
+	}
+
+	.admin-menu-btn:focus,
+	.admin-menu-btn:hover {
+		color: #FFB415 !important;
+		text-decoration: none;
+		outline: none;
+	}
+
+	.admin-mobile-title {
+		font-size: 18px;
+		font-weight: bold;
+		color: #FFB415;
+		flex-grow: 1;
+		letter-spacing: 0.5px;
+	}
+
+	.admin-mobile-back-btn {
+		color: #fff !important;
+		font-size: 13px;
+		font-weight: bold;
+		text-decoration: none;
+		padding: 6px 12px;
+		background: rgba(255, 180, 21, 0.25);
+		border-radius: 4px;
+		border: 1px solid rgba(255, 180, 21, 0.5);
+		transition: all 0.2s ease;
+	}
+
+	.admin-mobile-back-btn:hover {
+		color: #FFB415 !important;
+		background: rgba(255, 180, 21, 0.4);
+		text-decoration: none;
+	}
+
+	.dashboard-page .sidebar {
+		position: fixed !important;
+		top: 50px !important;
+		bottom: 0 !important;
+		left: -270px !important;
+		width: 260px !important;
+		z-index: 1050 !important;
+		display: block !important;
+		background-color: #2c3e50 !important;
+		transition: left 0.25s ease-in-out !important;
+		overflow-y: auto !important;
+		padding: 15px 20px 30px !important;
+		box-shadow: 3px 0 15px rgba(0,0,0,0.6) !important;
+		border-right: 1px solid #34495e !important;
+	}
+
+	.dashboard-page .sidebar.mobile-open {
+		left: 0 !important;
+	}
+
+	.mobile-sidebar-backdrop {
+		position: fixed;
+		top: 50px;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba(0,0,0,0.65);
+		z-index: 1045;
+		backdrop-filter: blur(2px);
+		-webkit-backdrop-filter: blur(2px);
+	}
+
+	.dashboard-page .main {
+		top: 50px !important;
+		left: 0 !important;
+		right: 0 !important;
+		padding: 15px !important;
+		position: absolute !important;
+		overflow-x: auto !important;
+	}
+
+	.dashboard-page .sidebar .nav-sidebar>li>a {
+		font-size: 14px;
+		padding: 10px 15px;
+	}
+}
+
+@media (min-width: 768px) {
+	.admin-mobile-header {
+		display: none !important;
+	}
+	.mobile-sidebar-backdrop {
+		display: none !important;
+	}
+}

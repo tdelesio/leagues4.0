@@ -36,17 +36,13 @@ public class PlayerService implements UserDetailsService {
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		String trimmedUsername = username != null ? username.trim() : "";
-		Player player = playerRepository.findByUsername(trimmedUsername);
-		if (player == null) {
-			player = playerRepository.findByEmail(trimmedUsername);
-		}
+		Player player = getPlayerByUserName(username);
 		if (player == null) {
 			throw new UsernameNotFoundException("User not found: " + username);
 		}
 		
 		List<GrantedAuthority> auth = AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER");
-		if ("admin".equals(player.getAccountLevel())) {
+		if ("admin".equalsIgnoreCase(player.getAccountLevel()) || player.getMemberLevel() == MemberLevel.ADMIN) {
 			auth = AuthorityUtils.createAuthorityList("ROLE_USER", "ROLE_ADMIN");
 		}		
 		player.setAuthorities(auth);
@@ -58,15 +54,28 @@ public class PlayerService implements UserDetailsService {
 	}
 
 	public Player getPlayerByUserName(String username) {
-		return playerRepository.findByUsername(username);
+		if (username == null) {
+			return null;
+		}
+		String trimmed = username.trim();
+		Player player = playerRepository.findByUsername(trimmed);
+		if (player == null) {
+			player = playerRepository.findByEmail(trimmed);
+		}
+		if (player == null) {
+			List<Player> all = playerRepository.findAll();
+			for (Player p : all) {
+				if (trimmed.equalsIgnoreCase(p.getUsername()) || trimmed.equalsIgnoreCase(p.getEmail())) {
+					return p;
+				}
+			}
+		}
+		return player;
 	}
 
 	public Player login(Player user) {
 		String trimmedUsername = user.getUsername() != null ? user.getUsername().trim() : "";
-		Player player = playerRepository.findByUsername(trimmedUsername);
-		if (player == null) {
-			player = playerRepository.findByEmail(trimmedUsername);
-		}
+		Player player = getPlayerByUserName(trimmedUsername);
 		if (player == null) {
 			throw new PlayerValidationException(PlayerExceptions.USER_NOT_FOUND);
 		}
@@ -76,7 +85,7 @@ public class PlayerService implements UserDetailsService {
 		
 		// Establish the spring security context for session tracking
 		List<GrantedAuthority> auth = AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER");
-		if ("admin".equals(player.getAccountLevel())) {
+		if ("admin".equalsIgnoreCase(player.getAccountLevel()) || player.getMemberLevel() == MemberLevel.ADMIN) {
 			auth = AuthorityUtils.createAuthorityList("ROLE_USER", "ROLE_ADMIN");
 		}		
 		player.setAuthorities(auth);
