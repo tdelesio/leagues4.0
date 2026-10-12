@@ -582,8 +582,18 @@
 		$scope.weekWinners = [];
 		$scope.loading = false;
 
+		function formatPrize(amount) {
+			if (amount === null || amount === undefined || isNaN(amount)) return '$0';
+			var rounded = Math.round(amount * 100) / 100;
+			if (rounded % 1 === 0) {
+				return '$' + rounded.toFixed(0);
+			} else {
+				return '$' + rounded.toFixed(2);
+			}
+		}
+
 		$scope.calculateWinnings = function() {
-			if (!$scope.standings || !$scope.standings.length || !$scope.weekWinners) {
+			if (!$scope.standings || !$scope.standings.length) {
 				return;
 			}
 			
@@ -593,34 +603,62 @@
 			
 			// Season pool is the remaining pot after 17 weeks of payouts
 			var seasonPool = N >= 20 ? (N * 100 - 1700) : (15 * N);
-			
-			var winningsMap = {};
+
+			// Player breakdown map
+			var playerBreakdownMap = {};
 			angular.forEach($scope.standings, function(player) {
-				winningsMap[player.playerId] = 0;
+				playerBreakdownMap[player.playerId.toLowerCase()] = {
+					player: player,
+					placePrize: 0,
+					placeLabel: '',
+					weeklyWins: [], // { weekNumber, amount, isSplit }
+					total: 0
+				};
 			});
-			
-			// 1. Process weekly winners and split tied prizes
-			angular.forEach($scope.weekWinners, function(weekData) {
-				if (!weekData.winners) return;
-				// Format is typically: "player1, player2 (12 wins)" or "No games completed yet"
-				var winTextIndex = weekData.winners.indexOf(' (');
-				if (winTextIndex !== -1) {
-					var winnersPart = weekData.winners.substring(0, winTextIndex);
-					var winners = winnersPart.split(',').map(function(s) { return s.trim(); });
-					var validWinners = winners.filter(function(w) { return w.length > 0; });
-					if (validWinners.length > 0) {
-						var splitPrize = W / validWinners.length;
-						angular.forEach(validWinners, function(winnerId) {
-							if (winningsMap[winnerId] !== undefined) {
-								winningsMap[winnerId] += splitPrize;
-							} else {
-								winningsMap[winnerId] = splitPrize;
-							}
-						});
+
+			// 1. Process weekly winners
+			if ($scope.weekWinners && $scope.weekWinners.length) {
+				angular.forEach($scope.weekWinners, function(weekData) {
+					if (!weekData.winners) {
+						weekData.payoutFormatted = null;
+						weekData.payoutSubtitle = null;
+						return;
 					}
-				}
-			});
-			
+					// Format is typically: "player1, player2 (12 wins)" or "No games completed yet"
+					var winTextIndex = weekData.winners.indexOf(' (');
+					if (winTextIndex !== -1) {
+						var winnersPart = weekData.winners.substring(0, winTextIndex);
+						var winners = winnersPart.split(',').map(function(s) { return s.trim(); });
+						var validWinners = winners.filter(function(w) { return w.length > 0; });
+						if (validWinners.length > 0) {
+							var splitPrize = W / validWinners.length;
+							var isSplit = validWinners.length > 1;
+							
+							weekData.payoutFormatted = isSplit ? (formatPrize(splitPrize) + ' ea') : formatPrize(W);
+							weekData.payoutSubtitle = isSplit ? ('(' + formatPrize(W) + ' split)') : null;
+							
+							angular.forEach(validWinners, function(winnerId) {
+								var key = winnerId.toLowerCase();
+								if (playerBreakdownMap[key]) {
+									playerBreakdownMap[key].weeklyWins.push({
+										weekNumber: parseInt(weekData.weekNumber) || weekData.weekNumber,
+										amount: splitPrize,
+										isSplit: isSplit
+									});
+									playerBreakdownMap[key].total += splitPrize;
+								}
+							});
+						} else {
+							weekData.payoutFormatted = null;
+							weekData.payoutSubtitle = null;
+						}
+					} else {
+						weekData.payoutFormatted = null;
+						weekData.payoutSubtitle = null;
+					}
+				});
+			}
+
 			// 2. Process season-end prizes (1st: 60%, 2nd: 30%, 3rd: 10%) with tie splitting
 			var placeGroups = {};
 			angular.forEach($scope.standings, function(player) {
@@ -650,15 +688,53 @@
 				if (totalShareForPlace > 0) {
 					var individualShare = totalShareForPlace / numPlayers;
 					var prize = individualShare * seasonPool;
+					var placeLabel = (numPlayers > 1) 
+						? ('T-' + (place === 1 ? '1st' : (place === 2 ? '2nd' : '3rd')) + ' split')
+						: (place === 1 ? '1st' : (place === 2 ? '2nd' : '3rd'));
+					
 					angular.forEach(playersInPlace, function(player) {
-						winningsMap[player.playerId] += prize;
+						var key = player.playerId.toLowerCase();
+						if (playerBreakdownMap[key]) {
+							playerBreakdownMap[key].placePrize = prize;
+							playerBreakdownMap[key].placeLabel = placeLabel;
+							playerBreakdownMap[key].total += prize;
+						}
 					});
 				}
 			});
-			
-			// Map winnings back to standings array
+
+			// 3. Assemble math breakdown for each player
 			angular.forEach($scope.standings, function(player) {
-				player.winnings = winningsMap[player.playerId] || 0;
+				var key = player.playerId.toLowerCase();
+				var pData = playerBreakdownMap[key];
+				var parts = [];
+
+				if (pData) {
+					// Place component
+					if (pData.placePrize > 0) {
+						parts.push(formatPrize(pData.placePrize) + ' (' + pData.placeLabel + ')');
+					}
+
+					// Weekly components (sort ascending by week number)
+					pData.weeklyWins.sort(function(a, b) { return a.weekNumber - b.weekNumber; });
+					angular.forEach(pData.weeklyWins, function(ww) {
+						var wDesc = ww.isSplit ? ('Wk ' + ww.weekNumber + ' split') : ('Wk ' + ww.weekNumber);
+						parts.push(formatPrize(ww.amount) + ' (' + wDesc + ')');
+					});
+
+					player.winnings = pData.total;
+					
+					if (parts.length > 1) {
+						player.breakdown = parts.join(' + ') + ' = ' + formatPrize(pData.total);
+					} else if (parts.length === 1) {
+						player.breakdown = parts[0];
+					} else {
+						player.breakdown = null;
+					}
+				} else {
+					player.winnings = 0;
+					player.breakdown = null;
+				}
 			});
 
 			$scope.prizeBreakdown = {
