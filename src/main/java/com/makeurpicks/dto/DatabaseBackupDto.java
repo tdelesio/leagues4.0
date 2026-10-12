@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.makeurpicks.domain.Game;
 import com.makeurpicks.domain.League;
+import com.makeurpicks.domain.LeagueMessage;
 import com.makeurpicks.domain.Pick;
 import com.makeurpicks.domain.Player;
 import com.makeurpicks.domain.PlayerLeague;
@@ -21,6 +22,7 @@ public class DatabaseBackupDto implements Serializable {
 	private List<Game> games;
 	private List<League> leagues;
 	private List<PlayerLeague> playerLeagues;
+	private List<LeagueMessage> leagueMessages;
 	private List<Pick> picks;
 	private Map<String, String> doublePicks;
 	private Map<String, Map<String, Map<String, Map<String, String>>>> picksByWeek;
@@ -71,6 +73,14 @@ public class DatabaseBackupDto implements Serializable {
 
 	public void setPlayerLeagues(List<PlayerLeague> playerLeagues) {
 		this.playerLeagues = playerLeagues;
+	}
+
+	public List<LeagueMessage> getLeagueMessages() {
+		return leagueMessages;
+	}
+
+	public void setLeagueMessages(List<LeagueMessage> leagueMessages) {
+		this.leagueMessages = leagueMessages;
 	}
 
 	public List<Pick> getPicks() {

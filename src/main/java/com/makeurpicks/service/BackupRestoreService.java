@@ -60,6 +60,9 @@ public class BackupRestoreService {
 	@Autowired
 	private DataInitializer dataInitializer;
 
+	@Autowired
+	private com.makeurpicks.repository.LeagueMessageRepository leagueMessageRepository;
+
 	public DatabaseBackupDto exportDatabase() {
 		DatabaseBackupDto backup = new DatabaseBackupDto();
 		
@@ -69,6 +72,7 @@ public class BackupRestoreService {
 		backup.setGames(toList(gameRepository.findAll()));
 		backup.setLeagues(leagueRepository.findAll());
 		backup.setPlayerLeagues(playerLeagueRepository.findAll());
+		backup.setLeagueMessages(leagueMessageRepository.findAll());
 		backup.setPicks(toList(pickRepository.findAll()));
 		backup.setDoublePicks(doublePickRepository.getAllDoublePicks());
 		backup.setPicksByWeek(picksByWeekRepository.getAllPicksByWeek());
@@ -79,6 +83,7 @@ public class BackupRestoreService {
 	@Transactional
 	public void importDatabase(DatabaseBackupDto backup) {
 		// 1. Clear database in dependent order (child tables first, then parent tables)
+		leagueMessageRepository.deleteAll();
 		playerLeagueRepository.deleteAll();
 		gameRepository.deleteAll();
 		weekRepository.deleteAll();
@@ -114,6 +119,10 @@ public class BackupRestoreService {
 
 		if (backup.getPlayerLeagues() != null && !backup.getPlayerLeagues().isEmpty()) {
 			playerLeagueRepository.saveAll(backup.getPlayerLeagues());
+		}
+
+		if (backup.getLeagueMessages() != null && !backup.getLeagueMessages().isEmpty()) {
+			leagueMessageRepository.saveAll(backup.getLeagueMessages());
 		}
 
 		// Import Redis cache tables

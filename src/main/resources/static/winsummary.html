@@ -72,5 +72,113 @@
 				</div>
 			</div>
 		</div>
+
+		<!-- Detailed Prize Breakdown -->
+		<div class="col-xs-12" style="margin-top: 30px;" ng-if="prizeBreakdown">
+			<div class="glass-table-container" style="padding: 24px;">
+				<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+					<h3 style="color: #FFB415; margin: 0; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; font-size: 18px;">
+						<i class="fa fa-calculator"></i> Detailed Prize Breakdown
+					</h3>
+					<span style="font-size: 13px; color: #a0aec0;">
+						<span style="color: #4ade80; font-weight: bold;">{{prizeBreakdown.totalPlayers}}</span> Active Players &times; $100 Entry Fee
+					</span>
+				</div>
+
+				<div class="row text-center" style="margin-bottom: 25px;">
+					<div class="col-xs-6 col-sm-3" style="margin-bottom: 12px;">
+						<div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 12px;">
+							<div style="color: #a0aec0; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Total Pot</div>
+							<div style="color: #FFB415; font-size: 22px; font-weight: bold;">{{prizeBreakdown.totalPot | currency:"$"}}</div>
+							<div style="color: #718096; font-size: 11px;">{{prizeBreakdown.totalPlayers}} &times; $100</div>
+						</div>
+					</div>
+					<div class="col-xs-6 col-sm-3" style="margin-bottom: 12px;">
+						<div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 12px;">
+							<div style="color: #a0aec0; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Weekly Winner</div>
+							<div style="color: #4ade80; font-size: 22px; font-weight: bold;">{{prizeBreakdown.weeklyPrize | currency:"$"}}<span style="font-size: 13px; color: #a0aec0; font-weight: normal;">/wk</span></div>
+							<div style="color: #718096; font-size: 11px;">17 Wks = {{prizeBreakdown.totalWeeklyPayouts | currency:"$"}}</div>
+						</div>
+					</div>
+					<div class="col-xs-6 col-sm-3" style="margin-bottom: 12px;">
+						<div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 12px;">
+							<div style="color: #a0aec0; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Weekly Payouts Total</div>
+							<div style="color: #38bdf8; font-size: 22px; font-weight: bold;">{{prizeBreakdown.totalWeeklyPayouts | currency:"$"}}</div>
+							<div style="color: #718096; font-size: 11px;">17 Weeks &times; {{prizeBreakdown.weeklyPrize | currency:"$"}}</div>
+						</div>
+					</div>
+					<div class="col-xs-6 col-sm-3" style="margin-bottom: 12px;">
+						<div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 12px;">
+							<div style="color: #a0aec0; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Season-End Pool</div>
+							<div style="color: #f43f5e; font-size: 22px; font-weight: bold;">{{prizeBreakdown.seasonPool | currency:"$"}}</div>
+							<div style="color: #718096; font-size: 11px;">Top 3 Finishers</div>
+						</div>
+					</div>
+				</div>
+
+				<h4 style="color: #cbd5e1; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">
+					<i class="fa fa-trophy" style="color: #FFB415; margin-right: 6px;"></i> Season-End Payout Distribution
+				</h4>
+				<div class="table-responsive">
+					<table class="table table-bordered picks-matrix-table" style="margin-bottom: 10px;">
+						<thead>
+							<tr>
+								<th class="header-cell" style="width: 25%;">Placement</th>
+								<th class="text-center header-cell" style="width: 25%;">Share %</th>
+								<th class="text-center header-cell" style="width: 25%;">Estimated Payout</th>
+								<th class="header-cell" style="width: 25%;">Formula</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td class="pick-cell" style="font-weight: 600; color: #FFB415;">
+									<i class="fa fa-circle" style="margin-right: 6px;"></i> 1st Place
+								</td>
+								<td class="text-center pick-cell font-weight-bold" style="color: #ffffff;">
+									60%
+								</td>
+								<td class="text-center pick-cell font-weight-bold" style="color: #4ade80; font-size: 15px;">
+									{{prizeBreakdown.firstPlacePayout | currency:"$"}}
+								</td>
+								<td class="pick-cell" style="color: #a0aec0; font-size: 12px;">
+									60% of {{prizeBreakdown.seasonPool | currency:"$"}} Season Pool
+								</td>
+							</tr>
+							<tr>
+								<td class="pick-cell" style="font-weight: 600; color: #cbd5e1;">
+									<i class="fa fa-circle" style="margin-right: 6px;"></i> 2nd Place
+								</td>
+								<td class="text-center pick-cell font-weight-bold" style="color: #ffffff;">
+									30%
+								</td>
+								<td class="text-center pick-cell font-weight-bold" style="color: #4ade80; font-size: 15px;">
+									{{prizeBreakdown.secondPlacePayout | currency:"$"}}
+								</td>
+								<td class="pick-cell" style="color: #a0aec0; font-size: 12px;">
+									30% of {{prizeBreakdown.seasonPool | currency:"$"}} Season Pool
+								</td>
+							</tr>
+							<tr>
+								<td class="pick-cell" style="font-weight: 600; color: #b45309;">
+									<i class="fa fa-circle" style="margin-right: 6px;"></i> 3rd Place
+								</td>
+								<td class="text-center pick-cell font-weight-bold" style="color: #ffffff;">
+									10%
+								</td>
+								<td class="text-center pick-cell font-weight-bold" style="color: #4ade80; font-size: 15px;">
+									{{prizeBreakdown.thirdPlacePayout | currency:"$"}}
+								</td>
+								<td class="pick-cell" style="color: #a0aec0; font-size: 12px;">
+									10% of {{prizeBreakdown.seasonPool | currency:"$"}} Season Pool
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<p style="color: #718096; font-size: 11.5px; margin: 10px 0 0 0; line-height: 1.4;">
+					<i class="fa fa-info-circle" style="margin-right: 4px;"></i> In case of ties, corresponding prize money is pooled and distributed equally. For complete details and formula specifics, see the <a href="rules.html" target="_blank" style="color: #FFB415; text-decoration: underline;">League Rules</a>.
+				</p>
+			</div>
+		</div>
 	</div>
 </div>

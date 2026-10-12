@@ -386,7 +386,7 @@ box-shadow: 0 0 5px #000000;
 
 /* NFL TEAMS */
 
-.ARZ { background-image:url(../img/teams/ARZ.svg);}
+.ARI, .ARZ { background-image:url(../img/teams/ARI.svg);}
 .ATL { background-image:url(../img/teams/ATL.svg);}
 .BAL { background-image:url(../img/teams/BAL.svg);}
 .BUF { background-image:url(../img/teams/BUF.svg);}
@@ -1430,4 +1430,76 @@ box-shadow: 0 0 5px #000000;
 	display: inline-block;
 	vertical-align: middle;
 	line-height: 1.2;
+}
+
+/* Spread Row in View Picks Matrix */
+.matrix-spread-row {
+	background: rgba(15, 23, 42, 0.95) !important;
+	border-bottom: 2px solid rgba(255, 180, 21, 0.3) !important;
+}
+
+.matrix-spread-label-cell {
+	background: rgba(255, 180, 21, 0.08) !important;
+	vertical-align: middle !important;
+	padding: 6px 4px !important;
+	border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.spread-row-label {
+	color: #FFB415;
+	font-weight: 700;
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.matrix-spread-dash-cell {
+	background: rgba(0, 0, 0, 0.4) !important;
+	vertical-align: middle !important;
+	padding: 6px 4px !important;
+	border-right: 2px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+.spread-row-dash {
+	color: rgba(255, 255, 255, 0.25);
+	font-size: 13px;
+	font-weight: bold;
+}
+
+.game-spread-col {
+	background: rgba(15, 23, 42, 0.85) !important;
+	vertical-align: middle !important;
+	padding: 6px 2px !important;
+	border-right: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+.spread-val-badge {
+	display: inline-block;
+	color: #38bdf8;
+	font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+	font-weight: 700;
+	font-size: 12px;
+	padding: 2px 5px;
+	border-radius: 4px;
+	background: rgba(56, 189, 248, 0.1);
+	border: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+/* Message Board Scrollbar and Styling */
+.message-feed-container::-webkit-scrollbar {
+	width: 6px;
+}
+.message-feed-container::-webkit-scrollbar-track {
+	background: rgba(0, 0, 0, 0.2);
+	border-radius: 4px;
+}
+.message-feed-container::-webkit-scrollbar-thumb {
+	background: rgba(255, 180, 21, 0.3);
+	border-radius: 4px;
+}
+.message-feed-container::-webkit-scrollbar-thumb:hover {
+	background: rgba(255, 180, 21, 0.6);
+}
+.message-item:hover {
+	background: rgba(255, 255, 255, 0.06) !important;
 }

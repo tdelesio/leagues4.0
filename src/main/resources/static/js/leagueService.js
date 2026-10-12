@@ -48,9 +48,25 @@
 					}).then(function(result) {
 						return result.data;
 					});
+				},
+
+				getLeagueMessages: function(leagueId) {
+					return $http.get('/leagues/' + leagueId + '/messages').then(function(result) {
+						return result.data;
+					});
+				},
+
+				postLeagueMessage: function(leagueId, message) {
+					return $http.post('/leagues/' + leagueId + '/messages', { message: message }).then(function(result) {
+						return result.data;
+					});
+				},
+
+				deleteLeagueMessage: function(leagueId, messageId) {
+					return $http.delete('/leagues/' + leagueId + '/messages/' + messageId).then(function(result) {
+						return result.data;
+					});
 				}
-				
-				
 			}
 			return service;
 	});

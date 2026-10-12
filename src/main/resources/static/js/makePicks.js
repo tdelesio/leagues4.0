@@ -226,12 +226,24 @@
 		};
 	});
 
-	app.controller('ViewPicksController', function ($scope, $http, $log, $q, leagueService) {
+	app.controller('ViewPicksController', function ($scope, $http, $log, $q, $window, leagueService) {
 		$scope.viewPicksGrid = [];
 		$scope.transposedColumns = [];
 		$scope.transposedRows = [];
 		$scope.playerStandings = [];
 		$scope.loading = false;
+
+		$scope.messages = [];
+		$scope.loadingMessages = false;
+		$scope.postingMessage = false;
+		$scope.newMessageText = '';
+
+		$scope.formatSpread = function(spread) {
+			if (spread === undefined || spread === null || spread === '') return '-';
+			var num = Math.abs(parseFloat(spread));
+			if (isNaN(num)) return '-';
+			return num;
+		};
 
 		$scope.isCurrentUser = function(playerName) {
 			if (!playerName) {
@@ -467,13 +479,89 @@
 			});
 		};
 
+		var getActiveLeagueId = function() {
+			if ($scope.league && $scope.league.id) {
+				return $scope.league.id;
+			}
+			if ($scope.leagues && $scope.leagues.length > 0) {
+				return $scope.leagues[0].id;
+			}
+			return null;
+		};
+
+		$scope.loadMessages = function() {
+			var leagueId = getActiveLeagueId();
+			if (!leagueId) {
+				return;
+			}
+			$scope.loadingMessages = true;
+			leagueService.getLeagueMessages(leagueId).then(function(msgs) {
+				$scope.messages = msgs || [];
+				$scope.loadingMessages = false;
+			}, function(err) {
+				$log.error('Error fetching league messages:', err);
+				$scope.loadingMessages = false;
+			});
+		};
+
+		$scope.postMessage = function() {
+			var leagueId = getActiveLeagueId();
+			if (!leagueId || !$scope.newMessageText || !$scope.newMessageText.trim()) {
+				return;
+			}
+			$scope.postingMessage = true;
+			leagueService.postLeagueMessage(leagueId, $scope.newMessageText.trim()).then(function(createdMsg) {
+				$scope.newMessageText = '';
+				$scope.postingMessage = false;
+				$scope.loadMessages();
+			}, function(err) {
+				$log.error('Error posting message:', err);
+				$scope.postingMessage = false;
+			});
+		};
+
+		$scope.deleteMessage = function(messageId) {
+			var leagueId = getActiveLeagueId();
+			if (!leagueId || !messageId) {
+				return;
+			}
+			leagueService.deleteLeagueMessage(leagueId, messageId).then(function() {
+				$scope.loadMessages();
+			}, function(err) {
+				$log.error('Error deleting message:', err);
+			});
+		};
+
+		$scope.canDeleteMessage = function(msg) {
+			if (!msg) return false;
+			if ($scope.isAdminOfAnyLeague) return true;
+			return $scope.isCurrentUser(msg.username);
+		};
+
+		$scope.formatMessageTime = function(timestamp) {
+			if (!timestamp) return '';
+			var d = new Date(timestamp);
+			var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+			var month = months[d.getMonth()];
+			var day = d.getDate();
+			var hours = d.getHours();
+			var minutes = d.getMinutes();
+			var ampm = hours >= 12 ? 'PM' : 'AM';
+			hours = hours % 12;
+			hours = hours ? hours : 12;
+			minutes = minutes < 10 ? '0' + minutes : minutes;
+			return month + ' ' + day + ', ' + hours + ':' + minutes + ' ' + ampm;
+		};
+
 		$scope.$on('weekLoaded', function() {
 			$scope.loadViewPicks();
+			$scope.loadMessages();
 		});
 
 		$scope.$watch('league.id', function(newVal, oldVal) {
 			if (newVal && newVal !== oldVal) {
 				$scope.loadViewPicks();
+				$scope.loadMessages();
 			}
 		});
 
@@ -485,6 +573,7 @@
 
 		if ($scope.leagues && $scope.week && $scope.week.weekId) {
 			$scope.loadViewPicks();
+			$scope.loadMessages();
 		}
 	});
 
@@ -571,6 +660,21 @@
 			angular.forEach($scope.standings, function(player) {
 				player.winnings = winningsMap[player.playerId] || 0;
 			});
+
+			$scope.prizeBreakdown = {
+				totalPlayers: N,
+				entryFee: 100,
+				totalPot: N * 100,
+				weeklyPrize: W,
+				totalWeeklyPayouts: W * 17,
+				seasonPool: seasonPool,
+				firstPlacePct: 60,
+				firstPlacePayout: seasonPool * 0.60,
+				secondPlacePct: 30,
+				secondPlacePayout: seasonPool * 0.30,
+				thirdPlacePct: 10,
+				thirdPlacePayout: seasonPool * 0.10
+			};
 		};
 
 		$scope.loadStandings = function() {
