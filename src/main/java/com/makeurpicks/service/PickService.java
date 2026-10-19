@@ -49,7 +49,14 @@ public class PickService {
 		//make sure all the parms are set
 		validatePick(pick, false);  
 		
-		pick.setId(UUID.randomUUID().toString());
+		if (pick.getId() == null || pick.getId().trim().isEmpty()) {
+			String existingPickId = picksByWeekRepository.findPicksByGame(pick.getLeagueId(), pick.getWeekId(), pick.getPlayerId(), pick.getGameId());
+			if (existingPickId != null && !existingPickId.trim().isEmpty()) {
+				pick.setId(existingPickId);
+			} else {
+				pick.setId(UUID.randomUUID().toString());
+			}
+		}
 		
 		//save pick by pick id
 		pickRepository.save(pick);
@@ -67,7 +74,7 @@ public class PickService {
 		Pick pickFromDS = pickRepository.findById(pick.getId()).orElse(null);
 		if (pickFromDS == null)
 			throw new PickValidationException(PickExceptions.PICK_IS_NULL);
-		if (!pickFromDS.getPlayerId().equalsIgnoreCase(pick.getPlayerId()))
+		if (!pick.isAdminOverride() && !pickFromDS.getPlayerId().equalsIgnoreCase(pick.getPlayerId()))
 			throw new PickValidationException(PickExceptions.UNAUTHORIZED_USER);
 		//check to see if the pick is the existing double pick
 //		DoublePick doublePick = doublePickRepository.findDoubleForPlayer(pick.getLeagueId(), pick.getWeekId(), pick.getPlayerId());
@@ -251,6 +258,11 @@ public class PickService {
 
 	public DoublePick makeDoublePick(String pickId, String loggedInPlayerId)
 	{
+		return makeDoublePick(pickId, loggedInPlayerId, false);
+	}
+
+	public DoublePick makeDoublePick(String pickId, String loggedInPlayerId, boolean adminOverride)
+	{
 //		Picks pick = dao.loadByPrimaryKey(Picks.class, pickId);
 		Pick pick = pickRepository.findById(pickId).orElse(null);
 		if (pick==null)
@@ -258,13 +270,13 @@ public class PickService {
 		
 		Game game = gameService.getGameById(pick.getGameId());
 		//check to see if the newly selected double has started
-		if (game.getHasGameStarted())
+		if (!adminOverride && game.getHasGameStarted())
 		{
 			//you can't change to a game that has started
 			throw new PickValidationException(PickExceptions.GAME_HAS_ALREADY_STARTED);
 		}
 		
-		if (!pick.isAdminOverride() && !pick.getPlayerId().equalsIgnoreCase(loggedInPlayerId))
+		if (!adminOverride && !pick.isAdminOverride() && !pick.getPlayerId().equalsIgnoreCase(loggedInPlayerId))
 			throw new PickValidationException(PickExceptions.UNAUTHORIZED_USER);
 		
 		//	Picks oldPick = getDoublePickForPlayerLeagueAndWeek(pick.getName(), pick.getLeague(), pick.getWeek());
@@ -276,17 +288,21 @@ public class PickService {
 		{
 			String orginalPickId = orginialDoublePick.getPickId();
 			Pick orginalPick = pickRepository.findById(orginalPickId).orElse(null);
-			Game orginalGame = gameService.getGameById(orginalPick.getGameId());
-			if (orginalGame.getHasGameStarted())
-			{
-				throw new PickValidationException(PickExceptions.GAME_HAS_ALREADY_STARTED);
+			if (orginalPick != null) {
+				Game orginalGame = gameService.getGameById(orginalPick.getGameId());
+				if (!adminOverride && orginalGame != null && orginalGame.getHasGameStarted())
+				{
+					throw new PickValidationException(PickExceptions.GAME_HAS_ALREADY_STARTED);
+				}
+				if (orginalGame != null) {
+					orginialDoublePick.setPreviousDoubleGameId(orginalGame.getId());
+				}
 			}
 			
 			orginialDoublePick.setPickId(pickId);
 			orginialDoublePick.setGameId(pick.getGameId());
 			orginialDoublePick.setPlayerId(pick.getPlayerId());
-			orginialDoublePick.setHasDoubleGameStarted(false);
-			orginialDoublePick.setPreviousDoubleGameId(orginalGame.getId());
+			orginialDoublePick.setHasDoubleGameStarted(game != null ? game.getHasGameStarted() : false);
 			doublePickRepository.save(orginialDoublePick);			
 			
 			return orginialDoublePick;

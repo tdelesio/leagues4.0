@@ -37,6 +37,10 @@
 		      url: "/add_score",
 		      templateUrl: "addScore.html"
 		    })
+		   .state('adminPicks', {
+		      url: "/admin_picks?player&league&week",
+		      templateUrl: "adminPicks.html"
+		    })
 		   .state('backup', {
 		      url: "/backup",
 		      templateUrl: "backup.html"
@@ -51,6 +55,13 @@
 		return {
 			restrict: 'E',
 			templateUrl: 'partials/chrome.html'
+		};
+	});
+
+	app.directive('adminPicks', function() {
+		return {
+			restrict: 'E',
+			templateUrl: 'partials/adminPicks.html'
 		};
 	});
 
@@ -190,10 +201,14 @@
 		};
 	});
 
-	app.controller('PlayersController', function ($scope, $http, $window, $log) {
+	app.controller('PlayersController', function ($scope, $http, $window, $log, $state) {
 		$scope.players = [];
 		$scope.loading = true;
 		$scope.currentUser = '';
+
+		$scope.makePicksForPlayer = function(player) {
+			$state.go('adminPicks', { player: player.username });
+		};
 
 		// Broadcast Email state
 		$scope.broadcastModal = {
@@ -1693,6 +1708,233 @@
 					$scope.status.loading = false;
 					$scope.status.error = "Failed to clean " + target + ": " + (data || "Unknown Error") + " (Status: " + status + ")";
 				});
+		};
+	});
+
+	app.controller('AdminPicksController', function ($scope, $http, $window, $log, $stateParams, $timeout) {
+		$scope.leagues = [];
+		$scope.weeks = [];
+		$scope.players = [];
+		$scope.games = [];
+		$scope.pickMap = {};
+		$scope.doublePick = null;
+
+		$scope.selectedLeague = null;
+		$scope.selectedWeek = null;
+		$scope.selectedPlayer = null;
+
+		$scope.loading = false;
+		$scope.savingPick = false;
+		$scope.statusMessage = null;
+		$scope.statusType = 'success';
+
+		var showStatus = function(msg, type) {
+			$scope.statusMessage = msg;
+			$scope.statusType = type || 'success';
+			$timeout(function() {
+				if ($scope.statusMessage === msg) {
+					$scope.statusMessage = null;
+				}
+			}, 5000);
+		};
+
+		// 1. Load Leagues
+		$http.get('/leagues/').success(function(leagues) {
+			$scope.leagues = leagues || [];
+			if ($scope.leagues.length > 0) {
+				var targetLeague = null;
+				if ($stateParams.league) {
+					for (var i = 0; i < $scope.leagues.length; i++) {
+						if ($scope.leagues[i].id === $stateParams.league || $scope.leagues[i].leagueName === $stateParams.league) {
+							targetLeague = $scope.leagues[i];
+							break;
+						}
+					}
+				}
+				$scope.selectedLeague = targetLeague || $scope.leagues[0];
+				$scope.onLeagueChange();
+			}
+		}).error(function(err) {
+			$log.error('AdminPicksController: error loading leagues', err);
+		});
+
+		// 2. On League Change
+		$scope.onLeagueChange = function() {
+			if (!$scope.selectedLeague) return;
+
+			// Load weeks for this league's season
+			$http.get('/weeks/seasonid/' + $scope.selectedLeague.seasonId).success(function(weeks) {
+				$scope.weeks = weeks || [];
+				if ($scope.weeks.length > 0) {
+					var targetWeek = null;
+					if ($stateParams.week) {
+						for (var i = 0; i < $scope.weeks.length; i++) {
+							if ($scope.weeks[i].id === $stateParams.week || $scope.weeks[i].weekNumber == $stateParams.week) {
+								targetWeek = $scope.weeks[i];
+								break;
+							}
+						}
+					}
+					// Default to targetWeek or the latest week
+					$scope.selectedWeek = targetWeek || $scope.weeks[$scope.weeks.length - 1];
+					$scope.loadGames();
+				} else {
+					$scope.selectedWeek = null;
+					$scope.games = [];
+				}
+			}).error(function(err) {
+				$log.error('AdminPicksController: error loading weeks', err);
+			});
+
+			// Load players in this league
+			$http.get('/leagues/player/leagueid/' + $scope.selectedLeague.id).success(function(playerUsernames) {
+				$scope.players = playerUsernames || [];
+				if ($scope.players.length > 0) {
+					var targetPlayer = null;
+					if ($stateParams.player) {
+						for (var j = 0; j < $scope.players.length; j++) {
+							if ($scope.players[j].toLowerCase() === $stateParams.player.toLowerCase()) {
+								targetPlayer = $scope.players[j];
+								break;
+							}
+						}
+					}
+					$scope.selectedPlayer = targetPlayer || $scope.players[0];
+					$scope.loadPicks();
+				} else {
+					$scope.selectedPlayer = null;
+					$scope.pickMap = {};
+					$scope.doublePick = null;
+				}
+			}).error(function(err) {
+				$log.error('AdminPicksController: error loading players in league', err);
+			});
+		};
+
+		// 3. On Week Change
+		$scope.onWeekChange = function() {
+			$scope.loadGames();
+			$scope.loadPicks();
+		};
+
+		// 4. On Player Change
+		$scope.onPlayerChange = function() {
+			$scope.loadPicks();
+		};
+
+		// 5. Load Games for the selected week
+		$scope.loadGames = function() {
+			if (!$scope.selectedWeek || !$scope.selectedWeek.id) {
+				$scope.games = [];
+				return;
+			}
+			$http.get('/games/weekid/' + $scope.selectedWeek.id).success(function(games) {
+				$scope.games = games || [];
+			}).error(function(err) {
+				$log.error('AdminPicksController: error loading games', err);
+				$scope.games = [];
+			});
+		};
+
+		// 6. Load Picks & Double Pick for the selected player
+		$scope.loadPicks = function() {
+			if (!$scope.selectedLeague || !$scope.selectedWeek || !$scope.selectedPlayer) {
+				$scope.pickMap = {};
+				$scope.doublePick = null;
+				return;
+			}
+
+			$scope.loading = true;
+
+			// Fetch picks
+			$http.get('/picks/player/leagueid/' + $scope.selectedLeague.id + '/weekid/' + $scope.selectedWeek.id + '/playerid/' + encodeURIComponent($scope.selectedPlayer))
+				.success(function(picks) {
+					$scope.pickMap = picks || {};
+				})
+				.error(function() {
+					$scope.pickMap = {};
+				});
+
+			// Fetch double pick
+			$http.get('/picks/double/leagueid/' + $scope.selectedLeague.id + '/weekid/' + $scope.selectedWeek.id + '/playerid/' + encodeURIComponent($scope.selectedPlayer))
+				.success(function(dp) {
+					$scope.doublePick = dp;
+					$scope.loading = false;
+				})
+				.error(function() {
+					$scope.doublePick = null;
+					$scope.loading = false;
+				});
+		};
+
+		// 7. Make or update pick for player (Admin Override)
+		$scope.makePick = function(game, teamId) {
+			if (!$scope.selectedPlayer || !$scope.selectedLeague || !$scope.selectedWeek) {
+				showStatus('Please select a league, week, and player first.', 'danger');
+				return;
+			}
+
+			var existingPick = $scope.pickMap[game.id];
+			var pickModel = {
+				gameId: game.id,
+				teamId: teamId,
+				weekId: $scope.selectedWeek.id,
+				leagueId: $scope.selectedLeague.id,
+				playerId: $scope.selectedPlayer,
+				adminOverride: true
+			};
+
+			if (existingPick && existingPick.id) {
+				pickModel.id = existingPick.id;
+			}
+
+			$scope.savingPick = true;
+			$http.post('/picks/admin', pickModel).success(function(savedPick) {
+				$scope.savingPick = false;
+				$scope.pickMap[game.id] = savedPick;
+				var teamName = (teamId === game.favId) ? game.favFullName : game.dogFullName;
+				showStatus('Pick saved: ' + teamName + ' for player ' + $scope.selectedPlayer, 'success');
+			}).error(function(err) {
+				$scope.savingPick = false;
+				var msg = (err && err.message) ? err.message : 'Error saving pick.';
+				showStatus('Failed to save pick: ' + msg, 'danger');
+			});
+		};
+
+		// 8. Make or toggle double pick for player (Admin Override)
+		$scope.toggleDoublePick = function(game, event) {
+			if (event) event.stopPropagation();
+
+			if (!$scope.selectedPlayer || !$scope.selectedLeague || !$scope.selectedWeek) {
+				showStatus('Please select a league, week, and player first.', 'danger');
+				return;
+			}
+
+			var activePick = $scope.pickMap[game.id];
+			if (!activePick || !activePick.id) {
+				showStatus('Player must have a pick selected for this matchup before setting it as 2x double.', 'warning');
+				return;
+			}
+
+			$http.put('/picks/double/admin', { pickId: activePick.id, adminOverride: true }).success(function(savedDoublePick) {
+				$scope.doublePick = savedDoublePick;
+				showStatus('2x Double Pick set for ' + $scope.selectedPlayer + '!', 'success');
+			}).error(function(err) {
+				var msg = (err && err.message) ? err.message : 'Error setting double pick.';
+				showStatus('Failed to set double pick: ' + msg, 'danger');
+			});
+		};
+
+		// Helper counts
+		$scope.getPickedCount = function() {
+			if (!$scope.games || $scope.games.length === 0) return 0;
+			var count = 0;
+			for (var i = 0; i < $scope.games.length; i++) {
+				if ($scope.pickMap[$scope.games[i].id]) {
+					count++;
+				}
+			}
+			return count;
 		};
 	});
 })();

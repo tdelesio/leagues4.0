@@ -63,6 +63,9 @@
                         </span>
                     </td>
                     <td style="padding: 12px 15px; border-color: #222; text-align: center; vertical-align: middle;">
+                        <button ng-click="makePicksForPlayer(player)" class="btn btn-xs" style="background-color: rgba(74, 222, 128, 0.1); border: 1px solid rgba(74, 222, 128, 0.3); color: #4ade80; padding: 4px 10px; border-radius: 4px; font-weight: 500; transition: all 0.2s; margin-right: 6px;" onmouseover="this.style.backgroundColor='#22c55e'; this.style.color='#fff'" onmouseout="this.style.backgroundColor='rgba(74, 222, 128, 0.1)'; this.style.color='#4ade80'" title="Make or edit picks for this player">
+                            <i class="fa fa-pencil-square-o" style="margin-right: 4px;"></i>Picks
+                        </button>
                         <button ng-click="openEditModal(player)" class="btn btn-xs" style="background-color: rgba(155, 197, 255, 0.1); border: 1px solid rgba(155, 197, 255, 0.3); color: #9bc5ff; padding: 4px 10px; border-radius: 4px; font-weight: 500; transition: all 0.2s; margin-right: 6px;" onmouseover="this.style.backgroundColor='#337ab7'; this.style.color='#fff'" onmouseout="this.style.backgroundColor='rgba(155, 197, 255, 0.1)'; this.style.color='#9bc5ff'">
                             <i class="fa fa-pencil" style="margin-right: 4px;"></i>Edit
                         </button>

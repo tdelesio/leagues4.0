@@ -16,10 +16,19 @@ public class WinSummary implements Comparable<WinSummary>, Serializable
 	private double entryPrizeWon=0;
 	private double weeklyMoneyWon=0;
 	private int numberOfPeopleSplitWith=1;
+	private boolean paid = false;
 	
 	public WinSummary(String player)
 	{
 		this.playerId = player;
+	}
+	
+	public boolean isPaid() {
+		return paid;
+	}
+
+	public void setPaid(boolean paid) {
+		this.paid = paid;
 	}
 	
 	

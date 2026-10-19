@@ -31,6 +31,9 @@ public class LeaderService {
 	@Autowired
 	private GameService gameService;
 
+	@Autowired
+	private com.makeurpicks.repository.PlayerRepository playerRepository;
+
 	public List<WinSummary> getWinSummary(String leagueId) {
 		try {
 			League league = leagueService.getLeagueById(leagueId);
@@ -44,6 +47,10 @@ public class LeaderService {
 			List<WinSummary> summaries = new ArrayList<>();
 			for (String playerId : players) {
 				WinSummary summary = new WinSummary(playerId);
+				com.makeurpicks.domain.Player player = playerRepository.findById(playerId).orElse(null);
+				if (player != null) {
+					summary.setPaid(player.isPaid());
+				}
 				int totalWins = 0;
 
 				for (Week week : weeks) {

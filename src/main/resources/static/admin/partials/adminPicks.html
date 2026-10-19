@@ -1,0 +1,229 @@
+<div class="admin-picks-container">
+	<!-- EMERGENCY OVERRIDE NOTICE BANNER -->
+	<div class="alert alert-warning" style="background-color: rgba(240, 173, 78, 0.15); border: 1px solid rgba(240, 173, 78, 0.4); color: #f0ad4e; border-radius: 8px; margin-bottom: 25px; padding: 15px 20px;">
+		<div style="display: flex; align-items: center; gap: 12px;">
+			<i class="fa fa-exclamation-triangle fa-2x" style="color: #FFB415;"></i>
+			<div>
+				<h4 style="margin: 0 0 5px 0; color: #FFB415; font-weight: 700; font-size: 16px;">
+					Admin Pick Override Active
+				</h4>
+				<p style="margin: 0; font-size: 13px; color: #ddd;">
+					This tool allows administrators to submit or modify picks (and 2x double picks) on behalf of players when there is a server outage, communication failure, or unforeseen emergency. Game start lockouts are automatically bypassed.
+				</p>
+			</div>
+		</div>
+	</div>
+
+	<!-- STATUS NOTIFICATION TOAST -->
+	<div ng-if="statusMessage" class="alert alert-{{statusType}}" style="border-radius: 8px; font-weight: 600; margin-bottom: 20px; animation: fadeIn 0.3s ease;">
+		<i class="fa" ng-class="statusType === 'success' ? 'fa-check-circle' : 'fa-times-circle'" style="margin-right: 8px;"></i>
+		{{statusMessage}}
+	</div>
+
+	<!-- SELECTION CONTROLS PANEL -->
+	<div class="panel panel-default" style="background-color: rgba(30, 30, 30, 0.7); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; margin-bottom: 25px;">
+		<div class="panel-body" style="padding: 20px;">
+			<div class="row">
+				<!-- LEAGUE SELECTOR -->
+				<div class="col-md-4 col-sm-12" style="margin-bottom: 15px;">
+					<label style="color: #FFB415; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">
+						<i class="fa fa-trophy" style="margin-right: 5px;"></i> 1. Select League
+					</label>
+					<select class="form-control input-lg" 
+							ng-model="selectedLeague" 
+							ng-options="league as league.leagueName for league in leagues track by league.id" 
+							ng-change="onLeagueChange()"
+							style="background-color: #1a1a1a; color: #fff; border: 1px solid #444; border-radius: 6px;">
+					</select>
+				</div>
+
+				<!-- WEEK SELECTOR -->
+				<div class="col-md-4 col-sm-12" style="margin-bottom: 15px;">
+					<label style="color: #FFB415; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">
+						<i class="fa fa-calendar" style="margin-right: 5px;"></i> 2. Select Week
+					</label>
+					<select class="form-control input-lg" 
+							ng-model="selectedWeek" 
+							ng-options="week as ('Week ' + week.weekNumber) for week in weeks track by week.id" 
+							ng-change="onWeekChange()"
+							style="background-color: #1a1a1a; color: #fff; border: 1px solid #444; border-radius: 6px;">
+					</select>
+				</div>
+
+				<!-- PLAYER SELECTOR -->
+				<div class="col-md-4 col-sm-12" style="margin-bottom: 15px;">
+					<label style="color: #FFB415; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">
+						<i class="fa fa-user" style="margin-right: 5px;"></i> 3. Select Player
+					</label>
+					<select class="form-control input-lg" 
+							ng-model="selectedPlayer" 
+							ng-options="player for player in players" 
+							ng-change="onPlayerChange()"
+							style="background-color: #1a1a1a; color: #fff; border: 1px solid #444; border-radius: 6px;">
+					</select>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- PLAYER SUMMARY STATS BAR -->
+	<div ng-if="selectedPlayer && selectedWeek" class="well" style="background-color: rgba(25, 25, 25, 0.85); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 15px 20px; margin-bottom: 25px;">
+		<div class="row" style="display: flex; align-items: center; flex-wrap: wrap;">
+			<div class="col-sm-4 col-xs-12" style="margin: 5px 0;">
+				<span style="color: #888; font-size: 12px; text-transform: uppercase;">Editing Picks For:</span>
+				<div style="font-size: 20px; font-weight: bold; color: #38bdf8;">
+					<i class="fa fa-user-circle-o" style="margin-right: 6px;"></i>{{selectedPlayer}}
+				</div>
+			</div>
+			<div class="col-sm-4 col-xs-6" style="margin: 5px 0;">
+				<span style="color: #888; font-size: 12px; text-transform: uppercase;">Picks Progress:</span>
+				<div style="font-size: 18px; font-weight: bold;" ng-class="getPickedCount() === games.length ? 'text-success' : 'text-warning'">
+					<i class="fa" ng-class="getPickedCount() === games.length ? 'fa-check' : 'fa-clock-o'" style="margin-right: 5px;"></i>
+					{{getPickedCount()}} / {{games.length}} Selected
+				</div>
+			</div>
+			<div class="col-sm-4 col-xs-6" style="margin: 5px 0;">
+				<span style="color: #888; font-size: 12px; text-transform: uppercase;">Double Pick (2x):</span>
+				<div>
+					<span ng-if="doublePick && doublePick.pickId" class="label label-warning" style="background-color: #FFB415; color: #111; font-size: 14px; padding: 5px 10px; border-radius: 4px; font-weight: bold;">
+						<i class="fa fa-star"></i> Active Double Set
+					</span>
+					<span ng-if="!doublePick || !doublePick.pickId" class="label label-default" style="background-color: rgba(255,255,255,0.1); color: #aaa; font-size: 13px; padding: 5px 10px; border-radius: 4px;">
+						None Selected
+					</span>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- LOADING STATE -->
+	<div ng-if="loading" style="text-align: center; padding: 50px 0;">
+		<i class="fa fa-spinner fa-spin fa-3x" style="color: #FFB415; margin-bottom: 15px;"></i>
+		<p style="color: #aaa; font-size: 16px;">Loading games and player picks...</p>
+	</div>
+
+	<!-- NO GAMES FOUND STATE -->
+	<div ng-if="!loading && (!games || games.length === 0)" class="well text-center" style="background-color: rgba(30, 30, 30, 0.5); border: 1px dashed #555; padding: 40px; border-radius: 8px;">
+		<i class="fa fa-calendar-times-o fa-3x" style="color: #666; margin-bottom: 15px;"></i>
+		<h4 style="color: #aaa;">No games scheduled for this week.</h4>
+		<p style="color: #777;">Please select a different week or add games in the Setup Week tab.</p>
+	</div>
+
+	<!-- GAMES LISTING -->
+	<div ng-if="!loading && games && games.length > 0">
+		<div class="row">
+			<div ng-repeat="game in games" class="col-lg-6 col-md-12 col-sm-12 col-xs-12" style="margin-bottom: 20px;">
+				<div class="panel panel-default" style="background-color: #18181b; border: 1px solid #27272a; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.4);" ng-class="{'border-warning': doublePick && doublePick.gameId === game.id}">
+					
+					<!-- GAME CARD HEADER -->
+					<div class="panel-heading" style="background-color: #27272a; border-bottom: 1px solid #3f3f46; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center;">
+						<div>
+							<span style="color: #e4e4e7; font-weight: 600; font-size: 13px;">
+								<i class="fa fa-clock-o" style="margin-right: 5px; color: #FFB415;"></i>
+								{{game.gameStartFormated || (game.gameStart | date:'EEE, MMM d h:mm a')}}
+							</span>
+							<span ng-if="game.hasGameStarted" class="label label-warning" style="margin-left: 8px; font-size: 10px; text-transform: uppercase;">
+								Started
+							</span>
+							<span ng-if="!game.hasGameStarted" class="label label-success" style="margin-left: 8px; font-size: 10px; text-transform: uppercase;">
+								Upcoming
+							</span>
+						</div>
+						
+						<!-- DOUBLE PICK TOGGLE BUTTON -->
+						<div>
+							<button type="button" 
+									class="btn btn-xs" 
+									ng-class="(doublePick && doublePick.gameId === game.id) ? 'btn-warning' : 'btn-default'" 
+									ng-click="toggleDoublePick(game, $event)" 
+									style="font-weight: 600; border-radius: 4px; padding: 3px 10px;"
+									title="{{(doublePick && doublePick.gameId === game.id) ? 'Currently selected as 2x double pick' : 'Click to set as 2x double pick'}}">
+								<i class="fa" ng-class="(doublePick && doublePick.gameId === game.id) ? 'fa-star' : 'fa-star-o'"></i>
+								{{(doublePick && doublePick.gameId === game.id) ? '2X DOUBLE' : 'Set 2X'}}
+							</button>
+						</div>
+					</div>
+
+					<!-- GAME CARD BODY (FAVORITE & UNDERDOG TEAMS) -->
+					<div class="panel-body" style="padding: 12px;">
+						
+						<!-- FAVORITE ROW -->
+						<div class="admin-pick-row" 
+							 ng-class="{'selected-fav': pickMap[game.id] && pickMap[game.id].teamId === game.favId}"
+							 ng-click="makePick(game, game.favId)"
+							 style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 6px; margin-bottom: 8px; cursor: pointer; border: 1px solid transparent; transition: all 0.2s;"
+							 ng-style="(pickMap[game.id] && pickMap[game.id].teamId === game.favId) ? {'background-color': 'rgba(255, 180, 21, 0.15)', 'border-color': '#FFB415'} : {'background-color': '#222225'}">
+							
+							<div style="display: flex; align-items: center; gap: 12px;">
+								<!-- CHECK / SELECTION ICON -->
+								<div style="width: 22px; text-align: center;">
+									<i class="fa fa-check-circle" style="color: #FFB415; font-size: 18px;" ng-if="pickMap[game.id] && pickMap[game.id].teamId === game.favId"></i>
+									<i class="fa fa-circle-o" style="color: #555; font-size: 18px;" ng-if="!pickMap[game.id] || pickMap[game.id].teamId !== game.favId"></i>
+								</div>
+
+								<!-- TEAM HELMET ICON -->
+								<div class="team-icon {{game.favShortName}}" style="width: 32px; height: 32px; background-size: contain; background-repeat: no-repeat; background-position: center;"></div>
+
+								<!-- TEAM NAME -->
+								<div>
+									<span style="font-weight: 700; font-size: 15px; color: #fff;">
+										{{game.favHome ? '@' : ''}}{{game.favFullName}}
+									</span>
+									<span class="label label-default" style="margin-left: 6px; font-size: 10px; background-color: #333;">FAV</span>
+								</div>
+							</div>
+
+							<!-- SPREAD & SCORE -->
+							<div style="text-align: right; display: flex; align-items: center; gap: 14px;">
+								<span style="font-weight: 600; font-size: 14px; color: #f87171;">
+									(-{{game.spread}})
+								</span>
+								<span style="font-size: 18px; font-weight: bold; color: #fff; min-width: 28px; text-align: center;">
+									{{game.favScore}}
+								</span>
+							</div>
+						</div>
+
+						<!-- UNDERDOG ROW -->
+						<div class="admin-pick-row" 
+							 ng-class="{'selected-dog': pickMap[game.id] && pickMap[game.id].teamId === game.dogId}"
+							 ng-click="makePick(game, game.dogId)"
+							 style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 6px; cursor: pointer; border: 1px solid transparent; transition: all 0.2s;"
+							 ng-style="(pickMap[game.id] && pickMap[game.id].teamId === game.dogId) ? {'background-color': 'rgba(255, 180, 21, 0.15)', 'border-color': '#FFB415'} : {'background-color': '#222225'}">
+							
+							<div style="display: flex; align-items: center; gap: 12px;">
+								<!-- CHECK / SELECTION ICON -->
+								<div style="width: 22px; text-align: center;">
+									<i class="fa fa-check-circle" style="color: #FFB415; font-size: 18px;" ng-if="pickMap[game.id] && pickMap[game.id].teamId === game.dogId"></i>
+									<i class="fa fa-circle-o" style="color: #555; font-size: 18px;" ng-if="!pickMap[game.id] || pickMap[game.id].teamId !== game.dogId"></i>
+								</div>
+
+								<!-- TEAM HELMET ICON -->
+								<div class="team-icon {{game.dogShortName}}" style="width: 32px; height: 32px; background-size: contain; background-repeat: no-repeat; background-position: center;"></div>
+
+								<!-- TEAM NAME -->
+								<div>
+									<span style="font-weight: 700; font-size: 15px; color: #fff;">
+										{{game.favHome ? '' : '@'}}{{game.dogFullName}}
+									</span>
+									<span class="label label-default" style="margin-left: 6px; font-size: 10px; background-color: #333;">DOG</span>
+								</div>
+							</div>
+
+							<!-- SPREAD & SCORE -->
+							<div style="text-align: right; display: flex; align-items: center; gap: 14px;">
+								<span style="font-weight: 600; font-size: 14px; color: #4ade80;">
+									(+{{game.spread}})
+								</span>
+								<span style="font-size: 18px; font-weight: bold; color: #fff; min-width: 28px; text-align: center;">
+									{{game.dogScore}}
+								</span>
+							</div>
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

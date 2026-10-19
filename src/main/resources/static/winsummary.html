@@ -15,11 +15,12 @@
 					<table class="table table-bordered picks-matrix-table">
 						<thead>
 							<tr>
-								<th class="text-center header-cell" style="width: 10%;">Place</th>
-								<th class="header-cell" style="width: 24%;">Player</th>
-								<th class="text-center header-cell" style="width: 12%;">Wins</th>
-								<th class="text-center header-cell" style="width: 16%;">Winnings</th>
-								<th class="header-cell" style="width: 38%;">Breakdown</th>
+								<th class="text-center header-cell" style="width: 8%;">Place</th>
+								<th class="header-cell" style="width: 22%;">Player</th>
+								<th class="text-center header-cell" style="width: 11%;">Paid</th>
+								<th class="text-center header-cell" style="width: 10%;">Wins</th>
+								<th class="text-center header-cell" style="width: 15%;">Winnings</th>
+								<th class="header-cell" style="width: 34%;">Breakdown</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -29,6 +30,14 @@
 								</td>
 								<td class="pick-cell" style="font-weight: 600; color: #ffffff;">
 									{{row.playerId}}
+								</td>
+								<td class="text-center pick-cell" style="vertical-align: middle;">
+									<span ng-if="row.paid" class="label label-success" style="background-color: rgba(74, 222, 128, 0.15); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.3); font-size: 11px; padding: 3px 8px; border-radius: 12px; font-weight: 600; display: inline-block;">
+										<i class="fa fa-check" style="margin-right: 3px;"></i>Paid
+									</span>
+									<span ng-if="!row.paid" class="label label-danger" style="background-color: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); font-size: 11px; padding: 3px 8px; border-radius: 12px; font-weight: 500; display: inline-block;">
+										<i class="fa fa-times" style="margin-right: 3px;"></i>Unpaid
+									</span>
 								</td>
 								<td class="text-center pick-cell font-weight-bold" style="color: #4ade80;">
 									{{row.numberOfWins}}

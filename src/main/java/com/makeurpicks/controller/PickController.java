@@ -54,9 +54,20 @@ public class PickController  {
 	
 	@RequestMapping(method=RequestMethod.POST, value="/admin")
 	@PreAuthorize("hasRole('ADMIN')")
-	public @ResponseBody Pick makePick(@RequestBody Pick pick)
+	public @ResponseBody Pick makePickAdmin(@RequestBody Pick pick)
 	{
 //		pick.setPlayerId(user.getName());
+		pick.setAdminOverride(true);
+		
+		log.debug(pick);
+		
+		return pickService.makePick(pick);
+	}
+
+	@RequestMapping(method=RequestMethod.PUT, value="/admin")
+	@PreAuthorize("hasRole('ADMIN')")
+	public @ResponseBody Pick updatePickAdmin(@RequestBody Pick pick)
+	{
 		pick.setAdminOverride(true);
 		
 		log.debug(pick);
@@ -86,13 +97,13 @@ public class PickController  {
 	
 	@RequestMapping(method=RequestMethod.PUT, value="/double/admin")
 	@PreAuthorize("hasRole('ADMIN')")
-	public @ResponseBody DoublePick makeDoublePick(@RequestBody DoublePick pick)
+	public @ResponseBody DoublePick makeDoublePickAdmin(@RequestBody DoublePick pick)
 	{
 		pick.setAdminOverride(true);
 		
 		log.debug(pick);
 		
-		return pickService.makeDoublePick(pick.getPickId(), "");
+		return pickService.makeDoublePick(pick.getPickId(), "", true);
 	}
 	
 	
@@ -109,6 +120,12 @@ public class PickController  {
 	public @ResponseBody DoublePick getDoublePick(Principal user, @PathVariable String leagueid, @PathVariable String weekid)
 	{
 		return pickService.getDoublePickForPlayer(leagueid, weekid, user.getName());
+	}
+
+	@RequestMapping(method=RequestMethod.GET, value="/double/leagueid/{leagueid}/weekid/{weekid}/playerid/{playerid}")
+	public @ResponseBody DoublePick getDoublePickForPlayer(@PathVariable String leagueid, @PathVariable String weekid, @PathVariable String playerid)
+	{
+		return pickService.getDoublePickForPlayer(leagueid, weekid, playerid);
 	}
 	
 	@RequestMapping(method=RequestMethod.GET, value="/doubles/leagueid/{leagueid}/weekid/{weekid}")
