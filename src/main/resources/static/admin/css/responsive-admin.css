@@ -1,6 +1,58 @@
 @charset "UTF-8";
 /* Responsive Admin Dashboard Styles */
 
+/* Common Sidebar Navigation Resets (enforce vertical sidebar list layout) */
+.dashboard-page .sidebar .nav-sidebar {
+	position: static !important;
+	width: auto !important;
+	max-width: none !important;
+	margin: 20px -20px 20px -20px !important;
+	padding: 0 !important;
+	background: transparent !important;
+	background-image: none !important;
+	background-color: transparent !important;
+	box-shadow: none !important;
+	display: block !important;
+	z-index: auto !important;
+	list-style: none !important;
+}
+
+.dashboard-page .sidebar .nav-sidebar > li {
+	display: block !important;
+	float: none !important;
+	width: 100% !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	background: transparent !important;
+	background-image: none !important;
+	border: none !important;
+}
+
+.dashboard-page .sidebar .nav-sidebar > li > a {
+	display: block !important;
+	color: #fff !important;
+	padding: 10px 20px !important;
+	text-decoration: none !important;
+	font-size: 14px !important;
+	background-color: transparent !important;
+	border-radius: 0 !important;
+}
+
+.dashboard-page .sidebar .nav-sidebar > li > a:hover,
+.dashboard-page .sidebar .nav-sidebar > li > a:focus {
+	color: #fff !important;
+	background-color: #2698dd !important;
+	text-decoration: none !important;
+}
+
+.dashboard-page .sidebar .nav-sidebar > li.active > a,
+.dashboard-page .sidebar .nav-sidebar > li.active > a:hover,
+.dashboard-page .sidebar .nav-sidebar > li.active > a:focus {
+	color: #fff !important;
+	background-color: #2698dd !important;
+}
+
+/* MOBILE PHONES & TABLETS (< 768px) */
 @media (max-width: 767px) {
 	.admin-mobile-header {
 		position: fixed;
@@ -103,17 +155,46 @@
 		overflow-x: auto !important;
 	}
 
-	.dashboard-page .sidebar .nav-sidebar>li>a {
-		font-size: 14px;
-		padding: 10px 15px;
+	.dashboard-page .sidebar .nav-sidebar > li > a {
+		font-size: 14px !important;
+		padding: 12px 18px !important;
+		color: #ecf0f1 !important;
+	}
+
+	.dashboard-page .sidebar .nav-sidebar > li.active > a {
+		background-color: #1abc9c !important;
+		color: #fff !important;
 	}
 }
 
+/* DESKTOP (>= 768px) */
 @media (min-width: 768px) {
 	.admin-mobile-header {
 		display: none !important;
 	}
 	.mobile-sidebar-backdrop {
 		display: none !important;
+	}
+	.dashboard-page .sidebar {
+		position: fixed !important;
+		top: 0 !important;
+		bottom: 0 !important;
+		left: 0 !important;
+		z-index: 1000 !important;
+		display: block !important;
+		padding: 0 20px 20px !important;
+		overflow-x: hidden !important;
+		overflow-y: auto !important;
+		background-color: #3ca2e0 !important;
+		border-right: 1px solid #eee !important;
+		box-shadow: none !important;
+		transition: none !important;
+	}
+	.dashboard-page .main {
+		top: 0 !important;
+		bottom: 0 !important;
+		position: absolute !important;
+		padding-right: 40px !important;
+		padding-left: 40px !important;
 	}
 }

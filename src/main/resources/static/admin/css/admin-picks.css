@@ -1,0 +1,42 @@
+/* Team Icon & Admin Picks Styling */
+.team-icon {
+	width: 32px;
+	height: 32px;
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: contain;
+	display: inline-block;
+}
+
+.ARI, .ari, .ARZ, .arz { background-image: url(/img/teams/ARI.svg); }
+.ATL, .atl { background-image: url(/img/teams/ATL.svg); }
+.BAL, .bal { background-image: url(/img/teams/BAL.svg); }
+.BUF, .buf { background-image: url(/img/teams/BUF.svg); }
+.CAR, .car { background-image: url(/img/teams/CAR.svg); }
+.CHI, .chi { background-image: url(/img/teams/CHI.svg); }
+.CIN, .cin { background-image: url(/img/teams/CIN.svg); }
+.CLE, .cle { background-image: url(/img/teams/CLE.svg); }
+.DAL, .dal { background-image: url(/img/teams/DAL.svg); }
+.DEN, .den { background-image: url(/img/teams/DEN.svg); }
+.DET, .det { background-image: url(/img/teams/DET.svg); }
+.GB, .gb { background-image: url(/img/teams/GB.svg); }
+.HOU, .hou { background-image: url(/img/teams/HOU.svg); }
+.IND, .ind { background-image: url(/img/teams/IND.svg); }
+.JAC, .jac { background-image: url(/img/teams/JAC.svg); }
+.KC, .kc { background-image: url(/img/teams/KC.svg); }
+.MIA, .mia { background-image: url(/img/teams/MIA.svg); }
+.MIN, .min { background-image: url(/img/teams/MIN.svg); }
+.NE, .ne { background-image: url(/img/teams/NE.svg); }
+.NO, .no, .NOP, .nop { background-image: url(/img/teams/NO.svg); }
+.NYG, .nyg { background-image: url(/img/teams/NYG.svg); }
+.NYJ, .nyj { background-image: url(/img/teams/NYJ.svg); }
+.OAK, .oak, .LV, .lv { background-image: url(/img/teams/LV.svg); }
+.PHI, .phi { background-image: url(/img/teams/PHI.svg); }
+.PIT, .pit { background-image: url(/img/teams/PIT.svg); }
+.SD, .sd, .LAC, .lac { background-image: url(/img/teams/LAC.svg); }
+.SEA, .sea { background-image: url(/img/teams/SEA.svg); }
+.SF, .sf { background-image: url(/img/teams/SF.svg); }
+.STL, .stl, .LAR, .lar { background-image: url(/img/teams/LAR.svg); }
+.TB, .tb { background-image: url(/img/teams/TB.svg); }
+.TEN, .ten { background-image: url(/img/teams/TEN.svg); }
+.WAS, .was { background-image: url(/img/teams/WAS.svg); }

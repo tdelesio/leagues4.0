@@ -88,7 +88,7 @@ p a:hover { color: #F16428; }
 
 .screen select {margin-right:10px;}
 
-.nav {background-color:#000; padding:0; width:100%; background-image:url(../img/colors/medium.png); position:fixed; z-index:9999;
+div.nav {background-color:#000; padding:0; width:100%; background-image:url(../img/colors/medium.png); position:fixed; z-index:9999;
  -webkit-transition: margin .4s ease-out; -moz-transition: margin .4s ease-out;  -ms-transition: margin .4s ease-out; -o-transition: margin .4s ease-out; transition: margin .4s ease-out;
 }
 
