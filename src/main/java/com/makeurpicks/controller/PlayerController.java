@@ -68,13 +68,21 @@ public class PlayerController {
 			throw new RuntimeException("Identifier cannot be empty");
 		}
 		
-		String scheme = servletRequest.getScheme();
-		String serverName = servletRequest.getServerName();
-		int serverPort = servletRequest.getServerPort();
-		
-		String baseUrl = scheme + "://" + serverName;
-		if (serverPort != 80 && serverPort != 443) {
-			baseUrl += ":" + serverPort;
+		String forwardedProto = servletRequest.getHeader("X-Forwarded-Proto");
+		String forwardedHost = servletRequest.getHeader("X-Forwarded-Host");
+		String baseUrl;
+		if (forwardedHost != null && !forwardedHost.trim().isEmpty()) {
+			String proto = (forwardedProto != null && !forwardedProto.trim().isEmpty()) ? forwardedProto : "https";
+			baseUrl = proto + "://" + forwardedHost.split(",")[0].trim();
+		} else {
+			String scheme = servletRequest.getScheme();
+			String serverName = servletRequest.getServerName();
+			int serverPort = servletRequest.getServerPort();
+			
+			baseUrl = scheme + "://" + serverName;
+			if (serverPort != 80 && serverPort != 443) {
+				baseUrl += ":" + serverPort;
+			}
 		}
 		
 		return playerService.initiateForgotPassword(identifier, baseUrl);

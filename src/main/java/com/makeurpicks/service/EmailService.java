@@ -18,6 +18,20 @@ public class EmailService {
 	@Value("${spring.mail.username:noreply@makeurpicks.com}")
 	private String fromEmail;
 
+	@Value("${app.base-url:https://leagues.delesio.com/}")
+	private String appBaseUrl;
+
+	public String getSanitizedBaseUrl() {
+		if (appBaseUrl == null || appBaseUrl.trim().isEmpty() || appBaseUrl.contains("${")) {
+			return "https://leagues.delesio.com/";
+		}
+		String sanitized = appBaseUrl.trim();
+		if (!sanitized.endsWith("/")) {
+			sanitized += "/";
+		}
+		return sanitized;
+	}
+
 	private String getSanitizedFromEmail() {
 		if (fromEmail == null || fromEmail.trim().isEmpty() || fromEmail.equals("''") || fromEmail.equals("\"\"") || fromEmail.contains("${")) {
 			return "noreply@makeurpicks.com";
@@ -140,7 +154,8 @@ public class EmailService {
 					+ "      </div>"
 					+ "      <p style=\"font-size: 15px; line-height: 1.6; margin: 0 0 10px 0; color: #ffffff;\">Hello, <strong>" + displayName + "</strong>!</p>"
 					+ "      <p style=\"font-size: 14px; line-height: 1.6; color: #aaaaaa; margin: 0 0 25px 0;\">The administrator has successfully set up the matchups and games for <strong>Week " + weekNumber + "</strong>. You can now log in and submit your picks before kickoff!</p>"
-					+ "      <a href=\"http://localhost:8080/\" style=\"display: inline-block; background: linear-gradient(135deg, #FFB415, #f39c12); color: #000000; font-weight: 700; text-decoration: none; padding: 14px 35px; border-radius: 6px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3); margin-bottom: 10px;\">Submit Your Picks</a>"
+					+ "      <a href=\"" + getSanitizedBaseUrl() + "\" style=\"display: inline-block; background: linear-gradient(135deg, #FFB415, #f39c12); color: #000000; font-weight: 700; text-decoration: none; padding: 14px 35px; border-radius: 6px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3); margin-bottom: 10px;\">Submit Your Picks</a>"
+					+ "      <p style=\"font-size: 11px; line-height: 1.6; color: #777777; margin: 15px 0 0 0; word-break: break-all;\">Button not working? Visit: " + getSanitizedBaseUrl() + "</p>"
 					+ "    </div>"
 					+ "    <div style=\"background: #151515; padding: 20px 30px; border-top: 1px solid rgba(255,255,255,0.03);\">"
 					+ "      <p style=\"font-size: 11px; color: #555555; margin: 0;\">&copy; 2026 Make Your Picks. Hosted on Basement Server.</p>"

@@ -124,7 +124,14 @@ public class PlayerService implements UserDetailsService {
 		player.setResetTokenExpiry(java.time.LocalDateTime.now().plusHours(24));
 		playerRepository.save(player);
 
-		String resetLink = baseUrl + "/login.html?token=" + token;
+		String cleanBaseUrl = (baseUrl != null && !baseUrl.trim().isEmpty()) ? baseUrl.trim() : emailService.getSanitizedBaseUrl();
+		if (cleanBaseUrl.contains("localhost") || cleanBaseUrl.contains("127.0.0.1")) {
+			cleanBaseUrl = emailService.getSanitizedBaseUrl();
+		}
+		if (cleanBaseUrl.endsWith("/")) {
+			cleanBaseUrl = cleanBaseUrl.substring(0, cleanBaseUrl.length() - 1);
+		}
+		String resetLink = cleanBaseUrl + "/login.html?token=" + token;
 		emailService.sendPasswordResetEmail(player.getEmail(), player.getUsername(), resetLink);
 		return true;
 	}

@@ -1,7 +1,11 @@
 server:
   port: 8080
+  forward-headers-strategy: framework
   error:
     include-message: always
+
+app:
+  base-url: ${APP_BASE_URL:https://leagues.delesio.com/}
 
 spring:
   datasource:
